@@ -1,6 +1,12 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
+using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
+using VendorManagementprojDomain.Entities;
 
 namespace VendorManagementprojApplication.Features.Quotations.Commands.RespondToQuotation;
 
@@ -9,13 +15,16 @@ public class RespondToQuotationCommandHandler
 {
     private readonly IQuotationRepository _quotationRepository;
     private readonly IPurchaseRequestRepository _purchaseRequestRepository;
+    private readonly ICurrentUserService _currentUserService;
 
     public RespondToQuotationCommandHandler(
         IQuotationRepository quotationRepository,
-        IPurchaseRequestRepository purchaseRequestRepository)
+        IPurchaseRequestRepository purchaseRequestRepository,
+        ICurrentUserService currentUserService)
     {
         _quotationRepository = quotationRepository;
         _purchaseRequestRepository = purchaseRequestRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task<RespondToQuotationResponse> Handle(
@@ -29,6 +38,26 @@ public class RespondToQuotationCommandHandler
         if (quotation == null)
             throw new InvalidOperationException(
                 "Quotation does not exist.");
+
+        var purchaseRequest = await _purchaseRequestRepository.GetByIdAsync(quotation.RequestID);
+
+        bool isAuthorized = false;
+        if (_currentUserService.IsAdmin)
+        {
+            isAuthorized = true;
+        }
+        else if (_currentUserService.IsPurchaseManager && _currentUserService.OutletID.HasValue)
+        {
+            if (purchaseRequest != null && purchaseRequest.OutletID == _currentUserService.OutletID.Value)
+            {
+                isAuthorized = true;
+            }
+        }
+
+        if (!isAuthorized)
+        {
+            throw new UnauthorizedAccessException("You are not authorized to respond to this quotation.");
+        }
 
         if (!string.Equals(
                 request.Status,
@@ -73,7 +102,6 @@ public class RespondToQuotationCommandHandler
                 "Accepted",
                 StringComparison.OrdinalIgnoreCase))
         {
-            var purchaseRequest = await _purchaseRequestRepository.GetByIdAsync(quotation.RequestID);
             if (purchaseRequest != null)
             {
                 purchaseRequest.Status = "Approved";

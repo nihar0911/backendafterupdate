@@ -1,5 +1,9 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
+using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
@@ -9,13 +13,16 @@ public class UpdatePurchaseRequestCommandHandler
 {
     private readonly IPurchaseRequestRepository _repository;
     private readonly IUserRepository _userRepository;
+    private readonly ICurrentUserService _currentUserService;
 
     public UpdatePurchaseRequestCommandHandler(
         IPurchaseRequestRepository repository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        ICurrentUserService currentUserService)
     {
         _repository = repository;
         _userRepository = userRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task<UpdatePurchaseRequestResponse> Handle(
@@ -23,20 +30,12 @@ public class UpdatePurchaseRequestCommandHandler
         CancellationToken cancellationToken)
     {
         if (request.RequestID <= 0)
-            throw new InvalidOperationException(
-                "A valid purchase request is required.");
+            throw new InvalidOperationException("A valid purchase request is required.");
 
         if (request.OutletID <= 0)
-            throw new InvalidOperationException(
-                "A valid outlet is required.");
+            throw new InvalidOperationException("A valid outlet is required.");
 
-        if (request.UpdatedByUserID <= 0)
-            throw new InvalidOperationException(
-                "A valid user is required.");
-
-        var purchaseRequest =
-            await _repository.GetByIdAsync(
-                request.RequestID);
+        var purchaseRequest = await _repository.GetByIdAsync(request.RequestID);
 
         if (purchaseRequest == null)
         {
@@ -51,33 +50,45 @@ public class UpdatePurchaseRequestCommandHandler
             "Pending",
             StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException(
-                "Only a pending purchase request can be updated.");
+            throw new InvalidOperationException("Only a pending purchase request can be updated.");
         }
 
-        var user =
-            await _userRepository.GetByIdAsync(
-                request.UpdatedByUserID);
+        bool isAuthorized = false;
+        if (_currentUserService.IsAdmin)
+        {
+            isAuthorized = true;
+        }
+        else if (_currentUserService.IsPurchaseManager && _currentUserService.OutletID.HasValue)
+        {
+            if (_currentUserService.OutletID.Value == request.OutletID && _currentUserService.OutletID.Value == purchaseRequest.OutletID)
+            {
+                isAuthorized = true;
+            }
+        }
+        else if (request.UpdatedByUserID > 0)
+        {
+            var user = await _userRepository.GetByIdAsync(request.UpdatedByUserID);
+            if (user != null)
+            {
+                if (string.Equals(user.Role?.RoleName, "Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    isAuthorized = true;
+                }
+                else if (string.Equals(user.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) && user.OutletID == request.OutletID && user.OutletID == purchaseRequest.OutletID)
+                {
+                    isAuthorized = true;
+                }
+            }
+        }
 
-        if (user == null)
-            throw new InvalidOperationException(
-                "User does not exist.");
+        if (!isAuthorized)
+        {
+            throw new UnauthorizedAccessException("User is not authorized to update this purchase request.");
+        }
 
-        if (user.OutletID == null)
-            throw new InvalidOperationException(
-                "User is not assigned to an outlet.");
+        purchaseRequest.OutletID = request.OutletID;
 
-        if (user.OutletID != request.OutletID)
-            throw new UnauthorizedAccessException(
-                "User is not authorized to update a purchase request for this outlet.");
-
-        purchaseRequest.OutletID =
-            request.OutletID;
-
-        var updated =
-            await _repository.UpdateAsync(
-                request.RequestID,
-                purchaseRequest);
+        var updated = await _repository.UpdateAsync(request.RequestID, purchaseRequest);
 
         if (updated == null)
         {
@@ -91,20 +102,11 @@ public class UpdatePurchaseRequestCommandHandler
         {
             PurchaseRequest = new PurchaseRequestDto
             {
-                RequestID =
-                    updated.RequestID,
-
-                OutletID =
-                    updated.OutletID,
-
-                CreatedByUserID =
-                    updated.CreatedByUserID,
-
-                RequestDate =
-                    updated.RequestDate,
-
-                Status =
-                    updated.Status
+                RequestID = updated.RequestID,
+                OutletID = updated.OutletID,
+                CreatedByUserID = updated.CreatedByUserID,
+                RequestDate = updated.RequestDate,
+                Status = updated.Status
             }
         };
     }

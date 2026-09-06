@@ -62,25 +62,22 @@ public class DispatchPurchaseRequestCommandHandler
             throw new InvalidOperationException($"Cannot dispatch a Purchase Request in '{purchaseRequest.Status}' status.");
         }
 
-        if ((_currentUserService.IsOutletManager || _currentUserService.IsPurchaseManager) && _currentUserService.OutletID.HasValue)
+        bool isAuthorized = false;
+        if (_currentUserService.IsAdmin)
         {
-            if (purchaseRequest.OutletID != _currentUserService.OutletID.Value)
+            isAuthorized = true;
+        }
+        else if (_currentUserService.IsPurchaseManager && _currentUserService.OutletID.HasValue)
+        {
+            if (purchaseRequest.OutletID == _currentUserService.OutletID.Value)
             {
-                throw new UnauthorizedAccessException("You are not authorized to dispatch a purchase request belonging to another outlet.");
+                isAuthorized = true;
             }
         }
-        else if (_currentUserService.IsPurchaseManager && !_currentUserService.OutletID.HasValue)
+
+        if (!isAuthorized)
         {
-            throw new UnauthorizedAccessException("You are not assigned to an outlet.");
-        }
-        else if (_currentUserService.IsOrganizationManager && _currentUserService.OrganizationID.HasValue)
-        {
-            var orgOutlets = await _outletRepository.GetByOrganizationIdAsync(_currentUserService.OrganizationID.Value);
-            var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToHashSet();
-            if (!orgOutletIds.Contains(purchaseRequest.OutletID))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to dispatch a purchase request outside your organization.");
-            }
+            throw new UnauthorizedAccessException("You are not authorized to dispatch this purchase request.");
         }
 
         var selectedVendorIds = request.SelectedVendorIDs

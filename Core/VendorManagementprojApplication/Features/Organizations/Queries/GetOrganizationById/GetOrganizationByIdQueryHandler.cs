@@ -9,13 +9,16 @@ public class GetOrganizationByIdQueryHandler
     : IRequestHandler<GetOrganizationByIdQuery, GetOrganizationByIdResponse>
 {
     private readonly IOrganizationRepository _repository;
+    private readonly IOutletRepository _outletRepository;
     private readonly ICurrentUserService _currentUserService;
 
     public GetOrganizationByIdQueryHandler(
         IOrganizationRepository repository,
+        IOutletRepository outletRepository,
         ICurrentUserService currentUserService)
     {
         _repository = repository;
+        _outletRepository = outletRepository;
         _currentUserService = currentUserService;
     }
 
@@ -51,6 +54,22 @@ public class GetOrganizationByIdQueryHandler
 
         if (_currentUserService.IsOutletManager)
         {
+            int? targetOrgId = _currentUserService.OrganizationID;
+
+            if (!targetOrgId.HasValue && _currentUserService.OutletID.HasValue)
+            {
+                var outlet = await _outletRepository.GetByIdAsync(_currentUserService.OutletID.Value);
+                if (outlet != null)
+                {
+                    targetOrgId = outlet.OrganizationID;
+                }
+            }
+
+            if (!targetOrgId.HasValue || organization.OrganizationID != targetOrgId.Value)
+            {
+                return new GetOrganizationByIdResponse { Organization = null };
+            }
+
             return new GetOrganizationByIdResponse { Organization = MapToDto(organization) };
         }
 

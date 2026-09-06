@@ -47,20 +47,22 @@ public class AcceptQuotationCommandHandler : IRequestHandler<AcceptQuotationComm
         }
 
         var purchaseRequest = await _purchaseRequestRepository.GetByIdAsync(quotation.RequestID);
-        if (_currentUserService.IsPurchaseManager)
+        bool isAuthorized = false;
+        if (_currentUserService.IsAdmin)
         {
-            if (!_currentUserService.OutletID.HasValue || purchaseRequest == null || purchaseRequest.OutletID != _currentUserService.OutletID.Value)
+            isAuthorized = true;
+        }
+        else if (_currentUserService.IsPurchaseManager && _currentUserService.OutletID.HasValue)
+        {
+            if (purchaseRequest != null && purchaseRequest.OutletID == _currentUserService.OutletID.Value)
             {
-                throw new UnauthorizedAccessException("You are not authorized to accept quotations belonging to another outlet.");
+                isAuthorized = true;
             }
         }
-        else if (purchaseRequest != null && _currentUserService.IsOrganizationManager && _currentUserService.OrganizationID.HasValue)
+
+        if (!isAuthorized)
         {
-            var outlet = await _outletRepository.GetByIdAsync(purchaseRequest.OutletID);
-            if (outlet != null && outlet.OrganizationID != _currentUserService.OrganizationID.Value)
-            {
-                throw new UnauthorizedAccessException("You are not authorized to accept quotations outside your organization.");
-            }
+            throw new UnauthorizedAccessException("You are not authorized to accept this quotation.");
         }
 
         if (purchaseRequest != null)

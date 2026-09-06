@@ -25,7 +25,7 @@ public class PurchaseOrderController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Organization Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> Create(
         [FromBody] CreatePurchaseOrderCommand command)
     {

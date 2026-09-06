@@ -45,7 +45,7 @@ public class QuotationsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,Organization Manager,Vendor Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager,Purchase Manager")]
     public async Task<IActionResult> GetAll()
     {
         var response =
@@ -104,7 +104,7 @@ public class QuotationsController : ControllerBase
         }
     }
     [HttpPut("respond")]
-    [Authorize(Roles = "Admin,Organization Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> Respond(
     RespondToQuotationCommand command)
     {
@@ -115,6 +115,10 @@ public class QuotationsController : ControllerBase
 
             return Ok(response);
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
         catch (InvalidOperationException ex)
         {
             return BadRequest(ex.Message);
@@ -122,7 +126,7 @@ public class QuotationsController : ControllerBase
     }
 
     [HttpPut("{quotationID:int}/accept")]
-    [Authorize(Roles = "Admin,Organization Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> Accept(int quotationID)
     {
         try
@@ -141,7 +145,7 @@ public class QuotationsController : ControllerBase
     }
 
     [HttpPut("{quotationID:int}/reject")]
-    [Authorize(Roles = "Admin,Organization Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> Reject(int quotationID)
     {
         try
@@ -160,7 +164,7 @@ public class QuotationsController : ControllerBase
     }
 
     [HttpGet("{quotationID:int}")]
-    [Authorize(Roles = "Admin,Organization Manager,Vendor Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager,Purchase Manager")]
     public async Task<IActionResult> GetById(
         int quotationID)
     {

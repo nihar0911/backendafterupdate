@@ -173,7 +173,7 @@ public class InvoiceController : ControllerBase
     }
 
     [HttpGet("payments")]
-    [Authorize(Roles = "Admin,Organization Manager,Vendor Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager,Purchase Manager")]
     public async Task<IActionResult> GetPayments()
     {
         var result = await _mediator.Send(new GetPaymentsQuery());

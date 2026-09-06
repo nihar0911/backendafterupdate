@@ -66,20 +66,22 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
             throw new InvalidOperationException("Purchase request does not exist.");
 
         // Security / Role & Outlet Authorization Check
-        if (_currentUserService.IsPurchaseManager)
+        bool isAuthorized = false;
+        if (_currentUserService.IsAdmin)
         {
-            if (!_currentUserService.OutletID.HasValue || purchaseRequest.OutletID != _currentUserService.OutletID.Value)
+            isAuthorized = true;
+        }
+        else if (_currentUserService.IsPurchaseManager && _currentUserService.OutletID.HasValue)
+        {
+            if (purchaseRequest.OutletID == _currentUserService.OutletID.Value)
             {
-                throw new UnauthorizedAccessException("You are not authorized to create purchase orders for another outlet.");
+                isAuthorized = true;
             }
         }
-        else if (_currentUserService.IsOrganizationManager && _currentUserService.OrganizationID.HasValue)
+
+        if (!isAuthorized)
         {
-            var outlet = await _outletRepository.GetByIdAsync(purchaseRequest.OutletID);
-            if (outlet != null && outlet.OrganizationID != _currentUserService.OrganizationID.Value)
-            {
-                throw new UnauthorizedAccessException("You are not authorized to create purchase orders outside your organization.");
-            }
+            throw new UnauthorizedAccessException("You are not authorized to create purchase orders for this outlet.");
         }
 
         if (quotation.QuotationItems == null || quotation.QuotationItems.Count == 0)

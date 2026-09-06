@@ -73,7 +73,7 @@ public class PurchaseRequestsController : ControllerBase
 
     [HttpPost("dispatch")]
     [HttpPost("{requestID:int}/dispatch")]
-    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> DispatchToSelectedVendors(int? requestID, [FromBody] DispatchPurchaseRequestCommand? command)
     {
         try
@@ -128,7 +128,7 @@ public class PurchaseRequestsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> Create(CreatePurchaseRequestCommand command)
     {
         try
@@ -178,19 +178,30 @@ public class PurchaseRequestsController : ControllerBase
     }
 
     [HttpPost("{requestID:int}/items")]
-    [Authorize(Roles = "Admin,Organization Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> AddItem(int requestID, AddPurchaseRequestItemCommand command)
     {
-        command.RequestID = requestID;
-        var response = await _mediator.Send(command);
-        if (response.Item == null)
-            return NotFound(new { message = "Purchase Request not found." });
+        try
+        {
+            command.RequestID = requestID;
+            var response = await _mediator.Send(command);
+            if (response.Item == null)
+                return NotFound(new { message = "Purchase Request not found." });
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{requestID:int}")]
-    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> Update(int requestID, UpdatePurchaseRequestCommand command)
     {
         try
@@ -213,13 +224,24 @@ public class PurchaseRequestsController : ControllerBase
     }
 
     [HttpDelete("items/{itemID:int}")]
-    [Authorize(Roles = "Admin,Organization Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> DeleteItem(int itemID)
     {
-        var response = await _mediator.Send(new DeletePurchaseRequestItemCommand(itemID));
-        if (!response.Success)
-            return NotFound();
+        try
+        {
+            var response = await _mediator.Send(new DeletePurchaseRequestItemCommand(itemID));
+            if (!response.Success)
+                return NotFound();
 
-        return NoContent();
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
     }
 }

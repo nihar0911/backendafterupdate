@@ -83,22 +83,6 @@ public class CreatePurchaseRequestCommandHandler
         {
             isAuthorized = true;
         }
-        else if (_currentUserService.IsOrganizationManager || string.Equals(user.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase))
-        {
-            int? userOrgId = _currentUserService.OrganizationID ?? user.OrganizationID;
-            if (userOrgId.HasValue && targetOutlet.OrganizationID == userOrgId.Value)
-            {
-                isAuthorized = true;
-            }
-        }
-        else if (_currentUserService.IsOutletManager || string.Equals(user.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase))
-        {
-            int? userOutletId = _currentUserService.OutletID ?? user.OutletID;
-            if (userOutletId.HasValue && request.OutletID == userOutletId.Value)
-            {
-                isAuthorized = true;
-            }
-        }
         else if (_currentUserService.IsPurchaseManager || string.Equals(user.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase))
         {
             int? userOutletId = _currentUserService.OutletID ?? user.OutletID;
