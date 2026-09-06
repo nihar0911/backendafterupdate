@@ -13,5 +13,6 @@ public class PurchaseOrderDto
     public DateTime? ActualDeliveryDate { get; set; }
     public string? DeliveryStatus { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string? ApproverRole { get; set; }
     public List<PurchaseOrderItemDto> Items { get; set; } = new();
 }

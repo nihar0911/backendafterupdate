@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using VendorManagementprojApplication.Common;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
@@ -49,25 +50,8 @@ public class RejectPurchaseOrderCommandHandler : IRequestHandler<RejectPurchaseO
             throw new InvalidOperationException($"Only purchase orders awaiting approval can be rejected. Current status is '{purchaseOrder.Status}'.");
         }
 
-        // Security / Role & Organization Scoping Check
-        if (!_currentUserService.IsOrganizationManager && !_currentUserService.IsAdmin)
-        {
-            throw new UnauthorizedAccessException("Only Organization Managers can reject purchase orders.");
-        }
-
-        if (_currentUserService.IsOrganizationManager)
-        {
-            if (!_currentUserService.OrganizationID.HasValue)
-            {
-                throw new UnauthorizedAccessException("You are not assigned to an organization.");
-            }
-
-            var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
-            if (outlet == null || outlet.OrganizationID != _currentUserService.OrganizationID.Value)
-            {
-                throw new UnauthorizedAccessException("You are not authorized to reject purchase orders outside your organization.");
-            }
-        }
+        var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
+        PurchaseOrderApprover.EnsureCurrentUserCanDecide(_currentUserService, purchaseOrder, outlet);
 
         purchaseOrder.Status = "Rejected";
         var updatedPurchaseOrder = await _purchaseOrderRepository.UpdateAsync(purchaseOrder);
@@ -133,6 +117,7 @@ public class RejectPurchaseOrderCommandHandler : IRequestHandler<RejectPurchaseO
             ActualDeliveryDate = purchaseOrder.ActualDeliveryDate,
             DeliveryStatus = purchaseOrder.DeliveryStatus,
             Status = purchaseOrder.Status,
+            ApproverRole = purchaseOrder.ApproverRole,
             Items = purchaseOrder.Items?.Select(item => new PurchaseOrderItemDto
             {
                 POItemID = item.POItemID,

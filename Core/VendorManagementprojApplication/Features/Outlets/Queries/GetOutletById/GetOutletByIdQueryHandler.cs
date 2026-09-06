@@ -87,7 +87,8 @@ public class GetOutletByIdQueryHandler
             OutletName = outlet.OutletName,
             Address = outlet.Address,
             Latitude = outlet.Latitude,
-            Longitude = outlet.Longitude
+            Longitude = outlet.Longitude,
+            PurchaseOrderApproverRole = outlet.PurchaseOrderApproverRole
         };
     }
 }

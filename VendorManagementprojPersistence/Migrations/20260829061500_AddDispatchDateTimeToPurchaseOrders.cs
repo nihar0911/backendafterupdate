@@ -1,11 +1,14 @@
 using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using VendorManagementprojPersistence.Data;
 
 #nullable disable
 
 namespace VendorManagementprojPersistence.Migrations
 {
-    /// <inheritdoc />
+    [DbContext(typeof(VendorManagementDbContext))]
+    [Migration("20260829061500_AddDispatchDateTimeToPurchaseOrders")]
     public partial class AddDispatchDateTimeToPurchaseOrders : Migration
     {
         /// <inheritdoc />

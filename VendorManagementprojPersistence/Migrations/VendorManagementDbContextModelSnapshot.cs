@@ -443,6 +443,13 @@ namespace VendorManagementprojPersistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<string>("PurchaseOrderApproverRole")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Organization Manager");
+
                     b.HasKey("OutletID");
 
                     b.HasIndex("OrganizationID");
@@ -537,9 +544,16 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Property<DateTime?>("ActualDeliveryDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ApproverRole")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("DeliveryStatus")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("DispatchDateTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("ExpectedDeliveryDate")
                         .HasColumnType("datetime2");

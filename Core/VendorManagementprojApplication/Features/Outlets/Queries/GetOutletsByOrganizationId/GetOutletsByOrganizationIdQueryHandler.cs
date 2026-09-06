@@ -63,7 +63,8 @@ public class GetOutletsByOrganizationIdQueryHandler
             OutletName = o.OutletName,
             Address = o.Address,
             Latitude = o.Latitude,
-            Longitude = o.Longitude
+            Longitude = o.Longitude,
+            PurchaseOrderApproverRole = o.PurchaseOrderApproverRole
         }).ToList();
     }
 }

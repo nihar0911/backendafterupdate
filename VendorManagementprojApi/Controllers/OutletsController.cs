@@ -23,7 +23,7 @@ public class OutletsController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager")]
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Purchase Manager")]
     public async Task<IActionResult> GetAll()
     {
         var response = await _mediator.Send(new GetAllOutletsQuery());

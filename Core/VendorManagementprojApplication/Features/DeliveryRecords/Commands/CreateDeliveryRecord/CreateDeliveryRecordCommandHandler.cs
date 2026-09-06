@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
+using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
 using VendorManagementprojDomain.Entities;
 
@@ -13,13 +14,16 @@ public class CreateDeliveryRecordCommandHandler : IRequestHandler<CreateDelivery
 {
     private readonly IDeliveryRecordRepository _deliveryRecordRepository;
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+    private readonly ICurrentUserService _currentUserService;
 
     public CreateDeliveryRecordCommandHandler(
         IDeliveryRecordRepository deliveryRecordRepository,
-        IPurchaseOrderRepository purchaseOrderRepository)
+        IPurchaseOrderRepository purchaseOrderRepository,
+        ICurrentUserService currentUserService)
     {
         _deliveryRecordRepository = deliveryRecordRepository;
         _purchaseOrderRepository = purchaseOrderRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task<CreateDeliveryRecordResponse> Handle(
@@ -45,6 +49,22 @@ public class CreateDeliveryRecordCommandHandler : IRequestHandler<CreateDelivery
         if (purchaseOrder == null)
             throw new InvalidOperationException(
                 "Purchase order does not exist.");
+
+        if (!_currentUserService.IsAdmin && !_currentUserService.IsPurchaseManager)
+        {
+            throw new UnauthorizedAccessException(
+                "Only the Purchase Manager can record a delivery.");
+        }
+
+        if (_currentUserService.IsPurchaseManager)
+        {
+            if (!_currentUserService.OutletID.HasValue ||
+                _currentUserService.OutletID.Value != purchaseOrder.OutletID)
+            {
+                throw new UnauthorizedAccessException(
+                    "You can only record deliveries for your assigned outlet.");
+            }
+        }
 
         if (!string.Equals(
             purchaseOrder.Status,

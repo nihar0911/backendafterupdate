@@ -127,6 +127,7 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
             ActualDeliveryDate = purchaseOrder.ActualDeliveryDate,
             DeliveryStatus = purchaseOrder.DeliveryStatus,
             Status = purchaseOrder.Status,
+            ApproverRole = purchaseOrder.ApproverRole,
             Items = purchaseOrder.Items?.Select(item => new PurchaseOrderItemDto
             {
                 POItemID = item.POItemID,

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using VendorManagementprojApplication.Common;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
@@ -87,6 +88,12 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
         if (quotation.QuotationItems == null || quotation.QuotationItems.Count == 0)
             throw new InvalidOperationException("Quotation must contain at least one item.");
 
+        var outlet = await _outletRepository.GetByIdAsync(purchaseRequest.OutletID);
+        if (outlet == null)
+            throw new InvalidOperationException("Outlet does not exist.");
+
+        var approverRole = PurchaseOrderApprover.Normalize(outlet.PurchaseOrderApproverRole);
+
         var purchaseOrder = new PurchaseOrder
         {
             RequestID = quotation.RequestID,
@@ -98,6 +105,7 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
             ActualDeliveryDate = null,
             DeliveryStatus = null,
             Status = "Awaiting Approval",
+            ApproverRole = approverRole,
             Items = new List<PurchaseOrderItem>()
         };
 
@@ -133,37 +141,35 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
 
         var createdPurchaseOrder = await _purchaseOrderRepository.AddAsync(purchaseOrder);
 
-        // Notify Organization Manager(s) for the PO's organization that PO is awaiting approval
         try
         {
-            var outlet = await _outletRepository.GetByIdAsync(purchaseRequest.OutletID);
-            if (outlet != null)
+            var allUsers = await _userRepository.GetAllAsync();
+            var approvers = allUsers.Where(u =>
             {
-                var allUsers = await _userRepository.GetAllAsync();
-                var orgManagers = allUsers.Where(u =>
-                    u.OrganizationID == outlet.OrganizationID &&
-                    (u.Role != null && string.Equals(u.Role.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) ||
-                     (u.Role == null && u.RoleID == 2))).ToList();
-
-                if (!orgManagers.Any())
+                var roleName = u.Role?.RoleName ?? string.Empty;
+                if (approverRole == PurchaseOrderApprover.OutletManager)
                 {
-                    orgManagers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID).ToList();
+                    return u.OutletID == purchaseRequest.OutletID &&
+                           string.Equals(roleName, PurchaseOrderApprover.OutletManager, StringComparison.OrdinalIgnoreCase);
                 }
 
-                foreach (var user in orgManagers)
+                return u.OrganizationID == outlet.OrganizationID &&
+                       string.Equals(roleName, PurchaseOrderApprover.OrganizationManager, StringComparison.OrdinalIgnoreCase);
+            }).ToList();
+
+            foreach (var user in approvers)
+            {
+                await _notificationRepository.AddAsync(new Notification
                 {
-                    await _notificationRepository.AddAsync(new Notification
-                    {
-                        UserID = user.UserID,
-                        Title = "Purchase Order Awaiting Approval",
-                        Message = $"Purchase Order PO-#{createdPurchaseOrder.PurchaseOrderID} is awaiting your approval.",
-                        NotificationType = "PurchaseOrderAwaitingApproval",
-                        RelatedRequestID = createdPurchaseOrder.PurchaseOrderID,
-                        RelatedVendorID = quotation.VendorID,
-                        IsRead = false,
-                        CreatedDate = DateTime.UtcNow
-                    });
-                }
+                    UserID = user.UserID,
+                    Title = "Purchase Order Awaiting Approval",
+                    Message = $"Purchase Order PO-#{createdPurchaseOrder.PurchaseOrderID} is awaiting your approval before it is placed with the vendor.",
+                    NotificationType = "PurchaseOrderAwaitingApproval",
+                    RelatedRequestID = createdPurchaseOrder.PurchaseOrderID,
+                    RelatedVendorID = quotation.VendorID,
+                    IsRead = false,
+                    CreatedDate = DateTime.UtcNow
+                });
             }
         }
         catch (Exception ex)
@@ -192,6 +198,7 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
             ActualDeliveryDate = purchaseOrder.ActualDeliveryDate,
             DeliveryStatus = purchaseOrder.DeliveryStatus,
             Status = purchaseOrder.Status,
+            ApproverRole = purchaseOrder.ApproverRole,
             Items = purchaseOrder.Items.Select(item => new PurchaseOrderItemDto
             {
                 POItemID = item.POItemID,

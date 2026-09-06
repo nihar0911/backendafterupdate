@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
+using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
 using VendorManagementprojDomain.Entities;
 
@@ -20,6 +21,7 @@ public class ConfirmDeliveryRecordCommandHandler
     private readonly IContractRepository _contractRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly IOutletRepository _outletRepository;
+    private readonly ICurrentUserService _currentUserService;
 
     public ConfirmDeliveryRecordCommandHandler(
         IDeliveryRecordRepository deliveryRecordRepository,
@@ -27,7 +29,8 @@ public class ConfirmDeliveryRecordCommandHandler
         IUserRepository userRepository,
         IContractRepository contractRepository,
         INotificationRepository notificationRepository,
-        IOutletRepository outletRepository)
+        IOutletRepository outletRepository,
+        ICurrentUserService currentUserService)
     {
         _deliveryRecordRepository = deliveryRecordRepository;
         _purchaseOrderRepository = purchaseOrderRepository;
@@ -35,6 +38,7 @@ public class ConfirmDeliveryRecordCommandHandler
         _contractRepository = contractRepository;
         _notificationRepository = notificationRepository;
         _outletRepository = outletRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task<ConfirmDeliveryRecordResponse> Handle(
@@ -66,9 +70,11 @@ public class ConfirmDeliveryRecordCommandHandler
             throw new InvalidOperationException(
                 "Confirming user does not exist.");
 
-        if (user.OutletID == null)
-            throw new InvalidOperationException(
-                "Confirming user is not assigned to an outlet.");
+        if (!_currentUserService.IsAdmin && !_currentUserService.IsPurchaseManager)
+        {
+            throw new UnauthorizedAccessException(
+                "Only the Purchase Manager can confirm a delivery.");
+        }
 
         var purchaseOrder =
             await _purchaseOrderRepository
@@ -78,9 +84,15 @@ public class ConfirmDeliveryRecordCommandHandler
             throw new InvalidOperationException(
                 "Purchase order does not exist.");
 
-        if (purchaseOrder.OutletID != user.OutletID)
-            throw new UnauthorizedAccessException(
-                "User is not authorized to confirm delivery for this outlet.");
+        if (_currentUserService.IsPurchaseManager)
+        {
+            if (!_currentUserService.OutletID.HasValue ||
+                _currentUserService.OutletID.Value != purchaseOrder.OutletID)
+            {
+                throw new UnauthorizedAccessException(
+                    "You can only confirm deliveries for your assigned outlet.");
+            }
+        }
 
         if (!string.Equals(
             purchaseOrder.Status,

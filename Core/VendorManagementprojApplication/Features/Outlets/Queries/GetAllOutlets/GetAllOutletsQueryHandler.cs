@@ -46,7 +46,7 @@ public class GetAllOutletsQueryHandler
             return new GetAllOutletsResponse { Outlets = MapToDto(organizationOutlets) };
         }
 
-        if (_currentUserService.IsOutletManager)
+        if (_currentUserService.IsOutletManager || _currentUserService.IsPurchaseManager)
         {
             if (!_currentUserService.OutletID.HasValue)
                 return new GetAllOutletsResponse { Outlets = new List<OutletDto>() };
@@ -76,7 +76,8 @@ public class GetAllOutletsQueryHandler
             OutletName = o.OutletName,
             Address = o.Address,
             Latitude = o.Latitude,
-            Longitude = o.Longitude
+            Longitude = o.Longitude,
+            PurchaseOrderApproverRole = o.PurchaseOrderApproverRole
         }).ToList();
     }
 }

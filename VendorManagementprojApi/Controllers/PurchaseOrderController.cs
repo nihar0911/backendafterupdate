@@ -45,7 +45,7 @@ public class PurchaseOrderController : ControllerBase
     }
 
     [HttpPut("{purchaseOrderID:int}/approve")]
-    [Authorize(Roles = "Organization Manager")]
+    [Authorize(Roles = "Organization Manager,Outlet Manager,Admin")]
     public async Task<IActionResult> Approve(int purchaseOrderID)
     {
         try
@@ -68,7 +68,7 @@ public class PurchaseOrderController : ControllerBase
     }
 
     [HttpPut("{purchaseOrderID:int}/reject")]
-    [Authorize(Roles = "Organization Manager")]
+    [Authorize(Roles = "Organization Manager,Outlet Manager,Admin")]
     public async Task<IActionResult> Reject(int purchaseOrderID)
     {
         try

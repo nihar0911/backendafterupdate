@@ -80,6 +80,7 @@ public class GetPurchaseOrderByIdQueryHandler : IRequestHandler<GetPurchaseOrder
                 ActualDeliveryDate = purchaseOrder.ActualDeliveryDate,
                 DeliveryStatus = purchaseOrder.DeliveryStatus,
                 Status = purchaseOrder.Status,
+                ApproverRole = purchaseOrder.ApproverRole,
                 Items = purchaseOrder.Items?.Select(item => new PurchaseOrderItemDto
                 {
                     POItemID = item.POItemID,

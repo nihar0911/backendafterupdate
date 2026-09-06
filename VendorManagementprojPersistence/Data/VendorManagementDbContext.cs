@@ -108,6 +108,11 @@ public class VendorManagementDbContext : DbContext
             entity.Property(e => e.Longitude)
                 .HasColumnType("decimal(9,6)");
 
+            entity.Property(e => e.PurchaseOrderApproverRole)
+                .HasMaxLength(50)
+                .IsRequired()
+                .HasDefaultValue("Organization Manager");
+
             entity.HasOne(e => e.Organization)
                 .WithMany()
                 .HasForeignKey(e => e.OrganizationID)
@@ -464,6 +469,9 @@ public class VendorManagementDbContext : DbContext
 
             entity.Property(e => e.DeliveryStatus)
                 .HasMaxLength(20);
+
+            entity.Property(e => e.ApproverRole)
+                .HasMaxLength(50);
         });
 
         modelBuilder.Entity<PurchaseOrderItem>(entity =>

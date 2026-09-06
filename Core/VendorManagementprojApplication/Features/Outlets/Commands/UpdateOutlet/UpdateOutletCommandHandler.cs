@@ -1,6 +1,7 @@
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
+using VendorManagementprojApplication.Common;
 using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.Outlets.Commands.UpdateOutlet;
@@ -65,6 +66,7 @@ public class UpdateOutletCommandHandler
         outlet.Address = request.Address;
         outlet.Latitude = request.Latitude;
         outlet.Longitude = request.Longitude;
+        outlet.PurchaseOrderApproverRole = PurchaseOrderApprover.Normalize(request.PurchaseOrderApproverRole);
 
         var updated =
             await _repository.UpdateAsync(outlet);
@@ -76,7 +78,8 @@ public class UpdateOutletCommandHandler
             OutletName = updated.OutletName,
             Address = updated.Address,
             Latitude = updated.Latitude,
-            Longitude = updated.Longitude
+            Longitude = updated.Longitude,
+            PurchaseOrderApproverRole = updated.PurchaseOrderApproverRole
         };
 
         return new UpdateOutletResponse

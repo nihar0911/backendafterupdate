@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using VendorManagementprojApplication.Common;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
@@ -49,33 +50,15 @@ public class ApprovePurchaseOrderCommandHandler : IRequestHandler<ApprovePurchas
             throw new InvalidOperationException($"Only purchase orders awaiting approval can be approved. Current status is '{purchaseOrder.Status}'.");
         }
 
-        // Security / Role & Organization Scoping Check
-        if (!_currentUserService.IsOrganizationManager && !_currentUserService.IsAdmin)
-        {
-            throw new UnauthorizedAccessException("Only Organization Managers can approve purchase orders.");
-        }
+        var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
+        PurchaseOrderApprover.EnsureCurrentUserCanDecide(_currentUserService, purchaseOrder, outlet);
 
-        if (_currentUserService.IsOrganizationManager)
-        {
-            if (!_currentUserService.OrganizationID.HasValue)
-            {
-                throw new UnauthorizedAccessException("You are not assigned to an organization.");
-            }
-
-            var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
-            if (outlet == null || outlet.OrganizationID != _currentUserService.OrganizationID.Value)
-            {
-                throw new UnauthorizedAccessException("You are not authorized to approve purchase orders outside your organization.");
-            }
-        }
-
-        purchaseOrder.Status = "Approved";
+        purchaseOrder.Status = "Pending";
         var updatedPurchaseOrder = await _purchaseOrderRepository.UpdateAsync(purchaseOrder);
 
         if (updatedPurchaseOrder == null)
             throw new InvalidOperationException("Unable to update purchase order.");
 
-        // Notify Purchase Manager responsible for the Purchase Request / Outlet
         try
         {
             var targetUserIds = new HashSet<int>();
@@ -98,8 +81,25 @@ public class ApprovePurchaseOrderCommandHandler : IRequestHandler<ApprovePurchas
                 {
                     UserID = userId,
                     Title = "Purchase Order Approved",
-                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been approved.",
+                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} was approved and placed with the vendor.",
                     NotificationType = "PurchaseOrderApproved",
+                    RelatedRequestID = purchaseOrder.PurchaseOrderID,
+                    RelatedVendorID = purchaseOrder.VendorID,
+                    IsRead = false,
+                    CreatedDate = DateTime.UtcNow
+                });
+            }
+
+            var allUsers = await _userRepository.GetAllAsync();
+            var vendorUsers = allUsers.Where(u => u.VendorID == purchaseOrder.VendorID).ToList();
+            foreach (var user in vendorUsers)
+            {
+                await _notificationRepository.AddAsync(new Notification
+                {
+                    UserID = user.UserID,
+                    Title = "New Purchase Order",
+                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been placed with you.",
+                    NotificationType = "PurchaseOrderSent",
                     RelatedRequestID = purchaseOrder.PurchaseOrderID,
                     RelatedVendorID = purchaseOrder.VendorID,
                     IsRead = false,
@@ -133,6 +133,7 @@ public class ApprovePurchaseOrderCommandHandler : IRequestHandler<ApprovePurchas
             ActualDeliveryDate = purchaseOrder.ActualDeliveryDate,
             DeliveryStatus = purchaseOrder.DeliveryStatus,
             Status = purchaseOrder.Status,
+            ApproverRole = purchaseOrder.ApproverRole,
             Items = purchaseOrder.Items?.Select(item => new PurchaseOrderItemDto
             {
                 POItemID = item.POItemID,

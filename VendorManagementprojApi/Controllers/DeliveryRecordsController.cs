@@ -20,7 +20,7 @@ public class DeliveryRecordsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin,Vendor Manager,Outlet Manager,Organization Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> CreateDelivery(
         [FromBody] CreateDeliveryRecordCommand command)
     {
@@ -46,7 +46,7 @@ public class DeliveryRecordsController : ControllerBase
     }
 
     [HttpPost("confirm")]
-    [Authorize(Roles = "Admin,Outlet Manager,Purchase Manager")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
     public async Task<IActionResult> ConfirmDelivery(
         [FromBody] ConfirmDeliveryRecordCommand command)
     {
