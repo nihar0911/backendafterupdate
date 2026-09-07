@@ -51,7 +51,8 @@ public class VendorFeedbackRepository : IVendorFeedbackRepository
 
     public async Task<List<VendorFeedback>> GetByVendorIdAsync(
         int vendorID,
-        int? organizationID = null)
+        int? organizationID = null,
+        int? productID = null)
     {
         var query = _context.VendorFeedbacks
             .Include(f => f.Vendor)
@@ -64,6 +65,11 @@ public class VendorFeedbackRepository : IVendorFeedbackRepository
         if (organizationID.HasValue && organizationID.Value > 0)
         {
             query = query.Where(f => f.Outlet != null && f.Outlet.OrganizationID == organizationID.Value);
+        }
+
+        if (productID.HasValue && productID.Value > 0)
+        {
+            query = query.Where(f => f.POItem != null && f.POItem.ProductID == productID.Value);
         }
 
         return await query.OrderByDescending(f => f.FeedbackDate).ToListAsync();

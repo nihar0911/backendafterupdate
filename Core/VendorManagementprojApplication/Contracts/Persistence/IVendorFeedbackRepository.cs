@@ -10,7 +10,7 @@ public interface IVendorFeedbackRepository
 
     Task<List<VendorFeedback>> GetAllAsync();
 
-    Task<List<VendorFeedback>> GetByVendorIdAsync(int vendorID, int? organizationID = null);
+    Task<List<VendorFeedback>> GetByVendorIdAsync(int vendorID, int? organizationID = null, int? productID = null);
 
     Task<List<VendorFeedback>> GetByOrganizationIdAsync(int organizationID);
 

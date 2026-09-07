@@ -16,6 +16,8 @@ public class VendorFeedbackDto
 
     public int POItemID { get; set; }
 
+    public int ProductID { get; set; }
+
     public string ProductName { get; set; } = string.Empty;
 
     public int RatedByUserID { get; set; }

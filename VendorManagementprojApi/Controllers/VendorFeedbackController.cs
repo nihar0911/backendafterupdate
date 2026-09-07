@@ -112,18 +112,18 @@ public class VendorFeedbackController : ControllerBase
     }
 
     [HttpGet("vendor/{vendorID:int}")]
-    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager")]
-    public async Task<IActionResult> GetByVendor(int vendorID)
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager,Purchase Manager")]
+    public async Task<IActionResult> GetByVendor(int vendorID, [FromQuery] int? productId = null)
     {
         if (string.Equals(_currentUserService.Role, "Vendor Manager", StringComparison.OrdinalIgnoreCase))
         {
-            if (_currentUserService.VendorID.HasValue && vendorID != _currentUserService.VendorID.Value)
+            if (!_currentUserService.VendorID.HasValue || vendorID != _currentUserService.VendorID.Value)
             {
                 return Forbid();
             }
         }
 
-        var list = await _feedbackRepository.GetByVendorIdAsync(vendorID, null);
+        var list = await _feedbackRepository.GetByVendorIdAsync(vendorID, null, productId);
         var dtos = list.Select(f => new VendorFeedbackDto
         {
             FeedbackID = f.FeedbackID,
@@ -133,6 +133,7 @@ public class VendorFeedbackController : ControllerBase
             OutletName = f.Outlet?.OutletName ?? string.Empty,
             PurchaseOrderID = f.PurchaseOrderID,
             POItemID = f.POItemID,
+            ProductID = f.POItem?.ProductID ?? 0,
             ProductName = f.POItem?.Product?.ProductName ?? string.Empty,
             RatedByUserID = f.RatedByUserID,
             RatedByUserName = f.RatedByUser?.Name ?? string.Empty,
@@ -147,9 +148,17 @@ public class VendorFeedbackController : ControllerBase
     }
 
     [HttpGet("vendor/{vendorID:int}/ai-insights")]
-    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager")]
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager,Purchase Manager")]
     public async Task<IActionResult> GetVendorAiInsights(int vendorID)
     {
+        if (string.Equals(_currentUserService.Role, "Vendor Manager", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!_currentUserService.VendorID.HasValue || vendorID != _currentUserService.VendorID.Value)
+            {
+                return Forbid();
+            }
+        }
+
         var list = await _feedbackRepository.GetByVendorIdAsync(vendorID, null);
         var vendorName = list.FirstOrDefault()?.Vendor?.VendorName ?? $"Vendor #{vendorID}";
 

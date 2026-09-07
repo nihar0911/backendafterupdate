@@ -76,6 +76,7 @@ public class GetAllVendorFeedbackQueryHandler
                 OutletName = f.Outlet?.OutletName ?? string.Empty,
                 PurchaseOrderID = f.PurchaseOrderID,
                 POItemID = f.POItemID,
+                ProductID = f.POItem?.ProductID ?? 0,
                 ProductName = f.POItem?.Product?.ProductName ?? string.Empty,
                 RatedByUserID = f.RatedByUserID,
                 RatedByUserName = f.RatedByUser?.Name ?? string.Empty,

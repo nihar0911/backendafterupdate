@@ -74,6 +74,7 @@ public class GetVendorFeedbackByIdQueryHandler
                 OutletName = !string.IsNullOrWhiteSpace(feedback.Outlet?.OutletName) ? feedback.Outlet.OutletName : (!string.IsNullOrWhiteSpace(feedback.Outlet?.Address) ? feedback.Outlet.Address : string.Empty),
                 PurchaseOrderID = feedback.PurchaseOrderID,
                 POItemID = feedback.POItemID,
+                ProductID = feedback.POItem?.ProductID ?? 0,
                 ProductName = feedback.POItem?.Product?.ProductName ?? string.Empty,
                 RatedByUserID = feedback.RatedByUserID,
                 RatedByUserName = feedback.RatedByUser?.Name ?? string.Empty,

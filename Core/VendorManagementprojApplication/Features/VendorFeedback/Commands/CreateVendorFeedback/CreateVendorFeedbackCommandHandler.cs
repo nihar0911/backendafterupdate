@@ -176,11 +176,11 @@ public class CreateVendorFeedbackCommandHandler
 
         return new CreateVendorFeedbackResponse
         {
-            Feedback = MapToDto(createdFeedback)
+            Feedback = MapToDto(createdFeedback, purchaseOrderItem.ProductID, purchaseOrderItem.Product?.ProductName ?? string.Empty)
         };
     }
 
-    private static VendorFeedbackDto MapToDto(VendorFeedbackEntity feedback)
+    private static VendorFeedbackDto MapToDto(VendorFeedbackEntity feedback, int productId = 0, string productName = "")
     {
         return new VendorFeedbackDto
         {
@@ -189,6 +189,8 @@ public class CreateVendorFeedbackCommandHandler
             OutletID = feedback.OutletID,
             PurchaseOrderID = feedback.PurchaseOrderID,
             POItemID = feedback.POItemID,
+            ProductID = feedback.POItem?.ProductID ?? (productId > 0 ? productId : 0),
+            ProductName = feedback.POItem?.Product?.ProductName ?? productName,
             RatedByUserID = feedback.RatedByUserID,
             Rating = feedback.Rating,
             ProductQualityRating = feedback.ProductQualityRating,
