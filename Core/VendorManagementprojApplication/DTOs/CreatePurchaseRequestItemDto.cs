@@ -14,4 +14,6 @@ public class CreatePurchaseRequestItemDto
     [Required]
     [StringLength(30)]
     public string Unit { get; set; } = string.Empty;
+
+    public int? VendorID { get; set; }
 }

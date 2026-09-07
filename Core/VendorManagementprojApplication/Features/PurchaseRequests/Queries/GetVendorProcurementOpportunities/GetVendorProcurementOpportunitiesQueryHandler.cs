@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -106,24 +106,22 @@ public class GetVendorProcurementOpportunitiesQueryHandler
             string creatorName = creatorUser?.Name ?? "Outlet Staff";
             string creatorRole = creatorUser?.Role?.RoleName ?? (creatorUser?.RoleID == 3 ? "Outlet Manager" : "Staff");
 
-            // Check if this request has explicit selected vendor assignments
-            bool hasExplicitResponses = responsesByRequest.TryGetValue(req.RequestID, out var reqResponses) &&
-                                        reqResponses != null && reqResponses.Count > 0;
+            // Retrieve explicit vendor responses for this request
+            responsesByRequest.TryGetValue(req.RequestID, out var reqResponses);
 
             foreach (var item in req.Items)
             {
                 if (vendorProducts.TryGetValue(item.ProductID, out var vp))
                 {
-                    // Strict Selected Vendor Isolation:
-                    // If the Purchase Request was dispatched to specific selected vendor(s),
-                    // only those selected vendors are permitted to see and respond to the opportunity.
-                    if (hasExplicitResponses)
+                    // Strict Explicit Vendor Isolation:
+                    // A Vendor Manager can ONLY see an opportunity if it was explicitly dispatched
+                    // to their vendor for this specific product (i.e. an explicit VendorOpportunityResponse exists).
+                    bool isVendorSelected = reqResponses != null &&
+                                            reqResponses.Any(r => r.VendorID == vendorId && r.ProductID == item.ProductID);
+
+                    if (!isVendorSelected)
                     {
-                        bool isVendorSelected = reqResponses!.Any(r => r.VendorID == vendorId && r.ProductID == item.ProductID);
-                        if (!isVendorSelected)
-                        {
-                            continue; // This vendor was NOT chosen by the user; do not expose this opportunity.
-                        }
+                        continue; // This vendor was NOT selected/dispatched for this item; do not expose.
                     }
 
                     allOutlets.TryGetValue(req.OutletID, out var outlet);

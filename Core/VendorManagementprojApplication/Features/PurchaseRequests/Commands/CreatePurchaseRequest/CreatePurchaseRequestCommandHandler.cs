@@ -129,6 +129,31 @@ public class CreatePurchaseRequestCommandHandler
                 throw new InvalidOperationException(
                     $"ProductID {itemDto.ProductID} does not exist.");
 
+            if (!string.Equals(product.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException(
+                    $"ProductID {itemDto.ProductID} is not active.");
+
+            if (itemDto.VendorID.HasValue && itemDto.VendorID.Value > 0)
+            {
+                var vendor = await _vendorRepository.GetByIdAsync(itemDto.VendorID.Value);
+                if (vendor == null)
+                    throw new InvalidOperationException(
+                        $"Vendor ID #{itemDto.VendorID.Value} does not exist.");
+
+                if (!string.Equals(vendor.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException(
+                        $"Vendor '{vendor.VendorName}' (ID #{itemDto.VendorID.Value}) is not active.");
+
+                var vendorProduct = await _vendorProductRepository.GetByVendorAndProductAsync(
+                    itemDto.VendorID.Value, itemDto.ProductID);
+
+                if (vendorProduct == null || !string.Equals(vendorProduct.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        $"Vendor '{vendor.VendorName}' does not supply product '{product.ProductName}'.");
+                }
+            }
+
             loadedProducts[itemDto.ProductID] = product;
 
             purchaseRequest.Items.Add(
@@ -144,72 +169,140 @@ public class CreatePurchaseRequestCommandHandler
             await _purchaseRequestRepository
                 .AddAsync(purchaseRequest);
 
-        // Resolve selected vendors (distinct positive vendor IDs)
-        var selectedVendorIds = new HashSet<int>();
-        if (request.SelectedVendorIDs != null && request.SelectedVendorIDs.Count > 0)
-        {
-            foreach (var vid in request.SelectedVendorIDs.Where(v => v > 0))
-            {
-                selectedVendorIds.Add(vid);
-            }
-        }
-        if (request.SelectedVendorID.HasValue && request.SelectedVendorID.Value > 0)
-        {
-            selectedVendorIds.Add(request.SelectedVendorID.Value);
-        }
+        var allUsers = await _userRepository.GetAllAsync();
+        string outletName = !string.IsNullOrWhiteSpace(targetOutlet.OutletName) ? targetOutlet.OutletName : $"Outlet #{targetOutlet.OutletID}";
 
-        // Process opportunity & notification creation ONLY for explicitly selected vendors
-        if (selectedVendorIds.Count > 0)
-        {
-            var allUsers = await _userRepository.GetAllAsync();
+        var itemVendorAssignments = request.Items
+            .Where(i => i.VendorID.HasValue && i.VendorID.Value > 0)
+            .ToList();
 
-            foreach (var vendorId in selectedVendorIds)
+        if (itemVendorAssignments.Count > 0)
+        {
+            // Explicit Item-Level Vendor Assignment Routing
+            var processedPairs = new HashSet<string>();
+
+            foreach (var itemDto in itemVendorAssignments)
             {
-                var vendor = await _vendorRepository.GetByIdAsync(vendorId);
-                if (vendor == null || !string.Equals(vendor.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                int vendorId = itemDto.VendorID!.Value;
+                int productId = itemDto.ProductID;
+                string pairKey = $"{vendorId}_{productId}";
+
+                if (!processedPairs.Add(pairKey))
                     continue;
 
-                foreach (var item in createdRequest.Items)
+                var existingResp = await _opportunityResponseRepository.GetByRequestAndVendorAsync(
+                    createdRequest.RequestID, vendorId, productId);
+
+                if (existingResp == null)
                 {
-                    var existingResp = await _opportunityResponseRepository.GetByRequestAndVendorAsync(
-                        createdRequest.RequestID, vendorId, item.ProductID);
-
-                    if (existingResp == null)
+                    var opp = new VendorOpportunityResponse
                     {
-                        var opp = new VendorOpportunityResponse
-                        {
-                            RequestID = createdRequest.RequestID,
-                            VendorID = vendorId,
-                            ProductID = item.ProductID,
-                            Status = "Pending",
-                            CreatedDate = DateTime.UtcNow
-                        };
-                        await _opportunityResponseRepository.AddAsync(opp);
-                    }
+                        RequestID = createdRequest.RequestID,
+                        VendorID = vendorId,
+                        ProductID = productId,
+                        Status = "Pending",
+                        CreatedDate = DateTime.UtcNow
+                    };
+                    await _opportunityResponseRepository.AddAsync(opp);
+                }
 
-                    // Create Notification for the Vendor Manager(s) of this specific selected vendor
-                    var vendorManagers = allUsers.Where(u =>
-                        u.VendorID == vendorId &&
-                        (string.Equals(u.Role?.RoleName, "Vendor Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 4))
-                        .ToList();
+                var vendorManagers = allUsers.Where(u =>
+                    u.VendorID == vendorId &&
+                    (string.Equals(u.Role?.RoleName, "Vendor Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 4))
+                    .ToList();
 
-                    loadedProducts.TryGetValue(item.ProductID, out var prod);
-                    string prodName = prod?.ProductName ?? $"Product #{item.ProductID}";
-                    string outletName = !string.IsNullOrWhiteSpace(targetOutlet.OutletName) ? targetOutlet.OutletName : $"Outlet #{targetOutlet.OutletID}";
+                loadedProducts.TryGetValue(productId, out var prod);
+                string prodName = prod?.ProductName ?? $"Product #{productId}";
+                var matchingItem = createdRequest.Items.FirstOrDefault(i => i.ProductID == productId);
+                decimal qty = matchingItem?.Quantity ?? itemDto.Quantity;
+                string unit = matchingItem?.Unit ?? itemDto.Unit;
 
-                    foreach (var vm in vendorManagers)
+                foreach (var vm in vendorManagers)
+                {
+                    var notif = new Notification
                     {
-                        var notif = new Notification
+                        UserID = vm.UserID,
+                        Title = $"New Procurement Opportunity #PR-{createdRequest.RequestID}",
+                        Message = $"You have received a new procurement opportunity for {qty:N2} {unit} of {prodName} from {outletName}.",
+                        NotificationType = "ProcurementOpportunity",
+                        RelatedRequestID = createdRequest.RequestID,
+                        RelatedVendorID = vendorId,
+                        IsRead = false,
+                        CreatedDate = DateTime.UtcNow
+                    };
+                    await _notificationRepository.AddAsync(notif);
+                }
+            }
+        }
+        else
+        {
+            // Legacy Fallback: Resolve selected vendors (distinct positive vendor IDs)
+            var selectedVendorIds = new HashSet<int>();
+            if (request.SelectedVendorIDs != null && request.SelectedVendorIDs.Count > 0)
+            {
+                foreach (var vid in request.SelectedVendorIDs.Where(v => v > 0))
+                {
+                    selectedVendorIds.Add(vid);
+                }
+            }
+            if (request.SelectedVendorID.HasValue && request.SelectedVendorID.Value > 0)
+            {
+                selectedVendorIds.Add(request.SelectedVendorID.Value);
+            }
+
+            if (selectedVendorIds.Count > 0)
+            {
+                foreach (var vendorId in selectedVendorIds)
+                {
+                    var vendor = await _vendorRepository.GetByIdAsync(vendorId);
+                    if (vendor == null || !string.Equals(vendor.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    foreach (var item in createdRequest.Items)
+                    {
+                        var vendorProduct = await _vendorProductRepository.GetByVendorAndProductAsync(vendorId, item.ProductID);
+                        if (vendorProduct == null || !string.Equals(vendorProduct.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                            continue;
+
+                        var existingResp = await _opportunityResponseRepository.GetByRequestAndVendorAsync(
+                            createdRequest.RequestID, vendorId, item.ProductID);
+
+                        if (existingResp == null)
                         {
-                            UserID = vm.UserID,
-                            Title = $"New Procurement Opportunity #PR-{createdRequest.RequestID}",
-                            Message = $"You have received a new procurement opportunity for {item.Quantity:N2} {item.Unit} of {prodName} from {outletName}.",
-                            NotificationType = "ProcurementOpportunity",
-                            RelatedRequestID = createdRequest.RequestID, RelatedVendorID = vendorId,
-                            IsRead = false,
-                            CreatedDate = DateTime.UtcNow
-                        };
-                        await _notificationRepository.AddAsync(notif);
+                            var opp = new VendorOpportunityResponse
+                            {
+                                RequestID = createdRequest.RequestID,
+                                VendorID = vendorId,
+                                ProductID = item.ProductID,
+                                Status = "Pending",
+                                CreatedDate = DateTime.UtcNow
+                            };
+                            await _opportunityResponseRepository.AddAsync(opp);
+                        }
+
+                        var vendorManagers = allUsers.Where(u =>
+                            u.VendorID == vendorId &&
+                            (string.Equals(u.Role?.RoleName, "Vendor Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 4))
+                            .ToList();
+
+                        loadedProducts.TryGetValue(item.ProductID, out var prod);
+                        string prodName = prod?.ProductName ?? $"Product #{item.ProductID}";
+
+                        foreach (var vm in vendorManagers)
+                        {
+                            var notif = new Notification
+                            {
+                                UserID = vm.UserID,
+                                Title = $"New Procurement Opportunity #PR-{createdRequest.RequestID}",
+                                Message = $"You have received a new procurement opportunity for {item.Quantity:N2} {item.Unit} of {prodName} from {outletName}.",
+                                NotificationType = "ProcurementOpportunity",
+                                RelatedRequestID = createdRequest.RequestID,
+                                RelatedVendorID = vendorId,
+                                IsRead = false,
+                                CreatedDate = DateTime.UtcNow
+                            };
+                            await _notificationRepository.AddAsync(notif);
+                        }
                     }
                 }
             }
