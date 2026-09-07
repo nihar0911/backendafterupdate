@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -65,7 +65,6 @@ public class GetVendorQuotationsQueryHandler
                 ProductID = item.ProductID,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
-                DiscountAmount = item.DiscountAmount,
                 TaxRate = item.TaxRate,
                 TaxAmount = item.TaxAmount,
                 TotalAmount = item.TotalAmount

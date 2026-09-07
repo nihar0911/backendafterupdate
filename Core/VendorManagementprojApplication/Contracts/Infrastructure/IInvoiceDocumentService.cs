@@ -1,11 +1,9 @@
-﻿namespace VendorManagementprojApplication.Contracts.Infrastructure;
+using System.Threading.Tasks;
+using VendorManagementprojDomain.Entities;
+
+namespace VendorManagementprojApplication.Contracts.Infrastructure;
 
 public interface IInvoiceDocumentService
 {
-    Task<byte[]> GenerateInvoicePdfAsync(
-        int invoiceID,
-        int purchaseOrderID,
-        decimal subtotal,
-        decimal taxAmount,
-        decimal totalAmount);
+    Task<byte[]> GenerateInvoicePdfAsync(Invoice invoice);
 }

@@ -12,4 +12,7 @@ public interface IDeliveryRecordRepository
     Task<List<DeliveryRecord>> GetByPurchaseOrderIdAsync(int purchaseOrderID);
     Task<DeliveryRecord?> UpdateAsync(DeliveryRecord deliveryRecord);
     Task<List<DeliveryRecord>> GetByVendorProductOutletAsync(int vendorID, int productID, int outletID);
+    Task<List<DeliveryRecord>> GetConfirmedByVendorAsync(int vendorID);
+    Task<List<DeliveryRecord>> GetConfirmedByVendorAndProductAsync(int vendorID, int productID);
 }
+

@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementprojApplication.DTOs;
 
 public class VendorAnalysisDto
 {
@@ -12,19 +12,11 @@ public class VendorAnalysisDto
 
     public decimal DeliveryScore { get; set; }
 
-    public decimal ComplaintScore { get; set; }
-
     public decimal ContractScore { get; set; }
 
     public decimal OverallScore { get; set; }
 
     public int TotalFeedbackCount { get; set; }
-
-    public int TotalComplaintCount { get; set; }
-
-    public int HighSeverityComplaintCount { get; set; }
-
-    public int CriticalComplaintCount { get; set; }
 
     public decimal DeliveryCompletionPercentage { get; set; }
 

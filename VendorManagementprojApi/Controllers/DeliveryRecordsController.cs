@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using VendorManagementprojApplication.Features.DeliveryRecords.Commands.ConfirmDeliveryRecord;
 using VendorManagementprojApplication.Features.DeliveryRecords.Commands.CreateDeliveryRecord;
 using VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
+using VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetSpoilageAdvice;
 
 namespace VendorManagementprojApi.Controllers;
 
@@ -54,5 +55,31 @@ public class DeliveryRecordsController : ControllerBase
             await _mediator.Send(command);
 
         return Ok(result);
+    }
+
+    [HttpGet("spoilage-advice/{purchaseOrderID:int}")]
+    [Authorize(Roles = "Admin,Vendor Manager,Purchase Manager,Organization Manager,Outlet Manager")]
+    public async Task<IActionResult> GetSpoilageAdvice(int purchaseOrderID)
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetSpoilageAdviceQuery
+            {
+                PurchaseOrderID = purchaseOrderID
+            });
+
+            if (result.Advisor == null)
+                return NotFound();
+
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
     }
 }

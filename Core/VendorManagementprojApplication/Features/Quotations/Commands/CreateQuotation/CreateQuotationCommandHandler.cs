@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,7 +17,6 @@ public class CreateQuotationCommandHandler
     private readonly IQuotationRepository _quotationRepository;
     private readonly IPurchaseRequestRepository _purchaseRequestRepository;
     private readonly IVendorProductRepository _vendorProductRepository;
-    private readonly IDiscountRepository _discountRepository;
     private readonly ITaxRateRepository _taxRateRepository;
     private readonly IProductRepository _productRepository;
     private readonly IVendorRepository _vendorRepository;
@@ -31,7 +30,6 @@ public class CreateQuotationCommandHandler
         IQuotationRepository quotationRepository,
         IPurchaseRequestRepository purchaseRequestRepository,
         IVendorProductRepository vendorProductRepository,
-        IDiscountRepository discountRepository,
         ITaxRateRepository taxRateRepository,
         IProductRepository productRepository,
         IVendorRepository vendorRepository,
@@ -44,7 +42,6 @@ public class CreateQuotationCommandHandler
         _quotationRepository = quotationRepository;
         _purchaseRequestRepository = purchaseRequestRepository;
         _vendorProductRepository = vendorProductRepository;
-        _discountRepository = discountRepository;
         _taxRateRepository = taxRateRepository;
         _productRepository = productRepository;
         _vendorRepository = vendorRepository;
@@ -190,46 +187,8 @@ public class CreateQuotationCommandHandler
             var grossAmount =
                 unitPrice * itemDto.Quantity;
 
-            var discount =
-                await _discountRepository
-                    .GetActiveDiscountAsync(
-                        request.VendorID,
-                        itemDto.ProductID,
-                        DateTime.Now);
-
-            decimal discountAmount = 0;
-
-            if (discount != null &&
-                itemDto.Quantity >= discount.MinimumQuantity)
-            {
-                if (string.Equals(
-                        discount.DiscountType,
-                        "Percentage",
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    discountAmount =
-                        grossAmount *
-                        (discount.DiscountValue / 100m);
-                }
-                else if (string.Equals(
-                        discount.DiscountType,
-                        "Fixed",
-                        StringComparison.OrdinalIgnoreCase) ||
-                         string.Equals(
-                        discount.DiscountType,
-                        "FixedAmount",
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    discountAmount =
-                        discount.DiscountValue;
-                }
-
-                if (discountAmount > grossAmount)
-                    discountAmount = grossAmount;
-            }
-
             var taxableAmount =
-                grossAmount - discountAmount;
+                grossAmount;
 
             var taxAmount =
                 taxableAmount *
@@ -249,9 +208,6 @@ public class CreateQuotationCommandHandler
 
                     UnitPrice =
                         unitPrice,
-
-                    DiscountAmount =
-                        discountAmount,
 
                     TaxRate =
                         taxRate.Percentage,
@@ -375,9 +331,6 @@ public class CreateQuotationCommandHandler
 
                             UnitPrice =
                                 item.UnitPrice,
-
-                            DiscountAmount =
-                                item.DiscountAmount,
 
                             TaxRate =
                                 item.TaxRate,

@@ -98,7 +98,6 @@ public class AcceptQuotationCommandHandler : IRequestHandler<AcceptQuotationComm
                     ProductID = item.ProductID,
                     Quantity = item.Quantity,
                     UnitPrice = item.UnitPrice,
-                    DiscountAmount = item.DiscountAmount,
                     TaxRate = item.TaxRate,
                     TaxAmount = item.TaxAmount,
                     TotalAmount = item.TotalAmount

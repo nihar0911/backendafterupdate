@@ -144,31 +144,28 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
 
         var createdInvoice = await _invoiceRepository.AddAsync(invoice);
 
-        var pdfBytes = await _invoiceDocumentService.GenerateInvoicePdfAsync(
-            createdInvoice.InvoiceID,
-            createdInvoice.PurchaseOrderID,
-            createdInvoice.Subtotal,
-            createdInvoice.TaxAmount,
-            createdInvoice.TotalAmount);
+        var fullInvoice = await _invoiceRepository.GetByIdAsync(createdInvoice.InvoiceID) ?? createdInvoice;
 
-        createdInvoice.InvoiceDocumentBase64 =
+        var pdfBytes = await _invoiceDocumentService.GenerateInvoicePdfAsync(fullInvoice);
+
+        fullInvoice.InvoiceDocumentBase64 =
             Convert.ToBase64String(pdfBytes);
 
-        createdInvoice.InvoiceFileName =
-            $"Invoice-{createdInvoice.InvoiceID}.pdf";
+        fullInvoice.InvoiceFileName =
+            $"Invoice-{fullInvoice.InvoiceID}.pdf";
 
-        createdInvoice.InvoiceContentType =
+        fullInvoice.InvoiceContentType =
             "application/pdf";
 
-        await _invoiceRepository.UpdateAsync(createdInvoice);
+        await _invoiceRepository.UpdateAsync(fullInvoice);
 
         // Notify Organization Manager(s)
         try
         {
-            var vendor = await _vendorRepository.GetByIdAsync(createdInvoice.VendorID);
+            var vendor = await _vendorRepository.GetByIdAsync(fullInvoice.VendorID);
             string vendorName = vendor?.VendorName ?? "Vendor";
 
-            var outlet = await _outletRepository.GetByIdAsync(createdInvoice.OutletID);
+            var outlet = await _outletRepository.GetByIdAsync(fullInvoice.OutletID);
             if (outlet != null)
             {
                 var allUsers = await _userRepository.GetAllAsync();
@@ -179,10 +176,10 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
                     {
                         UserID = user.UserID,
                         Title = "Invoice Submitted",
-                        Message = $"New invoice INV-{createdInvoice.InvoiceID} has been submitted by {vendorName} for PO-#{createdInvoice.PurchaseOrderID}.",
+                        Message = $"New invoice INV-{fullInvoice.InvoiceID} has been submitted by {vendorName} for PO-#{fullInvoice.PurchaseOrderID}.",
                         NotificationType = "InvoiceSubmitted",
-                        RelatedRequestID = createdInvoice.PurchaseOrderID,
-                        RelatedVendorID = createdInvoice.VendorID,
+                        RelatedRequestID = fullInvoice.PurchaseOrderID,
+                        RelatedVendorID = fullInvoice.VendorID,
                         IsRead = false,
                         CreatedDate = DateTime.Now
                     });
@@ -193,8 +190,6 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
         {
             Console.WriteLine($"[CreateInvoice Notification Error]: {ex.Message}");
         }
-
-        var fullInvoice = await _invoiceRepository.GetByIdAsync(createdInvoice.InvoiceID) ?? createdInvoice;
 
         return new CreateInvoiceResponse
         {

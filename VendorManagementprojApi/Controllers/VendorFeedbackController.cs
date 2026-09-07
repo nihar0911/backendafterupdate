@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Contracts.Infrastructure;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
@@ -23,18 +22,15 @@ public class VendorFeedbackController : ControllerBase
     private readonly IMediator _mediator;
     private readonly IVendorFeedbackRepository _feedbackRepository;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IGeminiAiService _geminiAiService;
 
     public VendorFeedbackController(
         IMediator mediator,
         IVendorFeedbackRepository feedbackRepository,
-        ICurrentUserService currentUserService,
-        IGeminiAiService geminiAiService)
+        ICurrentUserService currentUserService)
     {
         _mediator = mediator;
         _feedbackRepository = feedbackRepository;
         _currentUserService = currentUserService;
-        _geminiAiService = geminiAiService;
     }
 
     [HttpPost]
@@ -147,29 +143,6 @@ public class VendorFeedbackController : ControllerBase
         return Ok(dtos);
     }
 
-    [HttpGet("vendor/{vendorID:int}/ai-insights")]
-    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager,Purchase Manager")]
-    public async Task<IActionResult> GetVendorAiInsights(int vendorID)
-    {
-        if (string.Equals(_currentUserService.Role, "Vendor Manager", StringComparison.OrdinalIgnoreCase))
-        {
-            if (!_currentUserService.VendorID.HasValue || vendorID != _currentUserService.VendorID.Value)
-            {
-                return Forbid();
-            }
-        }
-
-        var list = await _feedbackRepository.GetByVendorIdAsync(vendorID, null);
-        var vendorName = list.FirstOrDefault()?.Vendor?.VendorName ?? $"Vendor #{vendorID}";
-
-        decimal avgRating = list.Count > 0 ? (decimal)list.Average(f => f.Rating) : 0m;
-        decimal avgQuality = list.Count > 0 ? (decimal)list.Average(f => f.ProductQualityRating) : 0m;
-        decimal avgDelivery = list.Count > 0 ? (decimal)list.Average(f => f.DeliveryRating) : 0m;
-
-        var insights = await _geminiAiService.GenerateVendorInsightsAsync(vendorName, avgRating, avgQuality, avgDelivery, list);
-        return Ok(insights);
-    }
-
     [HttpGet("eligible-orders")]
     [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Purchase Manager")]
     public async Task<IActionResult> GetEligibleOrders()
@@ -178,3 +151,4 @@ public class VendorFeedbackController : ControllerBase
         return Ok(orders);
     }
 }
+

@@ -190,7 +190,6 @@ public class Handler : IRequestHandler<Query, Response>
                         AverageQualityRating = avgQuality,
                         AverageDeliveryRating = avgDelivery,
                         TotalFeedbackCount = feedbackCount,
-                        TotalComplaintCount = 0,
                         DeliveryCompletionPercentage = deliveryScore,
                         AverageSpoilagePercentage = 0m,
                         Recommendation = string.Empty,

@@ -134,7 +134,6 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
                 ProductID = item.ProductID,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
-                DiscountAmount = item.DiscountAmount,
                 TaxRate = item.TaxRate,
                 Subtotal = item.Subtotal,
                 TaxAmount = item.TaxAmount,

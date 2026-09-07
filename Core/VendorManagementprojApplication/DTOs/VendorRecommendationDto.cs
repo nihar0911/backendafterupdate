@@ -24,8 +24,6 @@ public class VendorRecommendationDto
 
     public int TotalFeedbackCount { get; set; }
 
-    public int TotalComplaintCount { get; set; }
-
     public decimal DeliveryCompletionPercentage { get; set; }
 
     public decimal AverageSpoilagePercentage { get; set; }

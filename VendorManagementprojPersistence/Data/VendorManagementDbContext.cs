@@ -27,8 +27,6 @@ public class VendorManagementDbContext : DbContext
 
     public DbSet<VendorProduct> VendorProducts { get; set; }
 
-    public DbSet<Discount> Discounts { get; set; }
-
     public DbSet<PurchaseRequest> PurchaseRequests { get; set; }
 
     public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; }
@@ -52,8 +50,6 @@ public class VendorManagementDbContext : DbContext
     public DbSet<InvoiceItem> InvoiceItems { get; set; }
 
     public DbSet<Payment> Payments { get; set; }
-
-    public DbSet<Complaint> Complaints { get; set; }
 
     public DbSet<VendorFeedback> VendorFeedbacks { get; set; }
 
@@ -287,43 +283,6 @@ public class VendorManagementDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<Discount>(entity =>
-        {
-            entity.ToTable("Discounts");
-
-            entity.HasKey(e => e.DiscountID);
-
-            entity.Property(e => e.DiscountName)
-                .HasMaxLength(150)
-                .IsRequired();
-
-            entity.Property(e => e.DiscountType)
-                .HasMaxLength(30)
-                .IsRequired();
-
-            entity.Property(e => e.DiscountValue)
-                .HasColumnType("decimal(12,2)")
-                .IsRequired();
-
-            entity.Property(e => e.MinimumQuantity)
-                .HasColumnType("decimal(12,2)")
-                .IsRequired();
-
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .IsRequired();
-
-            entity.HasOne(e => e.Vendor)
-                .WithMany()
-                .HasForeignKey(e => e.VendorID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.Product)
-                .WithMany()
-                .HasForeignKey(e => e.ProductID)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
         modelBuilder.Entity<PurchaseRequest>(entity =>
         {
             entity.ToTable("Purchase_Requests");
@@ -405,10 +364,6 @@ public class VendorManagementDbContext : DbContext
                 .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
-            entity.Property(e => e.DiscountAmount)
-                .HasColumnType("decimal(10,2)")
-                .IsRequired();
-
             entity.Property(e => e.TaxRate)
                 .HasColumnType("decimal(5,2)")
                 .IsRequired();
@@ -485,10 +440,6 @@ public class VendorManagementDbContext : DbContext
                 .IsRequired();
 
             entity.Property(e => e.UnitPrice)
-                .HasColumnType("decimal(10,2)")
-                .IsRequired();
-
-            entity.Property(e => e.DiscountAmount)
                 .HasColumnType("decimal(10,2)")
                 .IsRequired();
 
@@ -747,58 +698,6 @@ public class VendorManagementDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<Complaint>(entity =>
-        {
-            entity.ToTable("Complaints");
-
-            entity.HasKey(e => e.ComplaintID);
-
-            entity.Property(e => e.ComplaintType)
-                .HasMaxLength(30)
-                .IsRequired();
-
-            entity.Property(e => e.Description)
-                .HasMaxLength(1000)
-                .IsRequired();
-
-            entity.Property(e => e.Severity)
-                .HasMaxLength(20)
-                .IsRequired();
-
-            entity.Property(e => e.Status)
-                .HasMaxLength(20)
-                .IsRequired();
-
-            entity.HasOne(e => e.Vendor)
-                .WithMany()
-                .HasForeignKey(e => e.VendorID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.Outlet)
-                .WithMany()
-                .HasForeignKey(e => e.OutletID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.PurchaseOrder)
-                .WithMany()
-                .HasForeignKey(e => e.PurchaseOrderID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.POItem)
-                .WithMany()
-                .HasForeignKey(e => e.POItemID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.Product)
-                .WithMany()
-                .HasForeignKey(e => e.ProductID)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.RaisedByUser)
-                .WithMany()
-                .HasForeignKey(e => e.RaisedByUserID)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
         modelBuilder.Entity<VendorFeedback>(entity =>
         {
             entity.ToTable("Vendor_Feedback");

@@ -70,7 +70,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IVendorRepository, VendorRepository>();
 builder.Services.AddScoped<IVendorProductRepository, VendorProductRepository>();
-builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
 builder.Services.AddScoped<ITaxRateRepository, TaxRateRepository>();
 builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
 builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
@@ -80,7 +79,6 @@ builder.Services.AddScoped<IDeliveryRecordRepository, DeliveryRecordRepository>(
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<IInvoiceDocumentService, InvoiceDocumentService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
 builder.Services.AddScoped<IVendorFeedbackRepository, VendorFeedbackRepository>();
 builder.Services.AddScoped<IVendorOpportunityResponseRepository, VendorOpportunityResponseRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();

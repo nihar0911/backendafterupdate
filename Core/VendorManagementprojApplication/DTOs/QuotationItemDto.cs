@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementprojApplication.DTOs;
 
 public class QuotationItemDto
 {
@@ -9,8 +9,6 @@ public class QuotationItemDto
     public decimal Quantity { get; set; }
 
     public decimal UnitPrice { get; set; }
-
-    public decimal DiscountAmount { get; set; }
 
     public decimal TaxRate { get; set; }
 

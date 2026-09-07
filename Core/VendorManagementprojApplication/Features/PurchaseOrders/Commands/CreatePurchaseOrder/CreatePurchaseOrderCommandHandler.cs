@@ -117,13 +117,7 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
             if (quotationItem.UnitPrice < 0)
                 throw new InvalidOperationException("Quotation item unit price cannot be negative.");
 
-            if (quotationItem.DiscountAmount < 0)
-                throw new InvalidOperationException("Quotation item discount cannot be negative.");
-
-            if (quotationItem.DiscountAmount > quotationItem.UnitPrice * quotationItem.Quantity)
-                throw new InvalidOperationException("Quotation item discount cannot exceed the item value.");
-
-            var subtotal = (quotationItem.UnitPrice * quotationItem.Quantity) - quotationItem.DiscountAmount;
+            var subtotal = quotationItem.UnitPrice * quotationItem.Quantity;
 
             purchaseOrder.Items.Add(
                 new PurchaseOrderItem
@@ -131,7 +125,6 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
                     ProductID = quotationItem.ProductID,
                     Quantity = quotationItem.Quantity,
                     UnitPrice = quotationItem.UnitPrice,
-                    DiscountAmount = quotationItem.DiscountAmount,
                     TaxRate = quotationItem.TaxRate,
                     Subtotal = subtotal,
                     TaxAmount = quotationItem.TaxAmount,
@@ -205,7 +198,6 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
                 ProductID = item.ProductID,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
-                DiscountAmount = item.DiscountAmount,
                 TaxRate = item.TaxRate,
                 Subtotal = item.Subtotal,
                 TaxAmount = item.TaxAmount,

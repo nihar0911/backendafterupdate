@@ -9,20 +9,17 @@ public class UpdateQuotationCommandHandler : IRequestHandler<UpdateQuotationComm
 {
     private readonly IQuotationRepository _quotationRepository;
     private readonly IVendorProductRepository _vendorProductRepository;
-    private readonly IDiscountRepository _discountRepository;
     private readonly ITaxRateRepository _taxRateRepository;
     private readonly IProductRepository _productRepository;
 
     public UpdateQuotationCommandHandler(
         IQuotationRepository quotationRepository,
         IVendorProductRepository vendorProductRepository,
-        IDiscountRepository discountRepository,
         ITaxRateRepository taxRateRepository,
         IProductRepository productRepository)
     {
         _quotationRepository = quotationRepository;
         _vendorProductRepository = vendorProductRepository;
-        _discountRepository = discountRepository;
         _taxRateRepository = taxRateRepository;
         _productRepository = productRepository;
     }
@@ -71,26 +68,7 @@ public class UpdateQuotationCommandHandler : IRequestHandler<UpdateQuotationComm
 
             var unitPrice = vendorProduct.UnitPrice;
             var grossAmount = unitPrice * itemDto.Quantity;
-            var discount = await _discountRepository.GetActiveDiscountAsync(request.VendorID, itemDto.ProductID, DateTime.Now);
-
-            decimal discountAmount = 0;
-
-            if (discount != null && itemDto.Quantity >= discount.MinimumQuantity)
-            {
-                if (string.Equals(discount.DiscountType, "Percentage", StringComparison.OrdinalIgnoreCase))
-                {
-                    discountAmount = grossAmount * (discount.DiscountValue / 100m);
-                }
-                else if (string.Equals(discount.DiscountType, "Fixed", StringComparison.OrdinalIgnoreCase))
-                {
-                    discountAmount = discount.DiscountValue;
-                }
-
-                if (discountAmount > grossAmount)
-                    discountAmount = grossAmount;
-            }
-
-            var taxableAmount = grossAmount - discountAmount;
+            var taxableAmount = grossAmount;
             var taxAmount = taxableAmount * (taxRate.Percentage / 100m);
             var totalAmount = taxableAmount + taxAmount;
 
@@ -99,7 +77,6 @@ public class UpdateQuotationCommandHandler : IRequestHandler<UpdateQuotationComm
                 ProductID = itemDto.ProductID,
                 Quantity = itemDto.Quantity,
                 UnitPrice = unitPrice,
-                DiscountAmount = discountAmount,
                 TaxRate = taxRate.Percentage,
                 TaxAmount = taxAmount,
                 TotalAmount = totalAmount
@@ -132,7 +109,6 @@ public class UpdateQuotationCommandHandler : IRequestHandler<UpdateQuotationComm
                 ProductID = item.ProductID,
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
-                DiscountAmount = item.DiscountAmount,
                 TaxRate = item.TaxRate,
                 TaxAmount = item.TaxAmount,
                 TotalAmount = item.TotalAmount

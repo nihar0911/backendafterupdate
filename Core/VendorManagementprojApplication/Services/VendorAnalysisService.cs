@@ -1,4 +1,4 @@
-﻿using VendorManagementprojApplication.Contracts.Persistence;
+using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
 
@@ -8,20 +8,17 @@ public class VendorAnalysisService : IVendorAnalysisService
 {
     private readonly IVendorRepository _vendorRepository;
     private readonly IVendorFeedbackRepository _feedbackRepository;
-    private readonly IComplaintRepository _complaintRepository;
     private readonly IDeliveryRecordRepository _deliveryRecordRepository;
     private readonly IContractRepository _contractRepository;
 
     public VendorAnalysisService(
         IVendorRepository vendorRepository,
         IVendorFeedbackRepository feedbackRepository,
-        IComplaintRepository complaintRepository,
         IDeliveryRecordRepository deliveryRecordRepository,
         IContractRepository contractRepository)
     {
         _vendorRepository = vendorRepository;
         _feedbackRepository = feedbackRepository;
-        _complaintRepository = complaintRepository;
         _deliveryRecordRepository = deliveryRecordRepository;
         _contractRepository = contractRepository;
     }
@@ -52,75 +49,8 @@ public class VendorAnalysisService : IVendorAnalysisService
                 vendorFeedback.Average(f => f.Rating);
 
         decimal ratingScore =
-            (averageRating / 5m) * 30m;
+            (averageRating / 5m) * 40m;
 
-        var allComplaints =
-            await _complaintRepository.GetAllAsync();
-
-        var vendorComplaints = allComplaints
-            .Where(c =>
-                c.VendorID == vendorID &&
-                string.Equals(
-                    c.Status,
-                    "Active",
-                    StringComparison.OrdinalIgnoreCase))
-            .ToList();
-
-        int totalComplaints =
-            vendorComplaints.Count;
-
-        int highComplaints =
-            vendorComplaints.Count(c =>
-                string.Equals(
-                    c.Severity,
-                    "High",
-                    StringComparison.OrdinalIgnoreCase));
-
-        int criticalComplaints =
-            vendorComplaints.Count(c =>
-                string.Equals(
-                    c.Severity,
-                    "Critical",
-                    StringComparison.OrdinalIgnoreCase));
-
-        decimal complaintPenalty = 0;
-
-        foreach (var complaint in vendorComplaints)
-        {
-            if (string.Equals(
-                    complaint.Severity,
-                    "Low",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                complaintPenalty += 1;
-            }
-            else if (string.Equals(
-                    complaint.Severity,
-                    "Medium",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                complaintPenalty += 2;
-            }
-            else if (string.Equals(
-                    complaint.Severity,
-                    "High",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                complaintPenalty += 4;
-            }
-            else if (string.Equals(
-                    complaint.Severity,
-                    "Critical",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                complaintPenalty += 7;
-            }
-        }
-
-        decimal complaintScore =
-            Math.Max(
-                0,
-                20m - complaintPenalty);
         var vendorDeliveries =
             (await _deliveryRecordRepository
                 .GetByVendorProductOutletAsync(
@@ -170,11 +100,11 @@ public class VendorAnalysisService : IVendorAnalysisService
             (spoilageScore * 0.20m);
 
         decimal deliveryScore =
-            (deliveryPerformance / 100m) * 30m;
+            (deliveryPerformance / 100m) * 40m;
 
         deliveryScore =
             Math.Min(
-                30m,
+                40m,
                 Math.Max(
                     0m,
                     deliveryScore));
@@ -215,7 +145,6 @@ public class VendorAnalysisService : IVendorAnalysisService
         decimal overallScore =
             ratingScore +
             deliveryScore +
-            complaintScore +
             contractScore;
 
         string recommendation;
@@ -239,20 +168,12 @@ public class VendorAnalysisService : IVendorAnalysisService
                 Math.Round(ratingScore, 2),
             DeliveryScore =
                 Math.Round(deliveryScore, 2),
-            ComplaintScore =
-                Math.Round(complaintScore, 2),
             ContractScore =
                 Math.Round(contractScore, 2),
             OverallScore =
                 Math.Round(overallScore, 2),
             TotalFeedbackCount =
                 vendorFeedback.Count,
-            TotalComplaintCount =
-                totalComplaints,
-            HighSeverityComplaintCount =
-                highComplaints,
-            CriticalComplaintCount =
-                criticalComplaints,
             DeliveryCompletionPercentage =
                 Math.Round(
                     deliveryCompletionPercentage,
