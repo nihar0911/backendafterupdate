@@ -172,6 +172,7 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
                 {
                     riskLevel = "MEDIUM";
                 }
+                //based on past spoilage percentage, what are the likely chances that the current quantity will  spoil before it can be dispatched
 
                 decimal? estimatedSpoiled = totalReceived > 0
                     ? Math.Round(currentQty * (weightedSpoilage / 100m), 2)
@@ -260,8 +261,7 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
             Advisor = advisorDto
         };
     }
-
-    private static int GetRiskSortOrder(string riskLevel)
+  private static int GetRiskSortOrder(string riskLevel)
     {
         return riskLevel?.ToUpperInvariant() switch
         {

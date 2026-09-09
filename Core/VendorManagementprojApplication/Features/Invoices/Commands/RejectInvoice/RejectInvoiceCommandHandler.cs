@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using VendorManagementprojApplication.Contracts.Infrastructure;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
@@ -17,19 +18,22 @@ public class RejectInvoiceCommandHandler : IRequestHandler<RejectInvoiceCommand,
     private readonly IUserRepository _userRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IInvoiceDocumentService _invoiceDocumentService;
 
     public RejectInvoiceCommandHandler(
         IInvoiceRepository invoiceRepository,
         IOutletRepository outletRepository,
         IUserRepository userRepository,
         INotificationRepository notificationRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IInvoiceDocumentService invoiceDocumentService)
     {
         _invoiceRepository = invoiceRepository;
         _outletRepository = outletRepository;
         _userRepository = userRepository;
         _notificationRepository = notificationRepository;
         _currentUserService = currentUserService;
+        _invoiceDocumentService = invoiceDocumentService;
     }
 
     public async Task<RejectInvoiceResponse> Handle(
@@ -65,6 +69,10 @@ public class RejectInvoiceCommandHandler : IRequestHandler<RejectInvoiceCommand,
         }
 
         invoice.Status = "Rejected";
+
+        var pdfBytes = await _invoiceDocumentService.GenerateInvoicePdfAsync(invoice);
+        invoice.InvoiceDocumentBase64 = Convert.ToBase64String(pdfBytes);
+
         var updated = await _invoiceRepository.UpdateAsync(invoice);
 
         string reasonNote = string.IsNullOrWhiteSpace(request.Reason) ? "No reason specified." : request.Reason.Trim();

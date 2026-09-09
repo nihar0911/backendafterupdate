@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using VendorManagementprojApplication.Contracts.Infrastructure;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
@@ -18,6 +19,7 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationRepository _notificationRepository;
+    private readonly IInvoiceDocumentService _invoiceDocumentService;
 
     private static readonly string[] ValidPaymentMethods = new[]
     {
@@ -33,7 +35,8 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
         IUserRepository userRepository,
         IPurchaseOrderRepository purchaseOrderRepository,
         ICurrentUserService currentUserService,
-        INotificationRepository notificationRepository)
+        INotificationRepository notificationRepository,
+        IInvoiceDocumentService invoiceDocumentService)
     {
         _invoiceRepository = invoiceRepository;
         _paymentRepository = paymentRepository;
@@ -41,6 +44,7 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
         _purchaseOrderRepository = purchaseOrderRepository;
         _currentUserService = currentUserService;
         _notificationRepository = notificationRepository;
+        _invoiceDocumentService = invoiceDocumentService;
     }
 
     public async Task<MarkInvoicePaidResponse> Handle(
@@ -134,6 +138,9 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
         await _paymentRepository.AddAsync(payment);
 
         invoice.Status = "Paid";
+
+        var pdfBytes = await _invoiceDocumentService.GenerateInvoicePdfAsync(invoice);
+        invoice.InvoiceDocumentBase64 = Convert.ToBase64String(pdfBytes);
 
         var updatedInvoice = await _invoiceRepository.UpdateAsync(invoice);
 

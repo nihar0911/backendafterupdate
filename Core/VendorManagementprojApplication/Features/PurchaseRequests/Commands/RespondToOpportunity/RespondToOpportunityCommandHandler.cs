@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -69,13 +69,19 @@ public class RespondToOpportunityCommandHandler
         }
 
         // Verify product in PR
-        var prItem = pr.Items.FirstOrDefault(i => i.ProductID == request.ProductID);
-        if (prItem == null && request.ProductID > 0)
+        var prItem = request.ProductID > 0
+            ? pr.Items.FirstOrDefault(i => i.ProductID == request.ProductID)
+            : (pr.Items.Count == 1 ? pr.Items.First() : null);
+
+        if (prItem == null)
         {
-            prItem = pr.Items.FirstOrDefault();
+            throw new InvalidOperationException(
+                request.ProductID > 0
+                    ? $"Product #{request.ProductID} is not part of Purchase Request #{request.RequestID}."
+                    : $"Purchase Request #{request.RequestID} contains multiple products. ProductID must be specified.");
         }
 
-        int productId = prItem?.ProductID ?? request.ProductID;
+        int productId = prItem.ProductID;
 
         // Verify active vendor product mapping
         var mapping = await _vendorProductRepository.GetByVendorAndProductAsync(vendorId, productId);

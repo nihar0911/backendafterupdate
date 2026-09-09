@@ -86,18 +86,18 @@ public class GetVendorProcurementOpportunitiesQueryHandler
             .Where(r => r.VendorID == vendorId)
             .ToDictionary(r => $"{r.RequestID}_{r.ProductID}");
 
-        var quotedRequestIds = allQuotations
+        // Build item-level quotation lookup for this vendor: (RequestID, ProductID) -> Quotation
+        var myQuotationsByItem = allQuotations
             .Where(q => q.VendorID == vendorId)
-            .Select(q => q.RequestID)
-            .ToHashSet();
+            .SelectMany(q => (q.QuotationItems ?? Enumerable.Empty<QuotationItem>())
+                .Select(qi => new { q.RequestID, qi.ProductID, Quotation = q }))
+            .GroupBy(x => $"{x.RequestID}_{x.ProductID}")
+            .ToDictionary(g => g.Key, g => g.First().Quotation);
 
         var opportunities = new List<VendorProcurementOpportunityDto>();
 
         foreach (var req in allRequests)
         {
-            if (quotedRequestIds.Contains(req.RequestID))
-                continue;
-
             if (string.Equals(req.Status, "Cancelled", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(req.Status, "Completed", StringComparison.OrdinalIgnoreCase))
                 continue;
@@ -135,12 +135,15 @@ public class GetVendorProcurementOpportunitiesQueryHandler
                         ? (!string.IsNullOrWhiteSpace(outlet.OutletName) ? outlet.OutletName : $"{outlet.Address} Outlet")
                         : $"Outlet #{req.OutletID}";
 
-                    string responseKey = $"{req.RequestID}_{item.ProductID}";
-                    myResponses.TryGetValue(responseKey, out var resp);
+                    string itemKey = $"{req.RequestID}_{item.ProductID}";
+                    myResponses.TryGetValue(itemKey, out var resp);
 
                     string oppStatus = resp?.Status ?? "Pending";
                     string? rejectionReason = resp?.RejectionReason;
                     DateTime? responseDate = resp?.ResponseDate;
+
+                    myQuotationsByItem.TryGetValue(itemKey, out var matchingQuotation);
+                    bool hasQuotation = matchingQuotation != null;
 
                     opportunities.Add(new VendorProcurementOpportunityDto
                     {
@@ -167,9 +170,9 @@ public class GetVendorProcurementOpportunitiesQueryHandler
                         OpportunityStatus = oppStatus,
                         RejectionReason = rejectionReason,
                         ResponseDate = responseDate,
-                        HasQuotation = false,
-                        QuotationID = null,
-                        QuotationStatus = null
+                        HasQuotation = hasQuotation,
+                        QuotationID = matchingQuotation?.QuotationID,
+                        QuotationStatus = matchingQuotation?.Status
                     });
                 }
             }

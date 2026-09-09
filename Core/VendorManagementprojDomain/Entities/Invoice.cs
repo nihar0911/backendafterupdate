@@ -13,7 +13,7 @@ public class Invoice
     public string Status { get; set; } = "Pending";
     public string? InvoiceDocumentBase64 { get; set; }
     public string? InvoiceFileName { get; set; }
-    public string? InvoiceContentType { get; set; }
+    public string? InvoiceContentType { get; set; } 
 
 
 
