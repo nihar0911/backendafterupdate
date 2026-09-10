@@ -77,10 +77,6 @@ public class InvoiceDocumentService : IInvoiceDocumentService
                     col.Item().Text($"Invoice Date: {invoice.InvoiceDate:dd-MM-yyyy}").FontSize(10).FontColor(Colors.Grey.Darken3);
                     col.Item().Text($"Purchase Order: PO-#{invoice.PurchaseOrderID}").FontSize(10).FontColor(Colors.Grey.Darken3);
 
-                    if (!string.IsNullOrWhiteSpace(invoice.Status))
-                    {
-                        col.Item().Text($"Status: {invoice.Status}").FontSize(10).Bold().FontColor(Colors.BlueGrey.Darken2);
-                    }
 
                     if (!string.IsNullOrWhiteSpace(invoice.PurchaseOrder?.DeliveryStatus))
                     {
