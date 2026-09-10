@@ -82,6 +82,8 @@ builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IVendorFeedbackRepository, VendorFeedbackRepository>();
 builder.Services.AddScoped<IVendorOpportunityResponseRepository, VendorOpportunityResponseRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<ISpoilageAdviceSettingsRepository, SpoilageAdviceSettingsRepository>();
+builder.Services.AddScoped<IVendorRecommendationSettingsRepository, VendorRecommendationSettingsRepository>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddMediatR(cfg =>
@@ -237,6 +239,43 @@ using (var scope = app.Services.CreateScope())
             abcVendorUser.VendorID = 11;
             await context.SaveChangesAsync();
         }
+    }
+
+    if (!await context.SpoilageAdviceSettings.AnyAsync())
+    {
+        context.SpoilageAdviceSettings.Add(new SpoilageAdviceSettings
+        {
+            RecentDeliveriesCount = 5,
+            TrendTolerancePercentage = 1.0m,
+            HighWeightedSpoilageThreshold = 5.0m,
+            HighRecentSpoilageThreshold = 6.0m,
+            HighMaximumSpoilageThreshold = 10.0m,
+            MediumWeightedSpoilageThreshold = 2.0m,
+            LowWeightedSpoilageThreshold = 2.0m,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await context.SaveChangesAsync();
+    }
+
+    if (!await context.VendorRecommendationSettings.AnyAsync())
+    {
+        context.VendorRecommendationSettings.Add(new VendorRecommendationSettings
+        {
+            QualityWeight = 35.0m,
+            DeliveryWeight = 25.0m,
+            PriceWeight = 25.0m,
+            ReliabilityWeight = 15.0m,
+            ReliabilityPointsPerReview = 3.0m,
+            NeutralScoreForNewVendors = 70.0m,
+            BestQualityThreshold = 4.5m,
+            FastestDeliveryThreshold = 4.5m,
+            HighQualityRationaleThreshold = 4.0m,
+            PrioritizeActiveContracts = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await context.SaveChangesAsync();
     }
 }
 

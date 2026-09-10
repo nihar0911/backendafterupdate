@@ -76,7 +76,7 @@ public class DeliveryRecordsController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return BadRequest(ex.Message);
-        }
+        } 
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(ex.Message);

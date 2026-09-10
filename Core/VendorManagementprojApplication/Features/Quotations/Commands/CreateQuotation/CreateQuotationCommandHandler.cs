@@ -87,10 +87,13 @@ public class CreateQuotationCommandHandler
             throw new InvalidOperationException(
                 "Purchase request does not exist.");
 
-        var purchaseRequestItems =
-            await _purchaseRequestRepository
-                .GetItemsByRequestIdAsync(
-                    request.RequestID);
+        if (string.Equals(purchaseRequest.Status, "Approved", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(purchaseRequest.Status, "Completed", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(purchaseRequest.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                $"Cannot submit a quotation for a purchase request in '{purchaseRequest.Status}' status.");
+        }
 
         if (request.Items == null ||
             request.Items.Count == 0)
@@ -98,6 +101,53 @@ public class CreateQuotationCommandHandler
             throw new InvalidOperationException(
                 "Quotation must contain at least one item.");
         }
+
+        var existingQuotations =
+            await _quotationRepository.GetByRequestAndVendorAsync(
+                request.RequestID,
+                request.VendorID);
+
+        if (existingQuotations != null && existingQuotations.Count > 0)
+        {
+            var requestProductIds = request.Items.Select(i => i.ProductID).ToHashSet();
+
+            foreach (var existingQuotation in existingQuotations)
+            {
+                bool hasOverlappingProduct = existingQuotation.QuotationItems == null ||
+                    existingQuotation.QuotationItems.Count == 0 ||
+                    existingQuotation.QuotationItems.Any(qi => requestProductIds.Contains(qi.ProductID));
+
+                if (hasOverlappingProduct)
+                {
+                    if (string.Equals(existingQuotation.Status, "Accepted", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException(
+                            "A quotation for this purchase request has already been accepted.");
+                    }
+
+                    if (string.Equals(existingQuotation.Status, "Submitted", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(existingQuotation.Status, "Pending", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException(
+                            "A quotation for this purchase request has already been submitted and is pending review.");
+                    }
+
+                    if (string.Equals(existingQuotation.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException(
+                            "A quotation for this purchase request was already submitted and rejected.");
+                    }
+
+                    throw new InvalidOperationException(
+                        $"A quotation for this purchase request already exists with status '{existingQuotation.Status}'.");
+                }
+            }
+        }
+
+        var purchaseRequestItems =
+            await _purchaseRequestRepository
+                .GetItemsByRequestIdAsync(
+                    request.RequestID);
 
         var quotation = new Quotation
         {

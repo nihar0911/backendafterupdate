@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VendorManagementprojApplication.Contracts.Persistence;
@@ -31,6 +31,14 @@ public class QuotationRepository : IQuotationRepository
             .Include(q => q.QuotationItems)
             .Include(q => q.Request)
             .FirstOrDefaultAsync(q => q.QuotationID == quotationID);
+    }
+
+    public async Task<List<Quotation>> GetByRequestAndVendorAsync(int requestId, int vendorId)
+    {
+        return await _context.Quotations
+            .Include(q => q.QuotationItems)
+            .Where(q => q.RequestID == requestId && q.VendorID == vendorId)
+            .ToListAsync();
     }
 
     public async Task<Quotation> AddAsync(Quotation quotation)

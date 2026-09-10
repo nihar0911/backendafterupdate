@@ -57,6 +57,10 @@ public class VendorManagementDbContext : DbContext
 
     public DbSet<Notification> Notifications { get; set; }
 
+    public DbSet<SpoilageAdviceSettings> SpoilageAdviceSettings { get; set; }
+
+    public DbSet<VendorRecommendationSettings> VendorRecommendationSettings { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -810,6 +814,98 @@ public class VendorManagementDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.UserID)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SpoilageAdviceSettings>(entity =>
+        {
+            entity.ToTable("SpoilageAdviceSettings");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.RecentDeliveriesCount)
+                .IsRequired();
+
+            entity.Property(e => e.TrendTolerancePercentage)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.HighWeightedSpoilageThreshold)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.HighRecentSpoilageThreshold)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.HighMaximumSpoilageThreshold)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.MediumWeightedSpoilageThreshold)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.LowWeightedSpoilageThreshold)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired();
+
+            entity.Property(e => e.UpdatedAt)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<VendorRecommendationSettings>(entity =>
+        {
+            entity.ToTable("VendorRecommendationSettings");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.QualityWeight)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.DeliveryWeight)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.PriceWeight)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.ReliabilityWeight)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.ReliabilityPointsPerReview)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.NeutralScoreForNewVendors)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.BestQualityThreshold)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.FastestDeliveryThreshold)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.HighQualityRationaleThreshold)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            entity.Property(e => e.PrioritizeActiveContracts)
+                .IsRequired();
+
+            entity.Property(e => e.CreatedAt)
+                .IsRequired();
+
+            entity.Property(e => e.UpdatedAt)
+                .IsRequired();
         });
     }
 }

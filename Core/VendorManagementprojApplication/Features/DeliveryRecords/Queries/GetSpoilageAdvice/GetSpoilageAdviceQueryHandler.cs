@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,19 +20,22 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
     private readonly IVendorRepository _vendorRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IGeminiAiService _geminiAiService;
+    private readonly ISpoilageAdviceSettingsRepository _settingsRepository;
 
     public GetSpoilageAdviceQueryHandler(
         IPurchaseOrderRepository purchaseOrderRepository,
         IDeliveryRecordRepository deliveryRecordRepository,
         IVendorRepository vendorRepository,
         ICurrentUserService currentUserService,
-        IGeminiAiService geminiAiService)
+        IGeminiAiService geminiAiService,
+        ISpoilageAdviceSettingsRepository settingsRepository)
     {
         _purchaseOrderRepository = purchaseOrderRepository;
         _deliveryRecordRepository = deliveryRecordRepository;
         _vendorRepository = vendorRepository;
         _currentUserService = currentUserService;
         _geminiAiService = geminiAiService;
+        _settingsRepository = settingsRepository;
     }
 
     public async Task<GetSpoilageAdviceResponse> Handle(
@@ -75,6 +79,15 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
 
         var confirmedDeliveries = await _deliveryRecordRepository.GetConfirmedByVendorAsync(vendorId);
         var poItems = purchaseOrder.Items?.ToList() ?? new List<PurchaseOrderItem>();
+
+        var settings = await _settingsRepository.GetSettingsAsync(cancellationToken);
+        int recentDeliveriesCount = settings.RecentDeliveriesCount > 0 ? settings.RecentDeliveriesCount : 5;
+        decimal trendTolerance = settings.TrendTolerancePercentage >= 0 ? settings.TrendTolerancePercentage : 1.0m;
+        decimal highWeightedThreshold = settings.HighWeightedSpoilageThreshold;
+        decimal highRecentThreshold = settings.HighRecentSpoilageThreshold;
+        decimal highMaxThreshold = settings.HighMaximumSpoilageThreshold;
+        decimal medWeightedThreshold = settings.MediumWeightedSpoilageThreshold;
+        decimal lowWeightedThreshold = settings.LowWeightedSpoilageThreshold;
 
         var productAdvices = new List<ProductSpoilageAdviceDto>();
 
@@ -131,21 +144,21 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
                 decimal minSpoilage = Math.Round(productDeliveries.Min(d => d.SpoilagePercentage), 2);
                 decimal maxSpoilage = Math.Round(productDeliveries.Max(d => d.SpoilagePercentage), 2);
 
-                // Recent deliveries (last 3-5 deliveries)
-                var recentDeliveries = productDeliveries.Take(5).ToList();
+                // Recent deliveries (configured count)
+                var recentDeliveries = productDeliveries.Take(recentDeliveriesCount).ToList();
                 decimal recentReceived = recentDeliveries.Sum(d => d.ReceivedQuantity);
                 decimal recentSpoiled = recentDeliveries.Sum(d => d.SpoiledQuantity);
                 decimal recentSpoilage = recentReceived > 0
                     ? Math.Round((recentSpoiled / recentReceived) * 100m, 2)
                     : weightedSpoilage;
 
-                // Trend Calculation
+                // Trend Calculation with configured tolerance
                 string trend;
-                if (recentSpoilage > weightedSpoilage + 1.0m)
+                if (recentSpoilage > weightedSpoilage + trendTolerance)
                 {
                     trend = "Increasing";
                 }
-                else if (recentSpoilage < weightedSpoilage - 1.0m)
+                else if (recentSpoilage < weightedSpoilage - trendTolerance)
                 {
                     trend = "Decreasing";
                 }
@@ -154,17 +167,17 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
                     trend = "Stable";
                 }
 
-                // Risk Level Rules
+                // Risk Level Rules with configured thresholds
                 string riskLevel;
-                if (weightedSpoilage >= 5.0m || recentSpoilage >= 6.0m || maxSpoilage >= 10.0m)
+                if (weightedSpoilage >= highWeightedThreshold || recentSpoilage >= highRecentThreshold || maxSpoilage >= highMaxThreshold)
                 {
                     riskLevel = "HIGH";
                 }
-                else if (weightedSpoilage >= 2.0m && weightedSpoilage < 5.0m)
+                else if (weightedSpoilage >= medWeightedThreshold && weightedSpoilage < highWeightedThreshold)
                 {
                     riskLevel = "MEDIUM";
                 }
-                else if (weightedSpoilage < 2.0m && (trend == "Stable" || trend == "Decreasing"))
+                else if (weightedSpoilage < lowWeightedThreshold && (trend == "Stable" || trend == "Decreasing"))
                 {
                     riskLevel = "LOW";
                 }

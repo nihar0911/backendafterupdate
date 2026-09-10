@@ -1,0 +1,7 @@
+using MediatR;
+
+namespace VendorManagementprojApplication.Features.VendorRecommendationSettings.Queries.GetVendorRecommendationSettings;
+
+public class GetVendorRecommendationSettingsQuery : IRequest<GetVendorRecommendationSettingsResponse>
+{
+}

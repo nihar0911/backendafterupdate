@@ -19,6 +19,7 @@ public class Handler : IRequestHandler<Query, Response>
     private readonly IVendorFeedbackRepository _vendorFeedbackRepository;
     private readonly IOutletRepository _outletRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IVendorRecommendationSettingsRepository _settingsRepository;
 
     public Handler(
         IPurchaseRequestRepository purchaseRequestRepository,
@@ -27,7 +28,8 @@ public class Handler : IRequestHandler<Query, Response>
         IVendorRepository vendorRepository,
         IVendorFeedbackRepository vendorFeedbackRepository,
         IOutletRepository outletRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IVendorRecommendationSettingsRepository settingsRepository)
     {
         _purchaseRequestRepository = purchaseRequestRepository;
         _vendorProductRepository = vendorProductRepository;
@@ -36,6 +38,7 @@ public class Handler : IRequestHandler<Query, Response>
         _vendorFeedbackRepository = vendorFeedbackRepository;
         _outletRepository = outletRepository;
         _currentUserService = currentUserService;
+        _settingsRepository = settingsRepository;
     }
 
     public async Task<Response> Handle(
@@ -82,6 +85,8 @@ public class Handler : IRequestHandler<Query, Response>
         if (items.Count == 0)
             throw new InvalidOperationException(
                 "Purchase request does not contain any items.");
+
+        var settings = await _settingsRepository.GetSettingsAsync(cancellationToken);
 
         var recommendations =
             new List<VendorRecommendationDto>();
@@ -154,24 +159,24 @@ public class Handler : IRequestHandler<Query, Response>
                     : 0m;
 
                 // Composite Multi-Factor Score (0 - 100):
-                // Quality (35%): 5.0 -> 100 pts. If no reviews, neutral 70.
-                decimal qualityScore = feedbackCount > 0 ? (avgQuality / 5.0m) * 100m : 70m;
+                // Quality: 5.0 -> 100 pts. If no reviews, neutral baseline.
+                decimal qualityScore = feedbackCount > 0 ? (avgQuality / 5.0m) * 100m : settings.NeutralScoreForNewVendors;
 
-                // Delivery (25%): 5.0 -> 100 pts. If no reviews, neutral 70.
-                decimal deliveryScore = feedbackCount > 0 ? (avgDelivery / 5.0m) * 100m : 70m;
+                // Delivery: 5.0 -> 100 pts. If no reviews, neutral baseline.
+                decimal deliveryScore = feedbackCount > 0 ? (avgDelivery / 5.0m) * 100m : settings.NeutralScoreForNewVendors;
 
-                // Price Competitiveness (25%): lowest price = 100 pts
+                // Price Competitiveness: lowest price = 100 pts
                 decimal priceScore = (vendorProduct.UnitPrice > 0 && minPrice > 0)
                     ? Math.Round((minPrice / vendorProduct.UnitPrice) * 100m, 1)
-                    : 70m;
+                    : settings.NeutralScoreForNewVendors;
 
-                // Volume & Reliability Bonus (15%): established reviews give up to 15 pts
-                decimal reliabilityBonus = Math.Min(15m, feedbackCount * 3m);
+                // Volume & Reliability Bonus: established reviews give points up to ReliabilityWeight
+                decimal reliabilityBonus = Math.Min(settings.ReliabilityWeight, feedbackCount * settings.ReliabilityPointsPerReview);
 
                 decimal overallCompositeScore = Math.Round(
-                    (qualityScore * 0.35m) +
-                    (deliveryScore * 0.25m) +
-                    (priceScore * 0.25m) +
+                    (qualityScore * (settings.QualityWeight / 100m)) +
+                    (deliveryScore * (settings.DeliveryWeight / 100m)) +
+                    (priceScore * (settings.PriceWeight / 100m)) +
                     reliabilityBonus,
                     1
                 );
@@ -204,18 +209,28 @@ public class Handler : IRequestHandler<Query, Response>
             }
 
             // AUTHORITATIVE RECOMMENDATION RANKING:
-            // 1. Group 1 (Active Contract with RemainingQuantity > 0) strictly above Group 2
+            // 1. Group 1 (Active Contract with RemainingQuantity > 0) strictly above Group 2 (if PrioritizeActiveContracts enabled)
             // 2. Highest OverallCompositeScore (Quality + Delivery + Price + Volume)
             // 3. Lowest Unit Price
             // 4. Lowest EstimatedDeliveryDays
             // 5. VendorID as deterministic tie-breaker
-            productRecommendations = productRecommendations
-                .OrderByDescending(r => r.HasActiveContract && r.RemainingQuantity > 0)
-                .ThenByDescending(r => r.OverallScore)
-                .ThenBy(r => r.UnitPrice)
-                .ThenBy(r => r.EstimatedDeliveryDays)
-                .ThenBy(r => r.VendorID)
-                .ToList();
+            var rankedQuery = productRecommendations.AsEnumerable();
+            if (settings.PrioritizeActiveContracts)
+            {    //for contracts
+                rankedQuery = rankedQuery.OrderByDescending(r => r.HasActiveContract && r.RemainingQuantity > 0)
+                    .ThenByDescending(r => r.OverallScore)
+                    .ThenBy(r => r.UnitPrice)
+                    .ThenBy(r => r.EstimatedDeliveryDays)
+                    .ThenBy(r => r.VendorID);
+            }
+            else
+            {
+                rankedQuery = rankedQuery.OrderByDescending(r => r.OverallScore)
+                    .ThenBy(r => r.UnitPrice)
+                    .ThenBy(r => r.EstimatedDeliveryDays)
+                    .ThenBy(r => r.VendorID);
+            }
+            productRecommendations = rankedQuery.ToList();
 
             for (int i = 0; i < productRecommendations.Count; i++)
             {
@@ -227,7 +242,7 @@ public class Handler : IRequestHandler<Query, Response>
                 {
                     rec.SmartBadge = "Top Recommended";
                 }
-                else if (rec.AverageQualityRating >= 4.5m)
+                else if (rec.AverageQualityRating >= settings.BestQualityThreshold)
                 {
                     rec.SmartBadge = "Best Quality";
                 }
@@ -235,7 +250,7 @@ public class Handler : IRequestHandler<Query, Response>
                 {
                     rec.SmartBadge = "Best Price";
                 }
-                else if (rec.AverageDeliveryRating >= 4.5m)
+                else if (rec.AverageDeliveryRating >= settings.FastestDeliveryThreshold)
                 {
                     rec.SmartBadge = "Fastest Delivery";
                 }
@@ -263,7 +278,7 @@ public class Handler : IRequestHandler<Query, Response>
                     }
                     else
                     {
-                        rec.Recommendation = rec.TotalFeedbackCount > 0 && rec.AverageQualityRating >= 4.0m
+                        rec.Recommendation = rec.TotalFeedbackCount > 0 && rec.AverageQualityRating >= settings.HighQualityRationaleThreshold
                             ? $"Alternative: High quality rating ({rec.AverageQualityRating:0.0}/5) across {rec.TotalFeedbackCount} past deliveries."
                             : "Alternative";
                     }

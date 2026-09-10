@@ -157,7 +157,7 @@ public class GeminiAiService : IGeminiAiService
             sb.AppendLine($"- Total Received Historically: {p.TotalReceivedQuantity:0.##} {unitStr}");
             sb.AppendLine($"- Total Spoiled Historically: {p.TotalSpoiledQuantity:0.##} {unitStr}");
             sb.AppendLine($"- Historical Volume-Weighted Spoilage: {(p.WeightedSpoilagePercentage.HasValue ? p.WeightedSpoilagePercentage.Value.ToString("0.0") + "%" : "N/A")}");
-            sb.AppendLine($"- Recent Spoilage Rate (Last 3-5 deliveries): {(p.RecentSpoilagePercentage.HasValue ? p.RecentSpoilagePercentage.Value.ToString("0.0") + "%" : "N/A")}");
+            sb.AppendLine($"- Recent Spoilage Rate (Recent deliveries): {(p.RecentSpoilagePercentage.HasValue ? p.RecentSpoilagePercentage.Value.ToString("0.0") + "%" : "N/A")}");
             sb.AppendLine($"- Recent Spoilage Trend: {p.Trend}");
             sb.AppendLine();
             sb.AppendLine("Instructions for Single Product Order:");
