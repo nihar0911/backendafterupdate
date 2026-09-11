@@ -83,4 +83,34 @@ public class QuotationRepository : IQuotationRepository
 
         return true;
     }
+
+    public async Task<List<Quotation>> GetByOutletIdAsync(int outletId)
+    {
+        return await _context.Quotations
+            .Where(q => q.Request != null && q.Request.OutletID == outletId)
+            .Include(q => q.QuotationItems)
+            .Include(q => q.Request)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<Quotation>> GetByOutletIdsAsync(IEnumerable<int> outletIds)
+    {
+        return await _context.Quotations
+            .Where(q => q.Request != null && outletIds.Contains(q.Request.OutletID))
+            .Include(q => q.QuotationItems)
+            .Include(q => q.Request)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<Quotation>> GetByVendorIdAsync(int vendorId)
+    {
+        return await _context.Quotations
+            .Where(q => q.VendorID == vendorId)
+            .Include(q => q.QuotationItems)
+            .Include(q => q.Request)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

@@ -171,7 +171,7 @@ public class RespondToOpportunityCommandHandler
                     }
                 }
 
-                // 2. Also notify the Purchase Request creator (Organization Manager)
+                
                 if (pr.CreatedByUserID > 0 && notifiedUserIds.Add(pr.CreatedByUserID))
                 {
                     var creatorNotif = new Notification
@@ -214,7 +214,7 @@ public class RespondToOpportunityCommandHandler
                     }
                 }
 
-                // 2. Also notify the Purchase Request creator (Organization Manager)
+              
                 if (pr.CreatedByUserID > 0 && notifiedUserIds.Add(pr.CreatedByUserID))
                 {
                     var creatorNotif = new Notification

@@ -32,7 +32,7 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
         IUserRepository userRepository,
         IOutletRepository outletRepository,
         ICurrentUserService currentUserService)
-    {
+       {
         _purchaseOrderRepository = purchaseOrderRepository;
         _quotationRepository = quotationRepository;
         _purchaseRequestRepository = purchaseRequestRepository;

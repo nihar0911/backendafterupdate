@@ -146,5 +146,18 @@ public class DeliveryRecordRepository : IDeliveryRecordRepository
                 d.Status == "Confirmed")
             .ToListAsync();
     }
+
+    public async Task<List<DeliveryRecord>> GetByVendorIdAsync(int vendorID)
+    {
+        return await _context.DeliveryRecords
+            .Where(d => d.PurchaseOrder != null && d.PurchaseOrder.VendorID == vendorID)
+            .Include(d => d.PurchaseOrder)
+                .ThenInclude(po => po!.Outlet)
+            .Include(d => d.PurchaseOrderItem)
+                .ThenInclude(i => i!.Product)
+            .Include(d => d.ConfirmedByUser)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
 

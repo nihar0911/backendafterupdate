@@ -1,4 +1,4 @@
-﻿using VendorManagementprojDomain.Entities;
+using VendorManagementprojDomain.Entities;
 
 namespace VendorManagementprojApplication.Contracts.Persistence;
 
@@ -11,4 +11,7 @@ public interface IPurchaseOrderRepository
     Task<PurchaseOrder?> UpdateAsync(PurchaseOrder purchaseOrder);
     Task<PurchaseOrder?> GetByQuotationIdAsync(int quotationID);
     Task<bool> DeleteAsync(int purchaseOrderID);
+    Task<List<PurchaseOrder>> GetByOutletIdAsync(int outletId);
+    Task<List<PurchaseOrder>> GetByOutletIdsAsync(IEnumerable<int> outletIds);
+    Task<List<PurchaseOrder>> GetByVendorIdAsync(int vendorId);
 }

@@ -71,4 +71,43 @@ public class InvoiceRepository : IInvoiceRepository
         await _context.SaveChangesAsync();
         return invoice;
     }
+
+    public async Task<List<Invoice>> GetByOutletIdAsync(int outletId)
+    {
+        return await _context.Invoices
+            .Where(i => i.OutletID == outletId)
+            .Include(i => i.Items)
+                .ThenInclude(it => it.Product)
+            .Include(i => i.Vendor)
+            .Include(i => i.Outlet)
+                .ThenInclude(o => o!.Organization)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<Invoice>> GetByOutletIdsAsync(IEnumerable<int> outletIds)
+    {
+        return await _context.Invoices
+            .Where(i => outletIds.Contains(i.OutletID))
+            .Include(i => i.Items)
+                .ThenInclude(it => it.Product)
+            .Include(i => i.Vendor)
+            .Include(i => i.Outlet)
+                .ThenInclude(o => o!.Organization)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<Invoice>> GetByVendorIdAsync(int vendorId)
+    {
+        return await _context.Invoices
+            .Where(i => i.VendorID == vendorId)
+            .Include(i => i.Items)
+                .ThenInclude(it => it.Product)
+            .Include(i => i.Vendor)
+            .Include(i => i.Outlet)
+                .ThenInclude(o => o!.Organization)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

@@ -21,4 +21,8 @@ public interface IPurchaseRequestRepository
     Task<PurchaseRequestItem> AddItemAsync(PurchaseRequestItem item);
 
     Task<bool> DeleteItemAsync(int itemId);
+
+    Task<List<PurchaseRequest>> GetByOutletIdAsync(int outletId);
+
+    Task<List<PurchaseRequest>> GetByOutletIdsAsync(IEnumerable<int> outletIds);
 }

@@ -134,4 +134,24 @@ public class PurchaseRequestRepository : IPurchaseRequestRepository
 
         return true;
     }
+
+    public async Task<List<PurchaseRequest>> GetByOutletIdAsync(int outletId)
+    {
+        return await _context.PurchaseRequests
+            .Where(r => r.OutletID == outletId)
+            .Include(r => r.Items)
+                .ThenInclude(i => i.Product)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<PurchaseRequest>> GetByOutletIdsAsync(IEnumerable<int> outletIds)
+    {
+        return await _context.PurchaseRequests
+            .Where(r => outletIds.Contains(r.OutletID))
+            .Include(r => r.Items)
+                .ThenInclude(i => i.Product)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

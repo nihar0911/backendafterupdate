@@ -116,4 +116,37 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
 
         return true;
     }
+
+    public async Task<List<PurchaseOrder>> GetByOutletIdAsync(int outletId)
+    {
+        return await _context.PurchaseOrders
+            .Where(p => p.OutletID == outletId)
+            .Include(p => p.Items)
+            .Include(p => p.Outlet)
+            .Include(p => p.Vendor)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<PurchaseOrder>> GetByOutletIdsAsync(IEnumerable<int> outletIds)
+    {
+        return await _context.PurchaseOrders
+            .Where(p => outletIds.Contains(p.OutletID))
+            .Include(p => p.Items)
+            .Include(p => p.Outlet)
+            .Include(p => p.Vendor)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<List<PurchaseOrder>> GetByVendorIdAsync(int vendorId)
+    {
+        return await _context.PurchaseOrders
+            .Where(p => p.VendorID == vendorId)
+            .Include(p => p.Items)
+            .Include(p => p.Outlet)
+            .Include(p => p.Vendor)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }

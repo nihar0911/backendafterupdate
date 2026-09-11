@@ -29,15 +29,15 @@ public class GetAllPurchaseRequestsQueryHandler : IRequestHandler<GetAllPurchase
 
     public async Task<GetAllPurchaseRequestsResponse> Handle(GetAllPurchaseRequestsQuery request, CancellationToken cancellationToken)
     {
-        var requests = await _repository.GetAllAsync();
+        List<PurchaseRequest> requests;
 
         if (_currentUserService.IsOrganizationManager)
         {
             if (_currentUserService.OrganizationID.HasValue)
             {
                 var orgOutlets = await _outletRepository.GetByOrganizationIdAsync(_currentUserService.OrganizationID.Value);
-                var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToHashSet();
-                requests = requests.Where(r => orgOutletIds.Contains(r.OutletID)).ToList();
+                var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToList();
+                requests = await _repository.GetByOutletIdsAsync(orgOutletIds);
             }
             else
             {
@@ -48,12 +48,16 @@ public class GetAllPurchaseRequestsQueryHandler : IRequestHandler<GetAllPurchase
         {
             if (_currentUserService.OutletID.HasValue)
             {
-                requests = requests.Where(r => r.OutletID == _currentUserService.OutletID.Value).ToList();
+                requests = await _repository.GetByOutletIdAsync(_currentUserService.OutletID.Value);
             }
             else
             {
                 requests = new List<PurchaseRequest>();
             }
+        }
+        else
+        {
+            requests = await _repository.GetAllAsync();
         }
 
         var list = requests.Select(req => new PurchaseRequestDto

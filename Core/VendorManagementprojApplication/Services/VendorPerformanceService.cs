@@ -79,10 +79,10 @@ public class VendorPerformanceService : IVendorPerformanceService
         var vendor = await _vendorRepository.GetByIdAsync(vendorId);
         if (vendor == null) return null;
 
-        var allPOs = await _purchaseOrderRepository.GetAllAsync();
-        var allDeliveries = await _deliveryRecordRepository.GetAllAsync();
-        var allInvoices = await _invoiceRepository.GetAllAsync();
-        var allFeedback = await _feedbackRepository.GetAllAsync();
+        var allPOs = await _purchaseOrderRepository.GetByVendorIdAsync(vendorId);
+        var allDeliveries = await _deliveryRecordRepository.GetByVendorIdAsync(vendorId);
+        var allInvoices = await _invoiceRepository.GetByVendorIdAsync(vendorId);
+        var allFeedback = await _feedbackRepository.GetByVendorIdAsync(vendorId, organizationId);
 
         if (organizationId.HasValue && organizationId.Value > 0)
         {
@@ -96,10 +96,10 @@ public class VendorPerformanceService : IVendorPerformanceService
         return CalculateSummary(
             vendor.VendorID,
             vendor.VendorName,
-            allPOs.Where(po => po.VendorID == vendorId).ToList(),
-            allDeliveries.Where(dr => dr.PurchaseOrder != null && dr.PurchaseOrder.VendorID == vendorId).ToList(),
-            allInvoices.Where(inv => inv.VendorID == vendorId).ToList(),
-            allFeedback.Where(f => f.VendorID == vendorId).ToList());
+            allPOs,
+            allDeliveries,
+            allInvoices,
+            allFeedback);
     }
 
     private static VendorPerformanceSummaryDto CalculateSummary(

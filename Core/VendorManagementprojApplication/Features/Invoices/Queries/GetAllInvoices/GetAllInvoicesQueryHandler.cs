@@ -30,15 +30,22 @@ public class GetAllInvoicesQueryHandler : IRequestHandler<GetAllInvoicesQuery, G
         GetAllInvoicesQuery request,
         CancellationToken cancellationToken)
     {
-        var invoices = await _invoiceRepository.GetAllAsync();
+        List<Invoice> invoices;
 
         if (_currentUserService.IsOrganizationManager)
         {
             if (_currentUserService.OrganizationID.HasValue)
             {
                 var orgOutlets = await _outletRepository.GetByOrganizationIdAsync(_currentUserService.OrganizationID.Value);
-                var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToHashSet();
-                invoices = invoices.Where(i => orgOutletIds.Contains(i.OutletID) || (i.Outlet != null && i.Outlet.OrganizationID == _currentUserService.OrganizationID.Value)).ToList();
+                var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToList();
+                if (orgOutletIds.Count > 0)
+                {
+                    invoices = await _invoiceRepository.GetByOutletIdsAsync(orgOutletIds);
+                }
+                else
+                {
+                    invoices = new List<Invoice>();
+                }
             }
             else
             {
@@ -49,7 +56,7 @@ public class GetAllInvoicesQueryHandler : IRequestHandler<GetAllInvoicesQuery, G
         {
             if (_currentUserService.VendorID.HasValue)
             {
-                invoices = invoices.Where(i => i.VendorID == _currentUserService.VendorID.Value).ToList();
+                invoices = await _invoiceRepository.GetByVendorIdAsync(_currentUserService.VendorID.Value);
             }
             else
             {
@@ -60,12 +67,16 @@ public class GetAllInvoicesQueryHandler : IRequestHandler<GetAllInvoicesQuery, G
         {
             if (_currentUserService.OutletID.HasValue)
             {
-                invoices = invoices.Where(i => i.OutletID == _currentUserService.OutletID.Value).ToList();
+                invoices = await _invoiceRepository.GetByOutletIdAsync(_currentUserService.OutletID.Value);
             }
             else
             {
                 invoices = new List<Invoice>();
             }
+        }
+        else
+        {
+            invoices = await _invoiceRepository.GetAllAsync();
         }
 
         return new GetAllInvoicesResponse

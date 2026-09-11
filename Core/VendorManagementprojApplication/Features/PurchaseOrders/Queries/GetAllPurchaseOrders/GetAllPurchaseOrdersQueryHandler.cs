@@ -30,15 +30,15 @@ public class GetAllPurchaseOrdersQueryHandler : IRequestHandler<GetAllPurchaseOr
         GetAllPurchaseOrdersQuery request,
         CancellationToken cancellationToken)
     {
-        var purchaseOrders = await _purchaseOrderRepository.GetAllAsync();
+        List<PurchaseOrder> purchaseOrders;
 
         if (_currentUserService.IsOrganizationManager)
         {
             if (_currentUserService.OrganizationID.HasValue)
             {
                 var orgOutlets = await _outletRepository.GetByOrganizationIdAsync(_currentUserService.OrganizationID.Value);
-                var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToHashSet();
-                purchaseOrders = purchaseOrders.Where(po => orgOutletIds.Contains(po.OutletID) || (po.Outlet != null && po.Outlet.OrganizationID == _currentUserService.OrganizationID.Value)).ToList();
+                var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToList();
+                purchaseOrders = await _purchaseOrderRepository.GetByOutletIdsAsync(orgOutletIds);
             }
             else
             {
@@ -49,7 +49,7 @@ public class GetAllPurchaseOrdersQueryHandler : IRequestHandler<GetAllPurchaseOr
         {
             if (_currentUserService.OutletID.HasValue)
             {
-                purchaseOrders = purchaseOrders.Where(po => po.OutletID == _currentUserService.OutletID.Value).ToList();
+                purchaseOrders = await _purchaseOrderRepository.GetByOutletIdAsync(_currentUserService.OutletID.Value);
             }
             else
             {
@@ -60,9 +60,9 @@ public class GetAllPurchaseOrdersQueryHandler : IRequestHandler<GetAllPurchaseOr
         {
             if (_currentUserService.VendorID.HasValue)
             {
-                purchaseOrders = purchaseOrders
-                    .Where(po => po.VendorID == _currentUserService.VendorID.Value &&
-                                 po.Status != "Awaiting Approval" &&
+                var vendorPOs = await _purchaseOrderRepository.GetByVendorIdAsync(_currentUserService.VendorID.Value);
+                purchaseOrders = vendorPOs
+                    .Where(po => po.Status != "Awaiting Approval" &&
                                  po.Status != "Approved")
                     .ToList();
             }
@@ -70,6 +70,10 @@ public class GetAllPurchaseOrdersQueryHandler : IRequestHandler<GetAllPurchaseOr
             {
                 purchaseOrders = new List<PurchaseOrder>();
             }
+        }
+        else
+        {
+            purchaseOrders = await _purchaseOrderRepository.GetAllAsync();
         }
 
         return new GetAllPurchaseOrdersResponse

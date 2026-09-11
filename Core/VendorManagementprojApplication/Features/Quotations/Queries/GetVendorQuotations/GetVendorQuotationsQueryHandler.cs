@@ -37,9 +37,7 @@ public class GetVendorQuotationsQueryHandler
 
         int vendorId = _currentUserService.VendorID.Value;
 
-        var allQuotations = await _quotationRepository.GetAllAsync();
-        var vendorQuotations = allQuotations
-            .Where(q => q.VendorID == vendorId)
+        var vendorQuotations = (await _quotationRepository.GetByVendorIdAsync(vendorId))
             .OrderByDescending(q => q.QuotationID)
             .Select(MapToDto)
             .ToList();

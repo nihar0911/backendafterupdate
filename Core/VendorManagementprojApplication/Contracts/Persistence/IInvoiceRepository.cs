@@ -11,4 +11,7 @@ public interface IInvoiceRepository
     Task<List<Invoice>> GetAllAsync();
     Task<Invoice?> GetByPurchaseOrderIdAsync(int purchaseOrderID);
     Task<Invoice?> UpdateAsync(Invoice invoice);
+    Task<List<Invoice>> GetByOutletIdAsync(int outletId);
+    Task<List<Invoice>> GetByOutletIdsAsync(IEnumerable<int> outletIds);
+    Task<List<Invoice>> GetByVendorIdAsync(int vendorId);
 }

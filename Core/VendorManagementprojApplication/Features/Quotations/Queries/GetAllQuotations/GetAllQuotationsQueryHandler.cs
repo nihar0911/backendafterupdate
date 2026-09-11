@@ -28,27 +28,53 @@ public class GetAllQuotationsQueryHandler : IRequestHandler<GetAllQuotationsQuer
 
     public async Task<GetAllQuotationsResponse> Handle(GetAllQuotationsQuery request, CancellationToken cancellationToken)
     {
-        var quotations = await _quotationRepository.GetAllAsync();
+        List<Quotation> quotations;
 
         if (_currentUserService.IsOrganizationManager)
         {
             if (_currentUserService.OrganizationID.HasValue)
             {
                 var orgOutlets = await _outletRepository.GetByOrganizationIdAsync(_currentUserService.OrganizationID.Value);
-                var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToHashSet();
-                quotations = quotations.Where(q => q.Request != null && orgOutletIds.Contains(q.Request.OutletID)).ToList();
+                var orgOutletIds = orgOutlets.Select(o => o.OutletID).ToList();
+                if (orgOutletIds.Count > 0)
+                {
+                    quotations = await _quotationRepository.GetByOutletIdsAsync(orgOutletIds);
+                }
+                else
+                {
+                    quotations = new List<Quotation>();
+                }
+            }
+            else
+            {
+                quotations = new List<Quotation>();
+            }
+        }
+        else if (_currentUserService.IsVendorManager)
+        {
+            if (_currentUserService.VendorID.HasValue)
+            {
+                quotations = await _quotationRepository.GetByVendorIdAsync(_currentUserService.VendorID.Value);
+            }
+            else
+            {
+                quotations = new List<Quotation>();
             }
         }
         else if (_currentUserService.IsOutletManager || _currentUserService.IsPurchaseManager)
         {
             if (_currentUserService.OutletID.HasValue)
             {
-                quotations = quotations.Where(q => q.Request != null && q.Request.OutletID == _currentUserService.OutletID.Value).ToList();
+                quotations = await _quotationRepository.GetByOutletIdAsync(_currentUserService.OutletID.Value);
             }
             else
             {
                 quotations = new List<Quotation>();
             }
+        }
+        else
+        {
+            quotations = await _quotationRepository.GetAllAsync();
         }
 
         var list = quotations.Select(MapToDto).ToList();

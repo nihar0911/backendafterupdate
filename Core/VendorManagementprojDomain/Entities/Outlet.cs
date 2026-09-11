@@ -16,10 +16,10 @@ public class Outlet
 
     public decimal? Longitude { get; set; }
 
-    /// <summary>
+   
     /// Who must approve purchase orders for this outlet before they are placed with a vendor.
     /// "Organization Manager" or "Outlet Manager".
-    /// </summary>
+  
     public string PurchaseOrderApproverRole { get; set; } = "Organization Manager";
 
     public Organization Organization { get; set; } = null!;
