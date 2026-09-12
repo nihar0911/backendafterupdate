@@ -181,23 +181,40 @@ public class CreatePurchaseRequestCommandHandler
             // Explicit Item-Level Vendor Assignment Routing
             var processedPairs = new HashSet<string>();
 
-            foreach (var itemDto in itemVendorAssignments)
+            for (int i = 0; i < request.Items.Count; i++)
             {
-                int vendorId = itemDto.VendorID!.Value;
+                var itemDto = request.Items[i];
+                if (!itemDto.VendorID.HasValue || itemDto.VendorID.Value <= 0)
+                    continue;
+
+                int vendorId = itemDto.VendorID.Value;
                 int productId = itemDto.ProductID;
-                string pairKey = $"{vendorId}_{productId}";
+                var matchingItem = createdRequest.Items.ElementAtOrDefault(i);
+                int? requestItemId = matchingItem?.RequestItemID;
+
+                string pairKey = $"{vendorId}_{requestItemId ?? productId}";
 
                 if (!processedPairs.Add(pairKey))
                     continue;
 
-                var existingResp = await _opportunityResponseRepository.GetByRequestAndVendorAsync(
-                    createdRequest.RequestID, vendorId, productId);
+                VendorOpportunityResponse? existingResp = null;
+                if (requestItemId.HasValue && requestItemId.Value > 0)
+                {
+                    existingResp = await _opportunityResponseRepository.GetByRequestItemAndVendorAsync(
+                        requestItemId.Value, vendorId);
+                }
+                else
+                {
+                    existingResp = await _opportunityResponseRepository.GetByRequestAndVendorAsync(
+                        createdRequest.RequestID, vendorId, productId);
+                }
 
                 if (existingResp == null)
                 {
                     var opp = new VendorOpportunityResponse
                     {
                         RequestID = createdRequest.RequestID,
+                        RequestItemID = requestItemId,
                         VendorID = vendorId,
                         ProductID = productId,
                         Status = "Pending",
@@ -213,7 +230,6 @@ public class CreatePurchaseRequestCommandHandler
 
                 loadedProducts.TryGetValue(productId, out var prod);
                 string prodName = prod?.ProductName ?? $"Product #{productId}";
-                var matchingItem = createdRequest.Items.FirstOrDefault(i => i.ProductID == productId);
                 decimal qty = matchingItem?.Quantity ?? itemDto.Quantity;
                 string unit = matchingItem?.Unit ?? itemDto.Unit;
 

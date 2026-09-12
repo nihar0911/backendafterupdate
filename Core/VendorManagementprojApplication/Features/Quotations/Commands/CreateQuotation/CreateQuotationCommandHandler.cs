@@ -164,13 +164,17 @@ public class CreateQuotationCommandHandler
                 throw new InvalidOperationException(
                     "Quantity must be greater than zero.");
 
-            var requestedItem =
-                purchaseRequestItems.FirstOrDefault(
-                    item => item.ProductID == itemDto.ProductID);
+            var matchingItems = purchaseRequestItems
+                .Where(item => item.ProductID == itemDto.ProductID)
+                .ToList();
 
-            if (requestedItem == null)
+            if (matchingItems.Count == 0)
                 throw new InvalidOperationException(
                     $"ProductID {itemDto.ProductID} was not requested in this purchase request.");
+
+            var requestedItem = matchingItems.FirstOrDefault(item => item.Quantity == itemDto.Quantity)
+                                ?? matchingItems.FirstOrDefault(item => item.Quantity >= itemDto.Quantity)
+                                ?? matchingItems.First();
 
             if (itemDto.Quantity > requestedItem.Quantity)
                 throw new InvalidOperationException(

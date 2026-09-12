@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using VendorManagementprojDomain.Entities;
 
@@ -11,4 +11,6 @@ public interface INotificationRepository
     Task<Notification> AddAsync(Notification notification);
     Task UpdateAsync(Notification notification);
     Task<int> GetUnreadCountByUserIdAsync(int userId);
+    Task MarkAllAsReadByUserIdAsync(int userId);
+    Task ClearAllByUserIdAsync(int userId);
 }

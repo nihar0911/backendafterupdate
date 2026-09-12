@@ -108,10 +108,19 @@ public class DispatchPurchaseRequestCommandHandler
                 if (assignment.RequestItemID.HasValue && assignment.RequestItemID.Value > 0)
                 {
                     item = purchaseRequest.Items.FirstOrDefault(i => i.RequestItemID == assignment.RequestItemID.Value);
+                    if (item != null && assignment.ProductID > 0 && item.ProductID != assignment.ProductID)
+                    {
+                        throw new InvalidOperationException($"RequestItemID #{assignment.RequestItemID.Value} does not match ProductID #{assignment.ProductID}.");
+                    }
                 }
                 else
                 {
-                    item = purchaseRequest.Items.FirstOrDefault(i => i.ProductID == assignment.ProductID);
+                    var matchingItems = purchaseRequest.Items.Where(i => i.ProductID == assignment.ProductID).ToList();
+                    if (matchingItems.Count > 1)
+                    {
+                        throw new InvalidOperationException($"Purchase Request #{purchaseRequest.RequestID} contains multiple line items for Product ID #{assignment.ProductID}. A valid RequestItemID must be specified.");
+                    }
+                    item = matchingItems.FirstOrDefault();
                 }
 
                 if (item == null)
@@ -131,7 +140,7 @@ public class DispatchPurchaseRequestCommandHandler
                     throw new InvalidOperationException($"Vendor '{vendor.VendorName}' does not supply product '{p?.ProductName ?? $"#{item.ProductID}"}'.");
                 }
 
-                string key = $"{vendor.VendorID}_{item.ProductID}";
+                string key = $"{item.RequestItemID}_{vendor.VendorID}";
                 if (distinctKeys.Add(key))
                 {
                     resolvedPairs.Add((item, vendor));
@@ -169,7 +178,7 @@ public class DispatchPurchaseRequestCommandHandler
                             var p = await _productRepository.GetByIdAsync(item.ProductID);
                             throw new InvalidOperationException($"Vendor '{vendor.VendorName}' does not supply product '{p?.ProductName ?? $"#{item.ProductID}"}'.");
                         }
-                        string key = $"{vendor.VendorID}_{item.ProductID}";
+                        string key = $"{item.RequestItemID}_{vendor.VendorID}";
                         if (distinctKeys.Add(key))
                         {
                             resolvedPairs.Add((item, vendor));
@@ -179,7 +188,7 @@ public class DispatchPurchaseRequestCommandHandler
                     {
                         if (vendorProduct != null && string.Equals(vendorProduct.Status, "Active", StringComparison.OrdinalIgnoreCase))
                         {
-                            string key = $"{vendor.VendorID}_{item.ProductID}";
+                            string key = $"{item.RequestItemID}_{vendor.VendorID}";
                             if (distinctKeys.Add(key))
                             {
                                 resolvedPairs.Add((item, vendor));
@@ -196,14 +205,15 @@ public class DispatchPurchaseRequestCommandHandler
         // Create opportunities and notifications only for resolved (item, vendor) pairs
         foreach (var (item, vendor) in resolvedPairs)
         {
-            var existingResp = await _opportunityResponseRepository.GetByRequestAndVendorAsync(
-                purchaseRequest.RequestID, vendor.VendorID, item.ProductID);
+            var existingResp = await _opportunityResponseRepository.GetByRequestItemAndVendorAsync(
+                item.RequestItemID, vendor.VendorID);
 
             if (existingResp == null)
             {
                 var opp = new VendorOpportunityResponse
                 {
                     RequestID = purchaseRequest.RequestID,
+                    RequestItemID = item.RequestItemID,
                     VendorID = vendor.VendorID,
                     ProductID = item.ProductID,
                     Status = "Pending",

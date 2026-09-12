@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VendorManagementprojPersistence.Data;
 
@@ -11,9 +12,11 @@ using VendorManagementprojPersistence.Data;
 namespace VendorManagementprojPersistence.Migrations
 {
     [DbContext(typeof(VendorManagementDbContext))]
-    partial class VendorManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260912093000_AddRequestItemIdToVendorOpportunityResponse")]
+    partial class AddRequestItemIdToVendorOpportunityResponse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1007,9 +1010,6 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Property<int>("RequestID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RequestItemID")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("ResponseDate")
                         .HasColumnType("datetime2");
 
@@ -1027,11 +1027,8 @@ namespace VendorManagementprojPersistence.Migrations
 
                     b.HasIndex("VendorID");
 
-                    b.HasIndex("RequestID", "VendorID", "ProductID");
-
-                    b.HasIndex("RequestItemID", "VendorID")
-                        .IsUnique()
-                        .HasFilter("[RequestItemID] IS NOT NULL");
+                    b.HasIndex("RequestID", "VendorID", "ProductID")
+                        .IsUnique();
 
                     b.ToTable("VendorOpportunityResponses", (string)null);
                 });
@@ -1435,11 +1432,6 @@ namespace VendorManagementprojPersistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseRequestItem", "RequestItem")
-                        .WithMany()
-                        .HasForeignKey("RequestItemID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("VendorManagementprojDomain.Entities.Vendor", "Vendor")
                         .WithMany()
                         .HasForeignKey("VendorID")
@@ -1449,8 +1441,6 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("PurchaseRequest");
-
-                    b.Navigation("RequestItem");
 
                     b.Navigation("Vendor");
                 });

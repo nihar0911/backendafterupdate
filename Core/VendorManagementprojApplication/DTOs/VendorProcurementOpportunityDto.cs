@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 
 namespace VendorManagementprojApplication.DTOs;
 
 public class VendorProcurementOpportunityDto
 {
     public int RequestID { get; set; }
+    public int RequestItemID { get; set; }
     public DateTime RequestDate { get; set; }
     public string Status { get; set; } = string.Empty;
 

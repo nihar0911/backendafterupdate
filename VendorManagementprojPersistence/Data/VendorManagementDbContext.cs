@@ -778,6 +778,11 @@ public class VendorManagementDbContext : DbContext
                 .HasForeignKey(e => e.RequestID)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            entity.HasOne(e => e.RequestItem)
+                .WithMany()
+                .HasForeignKey(e => e.RequestItemID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasOne(e => e.Vendor)
                 .WithMany()
                 .HasForeignKey(e => e.VendorID)
@@ -788,8 +793,11 @@ public class VendorManagementDbContext : DbContext
                 .HasForeignKey(e => e.ProductID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasIndex(e => new { e.RequestID, e.VendorID, e.ProductID })
-                .IsUnique();
+            entity.HasIndex(e => new { e.RequestItemID, e.VendorID })
+                .IsUnique()
+                .HasFilter("[RequestItemID] IS NOT NULL");
+
+            entity.HasIndex(e => new { e.RequestID, e.VendorID, e.ProductID });
         });
 
         modelBuilder.Entity<Notification>(entity =>

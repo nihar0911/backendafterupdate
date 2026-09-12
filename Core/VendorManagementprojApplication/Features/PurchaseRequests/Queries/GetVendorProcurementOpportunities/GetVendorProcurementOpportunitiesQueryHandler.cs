@@ -82,9 +82,15 @@ public class GetVendorProcurementOpportunitiesQueryHandler
             .GroupBy(r => r.RequestID)
             .ToDictionary(g => g.Key, g => g.ToList());
 
-        var myResponses = allResponses
-            .Where(r => r.VendorID == vendorId)
-            .ToDictionary(r => $"{r.RequestID}_{r.ProductID}");
+        var myResponsesByItem = allResponses
+            .Where(r => r.VendorID == vendorId && r.RequestItemID.HasValue)
+            .GroupBy(r => r.RequestItemID!.Value)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        var myLegacyResponsesByProd = allResponses
+            .Where(r => r.VendorID == vendorId && !r.RequestItemID.HasValue)
+            .GroupBy(r => $"{r.RequestID}_{r.ProductID}")
+            .ToDictionary(g => g.Key, g => g.First());
 
         // Build item-level quotation lookup for this vendor: (RequestID, ProductID) -> Quotation
         var myQuotationsByItem = allQuotations
@@ -113,11 +119,30 @@ public class GetVendorProcurementOpportunitiesQueryHandler
             {
                 if (vendorProducts.TryGetValue(item.ProductID, out var vp))
                 {
-                    // Strict Explicit Vendor Isolation:
+                    // Strict Explicit Vendor Isolation by RequestItemID:
                     // A Vendor Manager can ONLY see an opportunity if it was explicitly dispatched
-                    // to their vendor for this specific product (i.e. an explicit VendorOpportunityResponse exists).
-                    bool isVendorSelected = reqResponses != null &&
-                                            reqResponses.Any(r => r.VendorID == vendorId && r.ProductID == item.ProductID);
+                    // to their vendor for this specific RequestItemID (or legacy ProductID response).
+                    bool isVendorSelected = false;
+                    VendorOpportunityResponse? resp = null;
+
+                    if (reqResponses != null)
+                    {
+                        resp = reqResponses.FirstOrDefault(r => r.VendorID == vendorId && r.RequestItemID == item.RequestItemID);
+                        if (resp != null)
+                        {
+                            isVendorSelected = true;
+                        }
+                        else
+                        {
+                            // Backward compatibility: If no item-level response exists for this product in this request, check legacy product-level response
+                            bool hasAnyItemLevelResponseForProd = reqResponses.Any(r => r.ProductID == item.ProductID && r.RequestItemID.HasValue);
+                            if (!hasAnyItemLevelResponseForProd)
+                            {
+                                resp = reqResponses.FirstOrDefault(r => r.VendorID == vendorId && !r.RequestItemID.HasValue && r.ProductID == item.ProductID);
+                                isVendorSelected = resp != null;
+                            }
+                        }
+                    }
 
                     if (!isVendorSelected)
                     {
@@ -135,19 +160,18 @@ public class GetVendorProcurementOpportunitiesQueryHandler
                         ? (!string.IsNullOrWhiteSpace(outlet.OutletName) ? outlet.OutletName : $"{outlet.Address} Outlet")
                         : $"Outlet #{req.OutletID}";
 
-                    string itemKey = $"{req.RequestID}_{item.ProductID}";
-                    myResponses.TryGetValue(itemKey, out var resp);
-
                     string oppStatus = resp?.Status ?? "Pending";
                     string? rejectionReason = resp?.RejectionReason;
                     DateTime? responseDate = resp?.ResponseDate;
 
+                    string itemKey = $"{req.RequestID}_{item.ProductID}";
                     myQuotationsByItem.TryGetValue(itemKey, out var matchingQuotation);
                     bool hasQuotation = matchingQuotation != null;
 
                     opportunities.Add(new VendorProcurementOpportunityDto
                     {
                         RequestID = req.RequestID,
+                        RequestItemID = item.RequestItemID,
                         RequestDate = req.RequestDate,
                         Status = req.Status,
                         OrganizationID = outlet?.OrganizationID ?? 0,

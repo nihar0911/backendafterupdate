@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +21,12 @@ public class VendorOpportunityResponseRepository : IVendorOpportunityResponseRep
     {
         return await _context.VendorOpportunityResponses
             .FirstOrDefaultAsync(r => r.RequestID == requestId && r.VendorID == vendorId && r.ProductID == productId);
+    }
+
+    public async Task<VendorOpportunityResponse?> GetByRequestItemAndVendorAsync(int requestItemId, int vendorId)
+    {
+        return await _context.VendorOpportunityResponses
+            .FirstOrDefaultAsync(r => r.RequestItemID == requestItemId && r.VendorID == vendorId);
     }
 
     public async Task<List<VendorOpportunityResponse>> GetByVendorIdAsync(int vendorId)

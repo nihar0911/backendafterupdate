@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -49,5 +49,19 @@ public class NotificationRepository : INotificationRepository
     {
         return await _context.Notifications
             .CountAsync(n => n.UserID == userId && !n.IsRead);
+    }
+
+    public async Task MarkAllAsReadByUserIdAsync(int userId)
+    {
+        await _context.Notifications
+            .Where(n => n.UserID == userId && !n.IsRead)
+            .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true));
+    }
+
+    public async Task ClearAllByUserIdAsync(int userId)
+    {
+        await _context.Notifications
+            .Where(n => n.UserID == userId)
+            .ExecuteDeleteAsync();
     }
 }

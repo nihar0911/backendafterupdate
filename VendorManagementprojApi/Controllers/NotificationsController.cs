@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VendorManagementprojApplication.Features.Notifications.Commands.ClearAllNotifications;
+using VendorManagementprojApplication.Features.Notifications.Commands.MarkAllNotificationsAsRead;
 using VendorManagementprojApplication.Features.Notifications.Commands.MarkNotificationAsRead;
 using VendorManagementprojApplication.Features.Notifications.Queries.GetMyNotifications;
 
@@ -39,5 +41,19 @@ public class NotificationsController : ControllerBase
         {
             return Unauthorized(new { message = ex.Message });
         }
+    }
+
+    [HttpPut("read-all")]
+    public async Task<IActionResult> MarkAllAsRead()
+    {
+        var response = await _mediator.Send(new MarkAllNotificationsAsReadCommand());
+        return Ok(response);
+    }
+
+    [HttpDelete("clear")]
+    public async Task<IActionResult> ClearAll()
+    {
+        var response = await _mediator.Send(new ClearAllNotificationsCommand());
+        return Ok(response);
     }
 }
