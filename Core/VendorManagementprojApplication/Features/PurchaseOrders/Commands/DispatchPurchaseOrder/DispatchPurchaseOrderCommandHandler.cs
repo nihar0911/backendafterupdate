@@ -47,6 +47,7 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
             throw new InvalidOperationException("Only an accepted purchase order can be dispatched.");
 
         purchaseOrder.Status = "Dispatched";
+        purchaseOrder.DispatchDateTime = DateTime.Now;
 
         var updatedPurchaseOrder = await _purchaseOrderRepository.UpdateAsync(purchaseOrder);
 

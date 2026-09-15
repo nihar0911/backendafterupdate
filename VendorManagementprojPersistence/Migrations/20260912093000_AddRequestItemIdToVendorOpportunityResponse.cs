@@ -12,6 +12,7 @@ namespace VendorManagementprojPersistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
+                
                 name: "RequestItemID",
                 table: "VendorOpportunityResponses",
                 type: "int",
