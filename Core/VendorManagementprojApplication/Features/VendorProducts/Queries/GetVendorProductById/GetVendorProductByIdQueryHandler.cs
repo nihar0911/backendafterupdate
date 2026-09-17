@@ -1,6 +1,6 @@
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojDomain.Entities;
+using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductById;
 
@@ -18,7 +18,15 @@ public class GetVendorProductByIdQueryHandler : IRequestHandler<GetVendorProduct
         var item = await _repository.GetByIdAsync(request.VendorProductID);
         return new GetVendorProductByIdResponse
         {
-            VendorProduct = item
+            VendorProduct = item == null ? null : new VendorProductDto
+            {
+                VendorProductID = item.VendorProductID,
+                VendorID = item.VendorID,
+                ProductID = item.ProductID,
+                UnitPrice = item.UnitPrice,
+                EstimatedDeliveryDays = item.EstimatedDeliveryDays,
+                Status = item.Status
+            }
         };
     }
 }

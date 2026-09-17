@@ -11,6 +11,7 @@ using VendorManagementprojApplication.Features.VendorFeedback.Commands.CreateVen
 using VendorManagementprojApplication.Features.VendorFeedback.Queries.GetAllVendorFeedback;
 using VendorManagementprojApplication.Features.VendorFeedback.Queries.GetEligibleReviewOrders;
 using VendorManagementprojApplication.Features.VendorFeedback.Queries.GetVendorFeedbackById;
+using VendorManagementprojApplication.Features.VendorFeedback.Queries.GetVendorFeedbackByVendor;
 
 namespace VendorManagementprojApi.Controllers;
 
@@ -119,36 +120,21 @@ public class VendorFeedbackController : ControllerBase
             }
         }
 
-        var list = await _feedbackRepository.GetByVendorIdAsync(vendorID, null, productId);
-        var dtos = list.Select(f => new VendorFeedbackDto
+        var response = await _mediator.Send(new GetVendorFeedbackByVendorQuery
         {
-            FeedbackID = f.FeedbackID,
-            VendorID = f.VendorID,
-            VendorName = f.Vendor?.VendorName ?? string.Empty,
-            OutletID = f.OutletID,
-            OutletName = f.Outlet?.OutletName ?? string.Empty,
-            PurchaseOrderID = f.PurchaseOrderID,
-            POItemID = f.POItemID,
-            ProductID = f.POItem?.ProductID ?? 0,
-            ProductName = f.POItem?.Product?.ProductName ?? string.Empty,
-            RatedByUserID = f.RatedByUserID,
-            RatedByUserName = f.RatedByUser?.Name ?? string.Empty,
-            Rating = f.Rating,
-            ProductQualityRating = f.ProductQualityRating,
-            DeliveryRating = f.DeliveryRating,
-            Review = f.Review,
-            FeedbackDate = f.FeedbackDate
-        }).ToList();
+            VendorID = vendorID,
+            ProductID = productId
+        });
 
-        return Ok(dtos);
+        return Ok(response.Feedback);
     }
 
     [HttpGet("eligible-orders")]
     [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Purchase Manager")]
     public async Task<IActionResult> GetEligibleOrders()
     {
-        var orders = await _mediator.Send(new GetEligibleReviewOrdersQuery());
-        return Ok(orders);
+        var response = await _mediator.Send(new GetEligibleReviewOrdersQuery());
+        return Ok(response.Orders);
     }
 }
 

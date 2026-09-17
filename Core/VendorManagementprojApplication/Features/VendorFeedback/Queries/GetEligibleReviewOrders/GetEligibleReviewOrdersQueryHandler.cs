@@ -10,7 +10,7 @@ using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.VendorFeedback.Queries.GetEligibleReviewOrders;
 
-public class GetEligibleReviewOrdersQueryHandler : IRequestHandler<GetEligibleReviewOrdersQuery, List<EligibleReviewOrderDto>>
+public class GetEligibleReviewOrdersQueryHandler : IRequestHandler<GetEligibleReviewOrdersQuery, GetEligibleReviewOrdersResponse>
 {
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
     private readonly IVendorFeedbackRepository _feedbackRepository;
@@ -26,7 +26,7 @@ public class GetEligibleReviewOrdersQueryHandler : IRequestHandler<GetEligibleRe
         _currentUserService = currentUserService;
     }
 
-    public async Task<List<EligibleReviewOrderDto>> Handle(
+    public async Task<GetEligibleReviewOrdersResponse> Handle(
         GetEligibleReviewOrdersQuery request,
         CancellationToken cancellationToken)
     {
@@ -41,7 +41,7 @@ public class GetEligibleReviewOrdersQueryHandler : IRequestHandler<GetEligibleRe
             }
             else
             {
-                return new List<EligibleReviewOrderDto>();
+                return new GetEligibleReviewOrdersResponse();
             }
         }
         else if (_currentUserService.IsOutletManager || _currentUserService.IsPurchaseManager)
@@ -52,7 +52,7 @@ public class GetEligibleReviewOrdersQueryHandler : IRequestHandler<GetEligibleRe
             }
             else
             {
-                return new List<EligibleReviewOrderDto>();
+                return new GetEligibleReviewOrdersResponse();
             }
         }
 
@@ -85,6 +85,9 @@ public class GetEligibleReviewOrdersQueryHandler : IRequestHandler<GetEligibleRe
             }
         }
 
-        return result.OrderByDescending(r => r.ActualDeliveryDate ?? DateTime.MinValue).ToList();
+        return new GetEligibleReviewOrdersResponse
+        {
+            Orders = result.OrderByDescending(r => r.ActualDeliveryDate ?? DateTime.MinValue).ToList()
+        };
     }
 }

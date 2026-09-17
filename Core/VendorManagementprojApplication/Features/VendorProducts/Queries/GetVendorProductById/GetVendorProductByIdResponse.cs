@@ -1,8 +1,8 @@
-using VendorManagementprojDomain.Entities;
+using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductById;
 
 public class GetVendorProductByIdResponse
 {
-    public VendorProduct? VendorProduct { get; set; }
+    public VendorProductDto? VendorProduct { get; set; }
 }

@@ -25,7 +25,7 @@ public class VendorRecommendationsController : ControllerBase
         try
         {
             var response = await _mediator.Send(
-                new Query
+                new GetRecommendationsQuery
                 {
                     PurchaseRequestID = purchaseRequestID
                 });

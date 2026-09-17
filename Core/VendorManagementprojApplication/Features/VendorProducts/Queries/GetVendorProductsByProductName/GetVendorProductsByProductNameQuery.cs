@@ -1,5 +1,6 @@
-﻿using MediatR;
-using VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductsByProductName;
+using MediatR;
+
+namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductsByProductName;
 
 public class GetVendorProductsByProductNameQuery : IRequest<GetVendorProductsByProductNameResponse>
 {

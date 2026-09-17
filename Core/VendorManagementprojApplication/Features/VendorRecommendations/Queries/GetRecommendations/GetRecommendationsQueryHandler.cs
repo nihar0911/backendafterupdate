@@ -10,7 +10,7 @@ using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.VendorRecommendations.Queries.GetRecommendations;
 
-public class Handler : IRequestHandler<Query, Response>
+public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendationsQuery, GetRecommendationsResponse>
 {
     private readonly IPurchaseRequestRepository _purchaseRequestRepository;
     private readonly IVendorProductRepository _vendorProductRepository;
@@ -21,7 +21,7 @@ public class Handler : IRequestHandler<Query, Response>
     private readonly ICurrentUserService _currentUserService;
     private readonly IVendorRecommendationSettingsRepository _settingsRepository;
 
-    public Handler(
+    public GetRecommendationsQueryHandler(
         IPurchaseRequestRepository purchaseRequestRepository,
         IVendorProductRepository vendorProductRepository,
         IContractRepository contractRepository,
@@ -41,8 +41,8 @@ public class Handler : IRequestHandler<Query, Response>
         _settingsRepository = settingsRepository;
     }
 
-    public async Task<Response> Handle(
-        Query request,
+    public async Task<GetRecommendationsResponse> Handle(
+        GetRecommendationsQuery request,
         CancellationToken cancellationToken)
     {
         if (request.PurchaseRequestID <= 0)
@@ -300,7 +300,7 @@ public class Handler : IRequestHandler<Query, Response>
             recommendations.AddRange(productRecommendations);
         }
 
-        return new Response
+        return new GetRecommendationsResponse
         {
             PurchaseRequestID = request.PurchaseRequestID,
             Recommendations = recommendations

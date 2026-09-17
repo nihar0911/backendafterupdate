@@ -1,6 +1,9 @@
-﻿using MediatR;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojDomain.Entities;
+using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductsByProductName;
 
@@ -26,7 +29,15 @@ public class GetVendorProductsByProductNameQueryHandler
 
         return new GetVendorProductsByProductNameResponse
         {
-            VendorProducts = vendorProducts
+            VendorProducts = vendorProducts.Select(vp => new VendorProductDto
+            {
+                VendorProductID = vp.VendorProductID,
+                VendorID = vp.VendorID,
+                ProductID = vp.ProductID,
+                UnitPrice = vp.UnitPrice,
+                EstimatedDeliveryDays = vp.EstimatedDeliveryDays,
+                Status = vp.Status
+            }).ToList()
         };
     }
 }

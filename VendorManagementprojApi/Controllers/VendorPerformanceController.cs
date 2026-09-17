@@ -1,8 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VendorManagementprojApplication.Contracts.Services;
+using VendorManagementprojApplication.Features.VendorPerformance.Queries.GetOrganizationVendorsPerformance;
+using VendorManagementprojApplication.Features.VendorPerformance.Queries.GetVendorPerformanceById;
 
 namespace VendorManagementprojApi.Controllers;
 
@@ -11,14 +14,14 @@ namespace VendorManagementprojApi.Controllers;
 [Authorize]
 public class VendorPerformanceController : ControllerBase
 {
-    private readonly IVendorPerformanceService _performanceService;
+    private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
 
     public VendorPerformanceController(
-        IVendorPerformanceService performanceService,
+        IMediator mediator,
         ICurrentUserService currentUserService)
     {
-        _performanceService = performanceService;
+        _mediator = mediator;
         _currentUserService = currentUserService;
     }
 
@@ -32,8 +35,11 @@ public class VendorPerformanceController : ControllerBase
             orgId = _currentUserService.OrganizationID.Value;
         }
 
-        var list = await _performanceService.GetOrganizationVendorsPerformanceAsync(orgId);
-        return Ok(list);
+        var response = await _mediator.Send(new GetOrganizationVendorsPerformanceQuery
+        {
+            OrganizationID = orgId
+        });
+        return Ok(response.VendorPerformances);
     }
 
     [HttpGet("{vendorID:int}")]
@@ -42,7 +48,7 @@ public class VendorPerformanceController : ControllerBase
     {
         if (string.Equals(_currentUserService.Role, "Vendor Manager", StringComparison.OrdinalIgnoreCase))
         {
-            if (_currentUserService.VendorID.HasValue && vendorID != _currentUserService.VendorID.Value)
+            if (!_currentUserService.VendorID.HasValue || vendorID != _currentUserService.VendorID.Value)
             {
                 return Forbid();
             }
@@ -54,10 +60,15 @@ public class VendorPerformanceController : ControllerBase
             orgId = _currentUserService.OrganizationID.Value;
         }
 
-        var summary = await _performanceService.GetVendorPerformanceAsync(vendorID, orgId);
-        if (summary == null)
+        var response = await _mediator.Send(new GetVendorPerformanceByIdQuery
+        {
+            VendorID = vendorID,
+            OrganizationID = orgId
+        });
+
+        if (response.VendorPerformance == null)
             return NotFound();
 
-        return Ok(summary);
+        return Ok(response.VendorPerformance);
     }
 }

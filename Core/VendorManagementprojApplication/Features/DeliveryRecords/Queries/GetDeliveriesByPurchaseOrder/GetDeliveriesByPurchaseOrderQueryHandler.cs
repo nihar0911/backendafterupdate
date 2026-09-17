@@ -1,10 +1,14 @@
-﻿using MediatR;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
 
-public class GBDPOhandler
+public class GetDeliveriesByPurchaseOrderQueryHandler
     : IRequestHandler<
         GetDeliveriesByPurchaseOrderQuery,
         GetDeliveriesByPurchaseOrderResponse>
@@ -12,7 +16,7 @@ public class GBDPOhandler
     private readonly IDeliveryRecordRepository _deliveryRecordRepository;
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
 
-    public GBDPOhandler(
+    public GetDeliveriesByPurchaseOrderQueryHandler(
         IDeliveryRecordRepository deliveryRecordRepository,
         IPurchaseOrderRepository purchaseOrderRepository)
     {

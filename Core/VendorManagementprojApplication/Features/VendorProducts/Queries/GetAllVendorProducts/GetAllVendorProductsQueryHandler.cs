@@ -1,6 +1,7 @@
+using System.Linq;
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojDomain.Entities;
+using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetAllVendorProducts;
 
@@ -18,7 +19,15 @@ public class GetAllVendorProductsQueryHandler : IRequestHandler<GetAllVendorProd
         var list = await _repository.GetAllAsync();
         return new GetAllVendorProductsResponse
         {
-            VendorProducts = list
+            VendorProducts = list.Select(vp => new VendorProductDto
+            {
+                VendorProductID = vp.VendorProductID,
+                VendorID = vp.VendorID,
+                ProductID = vp.ProductID,
+                UnitPrice = vp.UnitPrice,
+                EstimatedDeliveryDays = vp.EstimatedDeliveryDays,
+                Status = vp.Status
+            }).ToList()
         };
     }
 }

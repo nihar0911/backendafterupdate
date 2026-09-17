@@ -1,10 +1,8 @@
-﻿using VendorManagementprojApplication.DTOs;
+using MediatR;
 
 namespace VendorManagementprojApplication.Features.VendorRecommendations.Queries.GetRecommendations;
 
-public class Response
+public class GetRecommendationsQuery : IRequest<GetRecommendationsResponse>
 {
     public int PurchaseRequestID { get; set; }
-
-    public List<VendorRecommendationDto> Recommendations { get; set; } = new();
 }
