@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -48,6 +48,17 @@ public class GetAllContractsQueryHandler : IRequestHandler<GetAllContractsQuery,
             }
         }
         else if (_currentUserService.IsOutletManager)
+        {
+            if (_currentUserService.OutletID.HasValue)
+            {
+                contracts = contracts.Where(c => c.OutletID == _currentUserService.OutletID.Value).ToList();
+            }
+            else
+            {
+                contracts = new List<Contract>();
+            }
+        }
+        else if (_currentUserService.IsPurchaseManager)
         {
             if (_currentUserService.OutletID.HasValue)
             {

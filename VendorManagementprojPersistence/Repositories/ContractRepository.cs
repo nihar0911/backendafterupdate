@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -81,6 +81,9 @@ public class ContractRepository : IContractRepository
 
         if (existing == null)
             return null;
+
+        existing.TotalQuantity =
+            contract.TotalQuantity;
 
         existing.StartDate =
             contract.StartDate;

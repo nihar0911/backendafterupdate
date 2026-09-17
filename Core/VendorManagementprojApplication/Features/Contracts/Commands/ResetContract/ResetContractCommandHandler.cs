@@ -1,4 +1,6 @@
-﻿using MediatR;
+using System;
+using System.Linq;
+using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.DTOs;
 
@@ -25,6 +27,27 @@ public class ResetContractCommandHandler : IRequestHandler<ResetContractCommand,
         if (!string.Equals(contract.Status, "Reached", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException(
                 "Contract can only be reset after the allocation has been reached.");
+
+        if (request.NewTotalQuantity.HasValue && request.NewTotalQuantity.Value > 0)
+        {
+            contract.TotalQuantity = request.NewTotalQuantity.Value;
+
+            foreach (var allocation in contract.VendorAllocations)
+            {
+                allocation.AllocatedQuantity = Math.Round(
+                    contract.TotalQuantity * allocation.AllocationPercentage / 100m,
+                    2,
+                    MidpointRounding.AwayFromZero);
+            }
+
+            var totalAllocated = contract.VendorAllocations.Sum(a => a.AllocatedQuantity);
+            var delta = contract.TotalQuantity - totalAllocated;
+            if (delta != 0 && contract.VendorAllocations.Count > 0)
+            {
+                var largest = contract.VendorAllocations.OrderByDescending(a => a.AllocatedQuantity).First();
+                largest.AllocatedQuantity += delta;
+            }
+        }
 
         contract.UsedQuantity = 0;
         contract.Status = "Active";

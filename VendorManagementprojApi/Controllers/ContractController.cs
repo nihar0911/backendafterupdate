@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -28,7 +28,7 @@ public class ContractController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager")]
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Vendor Manager,Purchase Manager")]
     public async Task<IActionResult> GetAll()
     {
         var result = await _mediator.Send(new GetAllContractsQuery());

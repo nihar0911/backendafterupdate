@@ -134,6 +134,10 @@ public class Handler : IRequestHandler<Query, Response>
                 decimal remainingQty = 0m;
                 decimal allocationPercentage = 0m;
                 int? contractId = null;
+                decimal contractTotalQuantity = 0m;
+                DateTime? contractStartDate = null;
+                DateTime? contractEndDate = null;
+                string? contractStatus = null;
 
                 if (primaryAllocation != null)
                 {
@@ -142,6 +146,10 @@ public class Handler : IRequestHandler<Query, Response>
                     allocatedQty = primaryAllocation.AllocatedQuantity;
                     usedQty = primaryAllocation.UsedQuantity;
                     remainingQty = Math.Max(0m, primaryAllocation.AllocatedQuantity - primaryAllocation.UsedQuantity);
+                    contractTotalQuantity = primaryAllocation.Contract?.TotalQuantity ?? 0m;
+                    contractStartDate = primaryAllocation.Contract?.StartDate;
+                    contractEndDate = primaryAllocation.Contract?.EndDate;
+                    contractStatus = primaryAllocation.Contract?.Status;
                 }
 
                 // Retrieve historical reviews and feedback for this vendor
@@ -204,7 +212,11 @@ public class Handler : IRequestHandler<Query, Response>
                         AllocationPercentage = allocationPercentage,
                         AllocatedQuantity = allocatedQty,
                         UsedQuantity = usedQty,
-                        RemainingQuantity = remainingQty
+                        RemainingQuantity = remainingQty,
+                        ContractTotalQuantity = contractTotalQuantity,
+                        ContractStartDate = contractStartDate,
+                        ContractEndDate = contractEndDate,
+                        ContractStatus = contractStatus
                     });
             }
 

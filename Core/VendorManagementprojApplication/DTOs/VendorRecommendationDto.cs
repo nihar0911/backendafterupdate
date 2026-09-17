@@ -45,4 +45,12 @@ public class VendorRecommendationDto
     public decimal UsedQuantity { get; set; }
 
     public decimal RemainingQuantity { get; set; }
+
+    public decimal ContractTotalQuantity { get; set; }
+
+    public DateTime? ContractStartDate { get; set; }
+
+    public DateTime? ContractEndDate { get; set; }
+
+    public string? ContractStatus { get; set; }
 }
