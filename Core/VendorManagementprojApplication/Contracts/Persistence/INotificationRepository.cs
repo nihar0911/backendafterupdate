@@ -13,4 +13,5 @@ public interface INotificationRepository
     Task<int> GetUnreadCountByUserIdAsync(int userId);
     Task MarkAllAsReadByUserIdAsync(int userId);
     Task ClearAllByUserIdAsync(int userId);
+    Task RemoveUnreadByRelatedRequestIdAsync(string notificationType, int relatedRequestId);
 }

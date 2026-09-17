@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VendorManagementprojApplication.Features.PurchaseOrders.Commands.ApprovePurchaseOrder;
+using VendorManagementprojApplication.Features.PurchaseOrders.Commands.ChangePurchaseOrderApproverRole;
 using VendorManagementprojApplication.Features.PurchaseOrders.Commands.CreatePurchaseOrder;
 using VendorManagementprojApplication.Features.PurchaseOrders.Commands.DispatchPurchaseOrder;
 using VendorManagementprojApplication.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
@@ -102,6 +103,30 @@ public class PurchaseOrderController : ControllerBase
                 {
                     PurchaseOrderID = purchaseOrderID
                 });
+
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
+    }
+
+    [HttpPut("{purchaseOrderID:int}/approver-role")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
+    public async Task<IActionResult> ChangeApproverRole(
+        int purchaseOrderID,
+        [FromBody] ChangePurchaseOrderApproverRoleCommand command)
+    {
+        try
+        {
+            command.PurchaseOrderID = purchaseOrderID;
+
+            var result = await _mediator.Send(command);
 
             return Ok(result);
         }

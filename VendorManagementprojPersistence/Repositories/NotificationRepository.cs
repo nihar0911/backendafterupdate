@@ -64,4 +64,11 @@ public class NotificationRepository : INotificationRepository
             .Where(n => n.UserID == userId)
             .ExecuteDeleteAsync();
     }
+
+    public async Task RemoveUnreadByRelatedRequestIdAsync(string notificationType, int relatedRequestId)
+    {
+        await _context.Notifications
+            .Where(n => n.NotificationType == notificationType && n.RelatedRequestID == relatedRequestId && !n.IsRead)
+            .ExecuteDeleteAsync();
+    }
 }

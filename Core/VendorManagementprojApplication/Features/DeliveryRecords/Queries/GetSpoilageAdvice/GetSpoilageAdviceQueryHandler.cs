@@ -128,6 +128,7 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
                 advice.MaximumSpoilagePercentage = null;
                 advice.Trend = "None";
                 advice.RiskLevel = "INSUFFICIENT DATA";
+                advice.RiskTrigger = "No previous confirmed deliveries available.";
                 advice.EstimatedSpoiledQuantity = null;
             }
             else
@@ -185,6 +186,47 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
                 {
                     riskLevel = "MEDIUM";
                 }
+
+                // Determine Risk Trigger dynamically from configured settings
+                string riskTrigger;
+                if (riskLevel == "HIGH")
+                {
+                    var highTriggers = new List<string>();
+                    if (weightedSpoilage >= highWeightedThreshold)
+                    {
+                        highTriggers.Add($"Weighted spoilage reached the configured HIGH threshold of {highWeightedThreshold:0.##}%.");
+                    }
+                    if (recentSpoilage >= highRecentThreshold)
+                    {
+                        highTriggers.Add($"Recent spoilage reached the configured HIGH threshold of {highRecentThreshold:0.##}%.");
+                    }
+                    if (maxSpoilage >= highMaxThreshold)
+                    {
+                        highTriggers.Add($"Maximum historical single-delivery spoilage reached the configured HIGH threshold of {highMaxThreshold:0.##}%.");
+                    }
+                    riskTrigger = highTriggers.Count > 0
+                        ? string.Join(" ", highTriggers)
+                        : "Spoilage metrics reached the configured HIGH threshold.";
+                }
+                else if (riskLevel == "MEDIUM")
+                {
+                    if (weightedSpoilage >= medWeightedThreshold && weightedSpoilage < highWeightedThreshold)
+                    {
+                        riskTrigger = $"Weighted spoilage falls within the configured MEDIUM threshold range ({medWeightedThreshold:0.##}% - {highWeightedThreshold:0.##}%).";
+                    }
+                    else
+                    {
+                        riskTrigger = $"Weighted spoilage is below {lowWeightedThreshold:0.##}%, but recent trend is {trend}, applying the fallback MEDIUM risk rule.";
+                    }
+                }
+                else if (riskLevel == "LOW")
+                {
+                    riskTrigger = $"Weighted spoilage is below the configured LOW threshold of {lowWeightedThreshold:0.##}% and the trend is {trend}.";
+                }
+                else
+                {
+                    riskTrigger = "No previous confirmed deliveries available.";
+                }
                 //based on past spoilage percentage, what are the likely chances that the current quantity will  spoil before it can be dispatched
 
                 decimal? estimatedSpoiled = totalReceived > 0
@@ -201,6 +243,7 @@ public class GetSpoilageAdviceQueryHandler : IRequestHandler<GetSpoilageAdviceQu
                 advice.MaximumSpoilagePercentage = maxSpoilage;
                 advice.Trend = trend;
                 advice.RiskLevel = riskLevel;
+                advice.RiskTrigger = riskTrigger;
                 advice.EstimatedSpoiledQuantity = estimatedSpoiled;
             }
 

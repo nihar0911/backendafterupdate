@@ -24,6 +24,7 @@ public class ProductSpoilageAdviceDto
     // Trend & Risk
     public string Trend { get; set; } = "None";
     public string RiskLevel { get; set; } = "INSUFFICIENT DATA";
+    public string RiskTrigger { get; set; } = string.Empty;
 
     // Dispatch & Advisory
     public int? PriorityRank { get; set; }
