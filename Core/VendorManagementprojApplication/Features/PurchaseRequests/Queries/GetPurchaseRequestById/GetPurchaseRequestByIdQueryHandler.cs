@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,15 +14,21 @@ public class GetPurchaseRequestByIdQueryHandler : IRequestHandler<GetPurchaseReq
 {
     private readonly IPurchaseRequestRepository _repository;
     private readonly IOutletRepository _outletRepository;
+    private readonly IVendorOpportunityResponseRepository _responseRepository;
+    private readonly IVendorRepository _vendorRepository;
     private readonly ICurrentUserService _currentUserService;
 
     public GetPurchaseRequestByIdQueryHandler(
         IPurchaseRequestRepository repository,
         IOutletRepository outletRepository,
+        IVendorOpportunityResponseRepository responseRepository,
+        IVendorRepository vendorRepository,
         ICurrentUserService currentUserService)
     {
         _repository = repository;
         _outletRepository = outletRepository;
+        _responseRepository = responseRepository;
+        _vendorRepository = vendorRepository;
         _currentUserService = currentUserService;
     }
 
@@ -54,6 +60,24 @@ public class GetPurchaseRequestByIdQueryHandler : IRequestHandler<GetPurchaseReq
             }
         }
 
+        string? rejectionReason = null;
+        string? vendorName = null;
+
+        var responses = await _responseRepository.GetByRequestIdAsync(req.RequestID);
+        if (responses != null && responses.Count > 0)
+        {
+            var rejectedResponse = responses.FirstOrDefault(r => string.Equals(r.Status, "Rejected", StringComparison.OrdinalIgnoreCase));
+            if (rejectedResponse != null)
+            {
+                rejectionReason = rejectedResponse.RejectionReason;
+                var vendor = await _vendorRepository.GetByIdAsync(rejectedResponse.VendorID);
+                if (vendor != null)
+                {
+                    vendorName = vendor.VendorName;
+                }
+            }
+        }
+
         return new GetPurchaseRequestByIdResponse
         {
             PurchaseRequest = new PurchaseRequestDto
@@ -63,6 +87,8 @@ public class GetPurchaseRequestByIdQueryHandler : IRequestHandler<GetPurchaseReq
                 CreatedByUserID = req.CreatedByUserID,
                 RequestDate = req.RequestDate,
                 Status = req.Status,
+                VendorName = vendorName,
+                RejectionReason = rejectionReason,
                 Items = req.Items?.Select(i => new PurchaseRequestItemDto
                 {
                     RequestItemID = i.RequestItemID,

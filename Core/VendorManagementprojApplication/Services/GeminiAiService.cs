@@ -343,6 +343,329 @@ public class GeminiAiService : IGeminiAiService
         public string Why { get; set; } = string.Empty;
         public string RecommendedAction { get; set; } = string.Empty;
     }
+
+    public async Task<ParsedProcurementPromptDto> ParseProcurementPromptAsync(
+        string prompt,
+        DateTime referenceDate)
+    {
+        if (string.IsNullOrWhiteSpace(prompt))
+        {
+            return new ParsedProcurementPromptDto
+            {
+                Success = false,
+                Message = "Procurement prompt is empty."
+            };
+        }
+
+        if (!string.IsNullOrWhiteSpace(_apiKey))
+        {
+            try
+            {
+                string procurementPrompt = BuildProcurementPrompt(prompt, referenceDate);
+                string endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
+                var requestBody = new
+                {
+                    contents = new[]
+                    {
+                        new { parts = new[] { new { text = procurementPrompt } } }
+                    },
+                    generationConfig = new
+                    {
+                        temperature = 0.1,
+                        maxOutputTokens = 1000
+                    }
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(endpoint, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(jsonResponse);
+
+                    if (doc.RootElement.TryGetProperty("candidates", out var candidates) &&
+                        candidates.GetArrayLength() > 0)
+                    {
+                        var textElement = candidates[0]
+                            .GetProperty("content")
+                            .GetProperty("parts")[0]
+                            .GetProperty("text");
+
+                        string rawText = textElement.GetString() ?? string.Empty;
+                        rawText = rawText.Replace("```json", "").Replace("```", "").Trim();
+
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var parsedResponse = JsonSerializer.Deserialize<GeminiProcurementExtractionResponse>(rawText, options);
+
+                        if (parsedResponse != null && parsedResponse.Items != null && parsedResponse.Items.Count > 0)
+                        {
+                            return new ParsedProcurementPromptDto
+                            {
+                                Success = true,
+                                Message = "Successfully parsed procurement request.",
+                                ExtractedOutletName = parsedResponse.OutletName?.Trim(),
+                                ParsedRequiredDate = parsedResponse.RequiredDate?.Trim(),
+                                ExtractedItems = parsedResponse.Items.Select(i => new ExtractedProcurementItemDto
+                                {
+                                    ProductName = i.ProductName?.Trim() ?? string.Empty,
+                                    Quantity = i.Quantity,
+                                    Unit = !string.IsNullOrWhiteSpace(i.Unit) ? NormalizeUnit(i.Unit.Trim()) : "units"
+                                }).ToList()
+                            };
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GeminiAiService] Procurement Parsing Gemini API call error: {ex.Message}");
+            }
+        }
+
+        // Deterministic NLP fallback
+        return ParseDeterministicProcurementFallback(prompt, referenceDate);
+    }
+
+    private static string BuildProcurementPrompt(string prompt, DateTime referenceDate)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("You are an expert AI Procurement Assistant for a restaurant and retail supply chain management system.");
+        sb.AppendLine("Parse the user's natural-language procurement order request into structured JSON.");
+        sb.AppendLine();
+        sb.AppendLine($"Reference Date: {referenceDate:yyyy-MM-dd} ({referenceDate.DayOfWeek})");
+        sb.AppendLine();
+        sb.AppendLine("INSTRUCTIONS:");
+        sb.AppendLine("1. Extract the target outlet/branch name into 'outletName' (null if not specified).");
+        sb.AppendLine("2. Extract the required delivery date into 'requiredDate' formatted as YYYY-MM-DD (null if not specified). Relative terms must be resolved relative to the Reference Date:");
+        sb.AppendLine("   - 'today' => Reference Date");
+        sb.AppendLine("   - 'tomorrow' => Reference Date + 1 day");
+        sb.AppendLine("   - Weekday names (e.g. 'Friday', 'next Monday') => next upcoming occurrence on or after Reference Date");
+        sb.AppendLine("   - 'in N days' => Reference Date + N days");
+        sb.AppendLine("3. Extract every requested product into the 'items' array. Each item must contain:");
+        sb.AppendLine("   - 'productName': natural-language product name");
+        sb.AppendLine("   - 'quantity': numeric quantity");
+        sb.AppendLine("   - 'unit': measurement unit (e.g., kg, Litre, units, box, packets). Default to 'units' if omitted.");
+        sb.AppendLine();
+        sb.AppendLine("STRICT RESTRICTIONS:");
+        sb.AppendLine("- DO NOT generate or invent ProductID, OutletID, VendorID, Price, Rating, Contract, PurchaseRequestID, or PurchaseOrderID.");
+        sb.AppendLine("- Ground all items and outlets strictly in the user's text.");
+        sb.AppendLine();
+        sb.AppendLine("Return a STRICT JSON object ONLY (no markdown fences, no explanatory text):");
+        sb.AppendLine("{");
+        sb.AppendLine("  \"outletName\": \"Panaji\",");
+        sb.AppendLine("  \"requiredDate\": \"YYYY-MM-DD\",");
+        sb.AppendLine("  \"items\": [");
+        sb.AppendLine("    {");
+        sb.AppendLine("      \"productName\": \"potatoes\",");
+        sb.AppendLine("      \"quantity\": 10,");
+        sb.AppendLine("      \"unit\": \"kg\"");
+        sb.AppendLine("    }");
+        sb.AppendLine("  ]");
+        sb.AppendLine("}");
+        sb.AppendLine();
+        sb.AppendLine($"USER REQUEST: \"{prompt}\"");
+        return sb.ToString();
+    }
+
+    private static ParsedProcurementPromptDto ParseDeterministicProcurementFallback(string prompt, DateTime referenceDate)
+    {
+        var result = new ParsedProcurementPromptDto();
+        string cleanPrompt = prompt.Trim();
+
+        // 1. Extract Date
+        string? extractedDate = null;
+        var dateMatch = System.Text.RegularExpressions.Regex.Match(
+            cleanPrompt,
+            @"\b(?:by|before|on|due|for\s+date)\s+(today|tomorrow|next\s+[a-zA-Z]+|[a-zA-Z]+day|in\s+\d+\s+days|\d{4}-\d{2}-\d{2})\b",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        if (dateMatch.Success)
+        {
+            string dateStr = dateMatch.Groups[1].Value.Trim().ToLowerInvariant();
+            extractedDate = ResolveRelativeDateString(dateStr, referenceDate);
+        }
+
+        // 2. Extract Outlet
+        string? extractedOutlet = null;
+        var outletMatch = System.Text.RegularExpressions.Regex.Match(
+            cleanPrompt,
+            @"\b(?:for|at|to)\s+(?:the\s+)?([a-zA-Z0-9\s\-]+?)\s+(?:outlet|branch|store|location)\b",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        if (outletMatch.Success)
+        {
+            extractedOutlet = outletMatch.Groups[1].Value.Trim();
+        }
+        else
+        {
+            var outletAltMatch = System.Text.RegularExpressions.Regex.Match(
+                cleanPrompt,
+                @"\b(?:for|at|to)\s+(?:the\s+)?([a-zA-Z0-9\s\-]+?)(?=\s+(?:by|before|on|due|with)\b|\.|\z)",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            if (outletAltMatch.Success)
+            {
+                string candidate = outletAltMatch.Groups[1].Value.Trim();
+                if (!System.Text.RegularExpressions.Regex.IsMatch(candidate, @"^\d+$") && candidate.Length > 2)
+                {
+                    extractedOutlet = candidate;
+                }
+            }
+        }
+
+        // 3. Extract Items
+        string itemsText = cleanPrompt;
+        itemsText = System.Text.RegularExpressions.Regex.Replace(
+            itemsText,
+            @"^(?:please\s+)?(?:order|purchase|buy|need|get|request)\s+",
+            "",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        if (dateMatch.Success)
+        {
+            itemsText = itemsText.Replace(dateMatch.Value, " ");
+        }
+        if (outletMatch.Success)
+        {
+            itemsText = itemsText.Replace(outletMatch.Value, " ");
+        }
+        else
+        {
+            var outletClause = System.Text.RegularExpressions.Regex.Match(
+                itemsText,
+                @"\b(?:for|at|to)\s+(?:the\s+)?[a-zA-Z0-9\s\-]+?(?=\s+(?:by|before|on|due)\b|\.|\z)",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (outletClause.Success)
+            {
+                itemsText = itemsText.Replace(outletClause.Value, " ");
+            }
+        }
+
+        var itemMatches = System.Text.RegularExpressions.Regex.Matches(
+            itemsText,
+            @"(?<qty>\d+(?:\.\d+)?)\s*(?:(?<unit>kg|kgs|kilogram|kilograms|kilo|kilos|g|gm|gms|gram|grams|l|ltr|litre|litres|liter|liters|ml|packets?|packs?|boxes?|crates?|bottles?|units?|pieces?|pcs)\b)?\s*(?:of\s+)?(?<prod>[a-zA-Z0-9\s\-]+?)(?=\s+(?:and|\&|\,)\s+\d|\.|\;|\z)",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        var extractedItems = new List<ExtractedProcurementItemDto>();
+        foreach (System.Text.RegularExpressions.Match m in itemMatches)
+        {
+            string qtyStr = m.Groups["qty"].Value;
+            string unitStr = m.Groups["unit"].Value;
+            string prodStr = m.Groups["prod"].Value.Trim();
+
+            if (decimal.TryParse(qtyStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal qty) && qty > 0)
+            {
+                if (string.IsNullOrWhiteSpace(unitStr))
+                    unitStr = "units";
+
+                unitStr = NormalizeUnit(unitStr);
+                prodStr = System.Text.RegularExpressions.Regex.Replace(prodStr, @"^(?:and|\&)\s+", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+
+                if (!string.IsNullOrWhiteSpace(prodStr))
+                {
+                    extractedItems.Add(new ExtractedProcurementItemDto
+                    {
+                        ProductName = prodStr,
+                        Quantity = qty,
+                        Unit = unitStr
+                    });
+                }
+            }
+        }
+
+        if (extractedItems.Count > 0)
+        {
+            result.Success = true;
+            result.Message = "Parsed procurement request via deterministic fallback.";
+            result.ExtractedOutletName = extractedOutlet;
+            result.ParsedRequiredDate = extractedDate;
+            result.ExtractedItems = extractedItems;
+        }
+        else
+        {
+            result.Success = false;
+            result.Message = "Could not extract any procurement items from the prompt.";
+        }
+
+        return result;
+    }
+
+    private static string? ResolveRelativeDateString(string expr, DateTime referenceDate)
+    {
+        expr = expr.Trim().ToLowerInvariant();
+        if (expr == "today")
+            return referenceDate.ToString("yyyy-MM-dd");
+        if (expr == "tomorrow")
+            return referenceDate.AddDays(1).ToString("yyyy-MM-dd");
+
+        var inDaysMatch = System.Text.RegularExpressions.Regex.Match(expr, @"^in\s+(\d+)\s+days?$");
+        if (inDaysMatch.Success && int.TryParse(inDaysMatch.Groups[1].Value, out int days))
+        {
+            return referenceDate.AddDays(days).ToString("yyyy-MM-dd");
+        }
+
+        if (DateTime.TryParse(expr, out DateTime directDate))
+        {
+            return directDate.ToString("yyyy-MM-dd");
+        }
+
+        bool isNext = expr.StartsWith("next ");
+        string dayName = isNext ? expr.Substring(5).Trim() : expr;
+
+        if (Enum.TryParse<DayOfWeek>(dayName, true, out var targetDay))
+        {
+            int currentDay = (int)referenceDate.DayOfWeek;
+            int target = (int)targetDay;
+            int daysToAdd = (target - currentDay + 7) % 7;
+
+            if (isNext)
+            {
+                daysToAdd += 7;
+            }
+            else if (daysToAdd == 0)
+            {
+                // By convention, if today is Friday and request is "by Friday", it's today
+                daysToAdd = 0;
+            }
+
+            return referenceDate.AddDays(daysToAdd).ToString("yyyy-MM-dd");
+        }
+
+        return null;
+    }
+
+    private static string NormalizeUnit(string unit)
+    {
+        string u = unit.Trim().ToLowerInvariant();
+        return u switch
+        {
+            "kg" or "kgs" or "kilogram" or "kilograms" or "kilo" or "kilos" => "kg",
+            "g" or "gm" or "gms" or "gram" or "grams" => "g",
+            "l" or "ltr" or "litre" or "litres" or "liter" or "liters" => "Litre",
+            "ml" => "ml",
+            "pkt" or "pkts" or "packet" or "packets" or "pack" or "packs" => "packets",
+            "box" or "boxes" => "box",
+            "crate" or "crates" => "crate",
+            "bottle" or "bottles" => "bottles",
+            "piece" or "pieces" or "pcs" or "pc" => "pieces",
+            _ => unit
+        };
+    }
+
+    private class GeminiProcurementExtractionResponse
+    {
+        public string? OutletName { get; set; }
+        public string? RequiredDate { get; set; }
+        public List<GeminiProcurementItemExtraction>? Items { get; set; }
+    }
+
+    private class GeminiProcurementItemExtraction
+    {
+        public string? ProductName { get; set; }
+        public decimal Quantity { get; set; }
+        public string? Unit { get; set; }
+    }
 }
 
 

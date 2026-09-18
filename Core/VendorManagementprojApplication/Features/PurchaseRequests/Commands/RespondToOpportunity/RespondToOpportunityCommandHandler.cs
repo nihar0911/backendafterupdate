@@ -126,6 +126,20 @@ public class RespondToOpportunityCommandHandler
             await _responseRepository.UpdateAsync(existingResponse);
         }
 
+        if (isReject)
+        {
+            var allResponses = await _responseRepository.GetByRequestIdAsync(pr.RequestID);
+            bool hasPendingOrAccepted = allResponses.Any(r =>
+                string.Equals(r.Status, "Pending", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(r.Status, "Accepted", StringComparison.OrdinalIgnoreCase));
+
+            if (!hasPendingOrAccepted)
+            {
+                pr.Status = "Rejected";
+                await _purchaseRequestRepository.UpdateAsync(pr.RequestID, pr);
+            }
+        }
+
         // Send notifications to the assigned Outlet Manager and PR Creator
         try
         {

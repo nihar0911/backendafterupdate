@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace VendorManagementprojApplication.DTOs;
@@ -14,6 +14,10 @@ public class PurchaseRequestDto
     public DateTime RequestDate { get; set; }
 
     public string Status { get; set; } = string.Empty;
+
+    public string? VendorName { get; set; }
+
+    public string? RejectionReason { get; set; }
 
     public List<PurchaseRequestItemDto> Items { get; set; } = new();
 }

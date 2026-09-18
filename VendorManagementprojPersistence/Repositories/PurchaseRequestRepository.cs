@@ -59,6 +59,9 @@ public class PurchaseRequestRepository : IPurchaseRequestRepository
         existingRequest.OutletID =
             purchaseRequest.OutletID;
 
+        existingRequest.Status =
+            purchaseRequest.Status;
+
         await _context.SaveChangesAsync();
 
         return existingRequest;

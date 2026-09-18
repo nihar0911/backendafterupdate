@@ -11,5 +11,9 @@ public interface IGeminiAiService
         int purchaseOrderID,
         bool isSingleProduct,
         List<ProductSpoilageAdviceDto> products);
+
+    Task<ParsedProcurementPromptDto> ParseProcurementPromptAsync(
+        string prompt,
+        DateTime referenceDate);
 }
 

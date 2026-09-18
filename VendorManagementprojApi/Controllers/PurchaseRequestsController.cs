@@ -14,6 +14,7 @@ using VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetAllPu
 using VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 using VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetPurchaseRequestItems;
 using VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetVendorProcurementOpportunities;
+using VendorManagementprojApplication.Features.PurchaseRequests.Queries.ParseVoiceProcurementOrder;
 
 namespace VendorManagementprojApi.Controllers;
 
@@ -27,6 +28,30 @@ public class PurchaseRequestsController : ControllerBase
     public PurchaseRequestsController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpPost("ai-parse-order")]
+    [Authorize(Roles = "Admin,Purchase Manager")]
+    public async Task<IActionResult> AiParseOrder([FromBody] ParseVoiceProcurementOrderQuery query)
+    {
+        try
+        {
+            if (query == null || string.IsNullOrWhiteSpace(query.Prompt))
+            {
+                return BadRequest(new { message = "Prompt is required." });
+            }
+
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpGet("vendor/opportunities")]
