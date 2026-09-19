@@ -32,7 +32,7 @@ public class PurchaseRequestsController : ControllerBase
 
     [HttpPost("ai-parse-order")]
     [Authorize(Roles = "Admin,Purchase Manager")]
-    public async Task<IActionResult> AiParseOrder([FromBody] ParseVoiceProcurementOrderQuery query)
+    public async Task<IActionResult> AiParseOrder([FromBody] ParseVoiceProcurementOrderQuery  query)
     {
         try
         {

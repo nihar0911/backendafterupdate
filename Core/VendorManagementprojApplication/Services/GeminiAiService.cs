@@ -650,7 +650,8 @@ public class GeminiAiService : IGeminiAiService
             "bottle" or "bottles" => "bottles",
             "piece" or "pieces" or "pcs" or "pc" => "pieces",
             _ => unit
-        };
+        }
+        ;
     }
 
     private class GeminiProcurementExtractionResponse
