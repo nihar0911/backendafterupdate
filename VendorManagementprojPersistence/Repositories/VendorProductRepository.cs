@@ -64,22 +64,20 @@ public class VendorProductRepository : IVendorProductRepository
             .ToListAsync();
     }
     public async Task<bool> IsVendorEligibleAsync(
-    int vendorID,
-    int productID,
-    int outletID)
+        int vendorID,
+        int productID,
+        int outletID)
     {
         var today = DateTime.Now;
 
-        return await _context.ContractVendorAllocations
-            .AnyAsync(a =>
-                a.VendorID == vendorID &&
-                a.Status == "Active" &&
-                a.Contract != null &&
-                a.Contract.ProductID == productID &&
-                a.Contract.OutletID == outletID &&
-                a.Contract.Status == "Active" &&
-                a.Contract.StartDate <= today &&
-                a.Contract.EndDate >= today);
+        return await _context.Contracts
+            .AnyAsync(c =>
+                c.OutletID == outletID &&
+                (c.VendorID == vendorID || c.VendorAllocations.Any(a => a.VendorID == vendorID && a.Status == "Active")) &&
+                c.Status == "Active" &&
+                c.StartDate <= today &&
+                c.EndDate >= today &&
+                (c.ContractProducts.Any(cp => cp.ProductID == productID) || c.ProductID == productID));
     }
     public async Task<VendorProduct> AddAsync(
         VendorProduct vendorProduct)

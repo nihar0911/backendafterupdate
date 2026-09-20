@@ -53,4 +53,12 @@ public class VendorRecommendationDto
     public DateTime? ContractEndDate { get; set; }
 
     public string? ContractStatus { get; set; }
+
+    public decimal? ContractQuantity { get; set; }
+
+    public decimal? PurchasedQuantity { get; set; }
+
+    public decimal? VarianceQuantity => PurchasedQuantity.HasValue && ContractQuantity.HasValue
+        ? PurchasedQuantity.Value - ContractQuantity.Value
+        : null;
 }

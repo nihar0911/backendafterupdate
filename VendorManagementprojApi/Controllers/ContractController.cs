@@ -6,12 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using VendorManagementprojApplication.DTOs;
 using VendorManagementprojApplication.Features.Contracts.Commands.CreateContract;
 using VendorManagementprojApplication.Features.Contracts.Commands.CreateContractFromQuotation;
+using VendorManagementprojApplication.Features.Contracts.Commands.EndContract;
 using VendorManagementprojApplication.Features.Contracts.Commands.ResetContract;
 using VendorManagementprojApplication.Features.Contracts.Commands.UpdateContract;
 using VendorManagementprojApplication.Features.Contracts.Queries.GetAllContracts;
 using VendorManagementprojApplication.Features.Contracts.Queries.GetContractById;
 using VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOrganizationId;
 using VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOutlet;
+using VendorManagementprojApplication.Features.Contracts.Queries.GetActiveContractsForProduct;
+using VendorManagementprojApplication.Features.Contracts.Queries.GetContractEligibleVendors;
 
 namespace VendorManagementprojApi.Controllers;
 
@@ -74,6 +77,33 @@ public class ContractController : ControllerBase
     {
         var result = await _mediator.Send(new GetContractsByOutletQuery(outletID));
         return Ok(result);
+    }
+
+    [HttpGet("active/{outletID:int}/{productID:int}")]
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager,Purchase Manager")]
+    public async Task<IActionResult> GetActiveContractsForProduct(int outletID, int productID)
+    {
+        var result = await _mediator.Send(new GetActiveContractsForProductQuery(outletID, productID));
+        return Ok(result);
+    }
+
+    [HttpGet("eligible-vendors/{outletID:int}/{productID:int}")]
+    [Authorize(Roles = "Admin,Organization Manager,Outlet Manager")]
+    public async Task<IActionResult> GetEligibleVendorsForContract(int outletID, int productID)
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetContractEligibleVendorsQuery(outletID, productID));
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
     }
 
     [HttpPost]
@@ -180,6 +210,52 @@ public class ContractController : ControllerBase
         catch (InvalidOperationException ex)
         {
             return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{contractID:int}/end")]
+    [Authorize(Roles = "Admin,Organization Manager")]
+    public async Task<IActionResult> End(int contractID)
+    {
+        try
+        {
+            var result = await _mediator.Send(new EndContractCommand { ContractID = contractID });
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("end")]
+    [Authorize(Roles = "Admin,Organization Manager")]
+    public async Task<IActionResult> EndWithBody([FromBody] EndContractCommand command)
+    {
+        try
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
         }
     }
 }

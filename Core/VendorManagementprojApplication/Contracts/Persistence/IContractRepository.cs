@@ -1,4 +1,4 @@
-﻿using VendorManagementprojDomain.Entities;
+using VendorManagementprojDomain.Entities;
 
 namespace VendorManagementprojApplication.Contracts.Persistence;
 
@@ -23,4 +23,10 @@ public interface IContractRepository
         int vendorID,
         int productID,
         int outletID);
+
+    Task<List<Contract>> GetActiveContractsByProductAndOutletAsync(
+        int outletID,
+        int productID);
+
+    Task<List<Contract>> AddBatchAsync(List<Contract> contracts);
 }

@@ -1,18 +1,23 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
 using VendorManagementprojDomain.Entities;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOutlet;
+namespace VendorManagementprojApplication.Features.Contracts.Queries.GetActiveContractsForProduct;
 
-public class GetContractsByOutletQueryHandler : IRequestHandler<GetContractsByOutletQuery, GetContractsByOutletResponse>
+public class GetActiveContractsForProductQueryHandler : IRequestHandler<GetActiveContractsForProductQuery, GetActiveContractsForProductResponse>
 {
     private readonly IContractRepository _contractRepository;
     private readonly IOutletRepository _outletRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public GetContractsByOutletQueryHandler(
+    public GetActiveContractsForProductQueryHandler(
         IContractRepository contractRepository,
         IOutletRepository outletRepository,
         ICurrentUserService currentUserService)
@@ -22,44 +27,48 @@ public class GetContractsByOutletQueryHandler : IRequestHandler<GetContractsByOu
         _currentUserService = currentUserService;
     }
 
-    public async Task<GetContractsByOutletResponse> Handle(GetContractsByOutletQuery request, CancellationToken cancellationToken)
+    public async Task<GetActiveContractsForProductResponse> Handle(GetActiveContractsForProductQuery request, CancellationToken cancellationToken)
     {
         if (_currentUserService.IsOrganizationManager)
         {
             if (!_currentUserService.OrganizationID.HasValue)
             {
-                return new GetContractsByOutletResponse { Contracts = new List<ContractDto>() };
+                return new GetActiveContractsForProductResponse { Contracts = new List<ContractDto>() };
             }
             var targetOutlet = await _outletRepository.GetByIdAsync(request.OutletID);
             if (targetOutlet == null || targetOutlet.OrganizationID != _currentUserService.OrganizationID.Value)
             {
-                return new GetContractsByOutletResponse { Contracts = new List<ContractDto>() };
+                return new GetActiveContractsForProductResponse { Contracts = new List<ContractDto>() };
             }
         }
-        else if (_currentUserService.IsOutletManager)
+        else if (_currentUserService.IsOutletManager || _currentUserService.IsPurchaseManager)
         {
-            if (!_currentUserService.OutletID.HasValue || request.OutletID != _currentUserService.OutletID.Value)
+            if (_currentUserService.OutletID.HasValue && request.OutletID != _currentUserService.OutletID.Value)
             {
-                return new GetContractsByOutletResponse { Contracts = new List<ContractDto>() };
+                return new GetActiveContractsForProductResponse { Contracts = new List<ContractDto>() };
             }
         }
 
-        var allContracts = await _contractRepository.GetAllAsync();
-        var outletContracts = allContracts.Where(c => c.OutletID == request.OutletID).Select(MapToDto).ToList();
+        // Phase 2D: Retrieve ALL active contracts matching OutletID + ProductID without filtering on remaining quantity
+        var contracts = await _contractRepository.GetActiveContractsByProductAndOutletAsync(request.OutletID, request.ProductID);
 
-        return new GetContractsByOutletResponse
+        var contractDtos = contracts.Select(c => MapToDto(c, request.ProductID)).ToList();
+
+        return new GetActiveContractsForProductResponse
         {
-            Contracts = outletContracts
+            Contracts = contractDtos
         };
     }
 
-    private static ContractDto MapToDto(Contract contract)
+    private static ContractDto MapToDto(Contract contract, int targetProductId)
     {
         var firstAlloc = contract.VendorAllocations?.FirstOrDefault();
-        var firstCp = contract.ContractProducts?.FirstOrDefault();
-        int resolvedProductId = firstCp?.ProductID ?? contract.ProductID;
-        string resolvedProductName = firstCp?.Product?.ProductName ?? contract.Product?.ProductName ?? $"Product #{resolvedProductId}";
-        string resolvedUnit = firstCp?.Product?.Unit ?? contract.Product?.Unit ?? "Kg";
+        var targetCp = contract.ContractProducts?.FirstOrDefault(cp => cp.ProductID == targetProductId)
+                       ?? contract.ContractProducts?.FirstOrDefault();
+
+        int resolvedProductId = targetCp?.ProductID ?? contract.ProductID;
+        string resolvedProductName = targetCp?.Product?.ProductName ?? contract.Product?.ProductName ?? $"Product #{resolvedProductId}";
+        string resolvedUnit = targetCp?.Product?.Unit ?? contract.Product?.Unit ?? "Kg";
 
         int? vendorId = contract.VendorID ?? firstAlloc?.VendorID;
         string vendorName = contract.Vendor?.VendorName ?? firstAlloc?.Vendor?.VendorName ?? "Vendor";

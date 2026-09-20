@@ -97,11 +97,146 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
 
         foreach (var item in items)
         {
-            var activeVendorProducts =
-                await _vendorProductRepository.GetEligibleVendorsForProductAsync(
-                    item.ProductID,
-                    purchaseRequest.OutletID);
+            // =========================================================================
+            // STEP 1: Determine whether active contracts exist for Outlet + Product
+            // =========================================================================
+            var activeContracts = await _contractRepository.GetActiveContractsByProductAndOutletAsync(
+                purchaseRequest.OutletID,
+                item.ProductID);
 
+            var activeVendorProducts = await _vendorProductRepository.GetEligibleVendorsForProductAsync(
+                item.ProductID,
+                purchaseRequest.OutletID);
+
+            // =========================================================================
+            // CASE A: Active Contracts Found (YES) -> Return contracted vendors
+            // =========================================================================
+            if (activeContracts.Count > 0)
+            {
+                var contractedRecommendations = new List<VendorRecommendationDto>();
+                decimal minContractPrice = decimal.MaxValue;
+
+                foreach (var contract in activeContracts)
+                {
+                    int vendorId = contract.VendorID ?? contract.VendorAllocations.FirstOrDefault()?.VendorID ?? 0;
+                    var cp = contract.ContractProducts.FirstOrDefault(p => p.ProductID == item.ProductID);
+                    var vp = activeVendorProducts.FirstOrDefault(v => v.VendorID == vendorId);
+                    decimal price = cp?.UnitPrice ?? vp?.UnitPrice ?? 0m;
+                    if (price > 0 && price < minContractPrice)
+                    {
+                        minContractPrice = price;
+                    }
+                }
+                if (minContractPrice == decimal.MaxValue) minContractPrice = 0m;
+
+                foreach (var contract in activeContracts)
+                {
+                    int vendorId = contract.VendorID ?? contract.VendorAllocations.FirstOrDefault()?.VendorID ?? 0;
+                    string vendorName = contract.Vendor?.VendorName 
+                        ?? (allVendors.TryGetValue(vendorId, out var name) ? name : $"Vendor #{vendorId}");
+
+                    var cp = contract.ContractProducts.FirstOrDefault(p => p.ProductID == item.ProductID);
+                    var vp = activeVendorProducts.FirstOrDefault(v => v.VendorID == vendorId);
+
+                    decimal unitPrice = cp?.UnitPrice ?? vp?.UnitPrice ?? 0m;
+                    int deliveryDays = vp?.EstimatedDeliveryDays ?? 1;
+
+                    decimal contractQty = cp?.ContractQuantity ?? contract.TotalQuantity;
+                    decimal purchasedQty = cp?.PurchasedQuantity ?? contract.UsedQuantity;
+                    decimal remainingQty = Math.Max(0m, contractQty - purchasedQty);
+
+                    var feedbacks = await _vendorFeedbackRepository.GetByVendorIdAsync(vendorId);
+                    int feedbackCount = feedbacks?.Count ?? 0;
+
+                    decimal avgRating = feedbackCount > 0
+                        ? Math.Round(feedbacks!.Average(f => f.Rating), 1)
+                        : 0m;
+                    decimal avgQuality = feedbackCount > 0
+                        ? Math.Round(feedbacks!.Average(f => f.ProductQualityRating), 1)
+                        : 0m;
+                    decimal avgDelivery = feedbackCount > 0
+                        ? Math.Round(feedbacks!.Average(f => f.DeliveryRating), 1)
+                        : 0m;
+
+                    decimal qualityScore = feedbackCount > 0 ? (avgQuality / 5.0m) * 100m : settings.NeutralScoreForNewVendors;
+                    decimal deliveryScore = feedbackCount > 0 ? (avgDelivery / 5.0m) * 100m : settings.NeutralScoreForNewVendors;
+                    decimal priceScore = (unitPrice > 0 && minContractPrice > 0)
+                        ? Math.Round((minContractPrice / unitPrice) * 100m, 1)
+                        : settings.NeutralScoreForNewVendors;
+                    decimal reliabilityBonus = Math.Min(settings.ReliabilityWeight, feedbackCount * settings.ReliabilityPointsPerReview);
+
+                    decimal overallCompositeScore = Math.Round(
+                        (qualityScore * (settings.QualityWeight / 100m)) +
+                        (deliveryScore * (settings.DeliveryWeight / 100m)) +
+                        (priceScore * (settings.PriceWeight / 100m)) +
+                        reliabilityBonus,
+                        1
+                    );
+
+                    contractedRecommendations.Add(new VendorRecommendationDto
+                    {
+                        VendorID = vendorId,
+                        VendorName = vendorName,
+                        ProductID = item.ProductID,
+                        ProductName = item.Product?.ProductName ?? cp?.Product?.ProductName ?? $"Product #{item.ProductID}",
+                        UnitPrice = unitPrice,
+                        EstimatedDeliveryDays = deliveryDays,
+                        OverallScore = overallCompositeScore,
+                        AverageRating = avgRating,
+                        AverageQualityRating = avgQuality,
+                        AverageDeliveryRating = avgDelivery,
+                        TotalFeedbackCount = feedbackCount,
+                        DeliveryCompletionPercentage = deliveryScore,
+                        AverageSpoilagePercentage = 0m,
+                        HasActiveContract = true,
+                        ContractID = contract.ContractID,
+                        ContractQuantity = contractQty,
+                        PurchasedQuantity = purchasedQty,
+                        AllocatedQuantity = contractQty,
+                        UsedQuantity = purchasedQty,
+                        RemainingQuantity = remainingQty,
+                        ContractTotalQuantity = contractQty,
+                        ContractStartDate = contract.StartDate,
+                        ContractEndDate = contract.EndDate,
+                        ContractStatus = contract.Status,
+                        Recommendation = string.Empty,
+                        SmartBadge = string.Empty
+                    });
+                }
+
+                var rankedContractVendors = contractedRecommendations
+                    .OrderByDescending(r => r.OverallScore)
+                    .ThenBy(r => r.UnitPrice)
+                    .ThenBy(r => r.EstimatedDeliveryDays)
+                    .ThenBy(r => r.VendorID)
+                    .ToList();
+
+                for (int i = 0; i < rankedContractVendors.Count; i++)
+                {
+                    var rec = rankedContractVendors[i];
+                    rec.Rank = i + 1;
+
+                    if (i == 0)
+                    {
+                        rec.SmartBadge = "Top Recommended";
+                        rec.Recommendation = rec.TotalFeedbackCount > 0
+                            ? $"Top Recommended: Active contract with {rec.VendorName} (Rating: {rec.AverageRating:0.0}, Unit Price: Rs. {rec.UnitPrice:N2})."
+                            : $"Top Recommended: Priority active contract with {rec.VendorName} at Rs. {rec.UnitPrice:N2}.";
+                    }
+                    else
+                    {
+                        rec.SmartBadge = "Active Contract";
+                        rec.Recommendation = "Active Contract";
+                    }
+                }
+
+                recommendations.AddRange(rankedContractVendors);
+                continue;
+            }
+
+            // =========================================================================
+            // CASE B: No Contract Fallback (NO) -> Existing recommendation system
+            // =========================================================================
             if (!activeVendorProducts.Any())
                 continue;
 
@@ -114,43 +249,6 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                 string vendorName = allVendors.TryGetValue(vendorProduct.VendorID, out var name)
                     ? name
                     : $"Vendor #{vendorProduct.VendorID}";
-
-                var allocations =
-                    await _contractRepository.GetVendorAllocationsAsync(
-                        vendorProduct.VendorID,
-                        item.ProductID,
-                        purchaseRequest.OutletID);
-
-                // Group 1 qualification: Active contract with remaining capacity > 0
-                var usableAllocations = allocations
-                    .Where(a => (a.AllocatedQuantity - a.UsedQuantity) > 0)
-                    .ToList();
-
-                bool hasActiveUsableContract = usableAllocations.Count > 0;
-                var primaryAllocation = usableAllocations.FirstOrDefault() ?? allocations.FirstOrDefault();
-
-                decimal allocatedQty = 0m;
-                decimal usedQty = 0m;
-                decimal remainingQty = 0m;
-                decimal allocationPercentage = 0m;
-                int? contractId = null;
-                decimal contractTotalQuantity = 0m;
-                DateTime? contractStartDate = null;
-                DateTime? contractEndDate = null;
-                string? contractStatus = null;
-
-                if (primaryAllocation != null)
-                {
-                    contractId = primaryAllocation.ContractID;
-                    allocationPercentage = primaryAllocation.AllocationPercentage;
-                    allocatedQty = primaryAllocation.AllocatedQuantity;
-                    usedQty = primaryAllocation.UsedQuantity;
-                    remainingQty = Math.Max(0m, primaryAllocation.AllocatedQuantity - primaryAllocation.UsedQuantity);
-                    contractTotalQuantity = primaryAllocation.Contract?.TotalQuantity ?? 0m;
-                    contractStartDate = primaryAllocation.Contract?.StartDate;
-                    contractEndDate = primaryAllocation.Contract?.EndDate;
-                    contractStatus = primaryAllocation.Contract?.Status;
-                }
 
                 // Retrieve historical reviews and feedback for this vendor
                 var feedbacks = await _vendorFeedbackRepository.GetByVendorIdAsync(vendorProduct.VendorID);
@@ -167,18 +265,11 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                     : 0m;
 
                 // Composite Multi-Factor Score (0 - 100):
-                // Quality: 5.0 -> 100 pts. If no reviews, neutral baseline.
                 decimal qualityScore = feedbackCount > 0 ? (avgQuality / 5.0m) * 100m : settings.NeutralScoreForNewVendors;
-
-                // Delivery: 5.0 -> 100 pts. If no reviews, neutral baseline.
                 decimal deliveryScore = feedbackCount > 0 ? (avgDelivery / 5.0m) * 100m : settings.NeutralScoreForNewVendors;
-
-                // Price Competitiveness: lowest price = 100 pts
                 decimal priceScore = (vendorProduct.UnitPrice > 0 && minPrice > 0)
                     ? Math.Round((minPrice / vendorProduct.UnitPrice) * 100m, 1)
                     : settings.NeutralScoreForNewVendors;
-
-                // Volume & Reliability Bonus: established reviews give points up to ReliabilityWeight
                 decimal reliabilityBonus = Math.Min(settings.ReliabilityWeight, feedbackCount * settings.ReliabilityPointsPerReview);
 
                 decimal overallCompositeScore = Math.Round(
@@ -207,41 +298,17 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                         AverageSpoilagePercentage = 0m,
                         Recommendation = string.Empty,
                         SmartBadge = string.Empty,
-                        HasActiveContract = hasActiveUsableContract,
-                        ContractID = contractId,
-                        AllocationPercentage = allocationPercentage,
-                        AllocatedQuantity = allocatedQty,
-                        UsedQuantity = usedQty,
-                        RemainingQuantity = remainingQty,
-                        ContractTotalQuantity = contractTotalQuantity,
-                        ContractStartDate = contractStartDate,
-                        ContractEndDate = contractEndDate,
-                        ContractStatus = contractStatus
+                        HasActiveContract = false,
+                        ContractID = null
                     });
             }
 
             // AUTHORITATIVE RECOMMENDATION RANKING:
-            // 1. Group 1 (Active Contract with RemainingQuantity > 0) strictly above Group 2 (if PrioritizeActiveContracts enabled)
-            // 2. Highest OverallCompositeScore (Quality + Delivery + Price + Volume)
-            // 3. Lowest Unit Price
-            // 4. Lowest EstimatedDeliveryDays
-            // 5. VendorID as deterministic tie-breaker
             var rankedQuery = productRecommendations.AsEnumerable();
-            if (settings.PrioritizeActiveContracts)
-            {    //for contracts
-                rankedQuery = rankedQuery.OrderByDescending(r => r.HasActiveContract && r.RemainingQuantity > 0)
-                    .ThenByDescending(r => r.OverallScore)
-                    .ThenBy(r => r.UnitPrice)
-                    .ThenBy(r => r.EstimatedDeliveryDays)
-                    .ThenBy(r => r.VendorID);
-            }
-            else
-            {
-                rankedQuery = rankedQuery.OrderByDescending(r => r.OverallScore)
-                    .ThenBy(r => r.UnitPrice)
-                    .ThenBy(r => r.EstimatedDeliveryDays)
-                    .ThenBy(r => r.VendorID);
-            }
+            rankedQuery = rankedQuery.OrderByDescending(r => r.OverallScore)
+                .ThenBy(r => r.UnitPrice)
+                .ThenBy(r => r.EstimatedDeliveryDays)
+                .ThenBy(r => r.VendorID);
             productRecommendations = rankedQuery.ToList();
 
             for (int i = 0; i < productRecommendations.Count; i++)
@@ -268,32 +335,17 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                 }
 
                 // AI / Smart Recommendation Rationale
-                if (rec.HasActiveContract && rec.RemainingQuantity > 0)
+                if (rec.UnitPrice == minPrice)
                 {
-                    rec.Recommendation = (i == 0)
-                        ? (rec.TotalFeedbackCount > 0
-                            ? $"Top Recommended: Active contract with {rec.RemainingQuantity:N0} remaining capacity & {rec.AverageRating:0.0} quality score across {rec.TotalFeedbackCount} verified orders."
-                            : $"Recommended: Priority active contract with {rec.RemainingQuantity:N0} remaining allocation at Rs. {rec.UnitPrice:N2}.")
-                        : "Active Contract";
+                    rec.Recommendation = rec.TotalFeedbackCount > 0
+                        ? $"Alternative — Best Price: Lowest unit price (Rs. {rec.UnitPrice:N2}) with {rec.AverageRating:0.0} customer rating."
+                        : "Alternative — Best Price";
                 }
                 else
                 {
-                    if (rec.UnitPrice == minPrice)
-                    {
-                        rec.Recommendation = rec.TotalFeedbackCount > 0
-                            ? $"Alternative — Best Price: Lowest unit price (Rs. {rec.UnitPrice:N2}) with {rec.AverageRating:0.0} customer rating."
-                            : "Alternative — Best Price";
-                    }
-                    else if (rec.ContractID.HasValue && rec.RemainingQuantity <= 0)
-                    {
-                        rec.Recommendation = "Alternative (Capacity Depleted)";
-                    }
-                    else
-                    {
-                        rec.Recommendation = rec.TotalFeedbackCount > 0 && rec.AverageQualityRating >= settings.HighQualityRationaleThreshold
-                            ? $"Alternative: High quality rating ({rec.AverageQualityRating:0.0}/5) across {rec.TotalFeedbackCount} past deliveries."
-                            : "Alternative";
-                    }
+                    rec.Recommendation = rec.TotalFeedbackCount > 0 && rec.AverageQualityRating >= settings.HighQualityRationaleThreshold
+                        ? $"Alternative: High quality rating ({rec.AverageQualityRating:0.0}/5) across {rec.TotalFeedbackCount} past deliveries."
+                        : "Alternative";
                 }
             }
 

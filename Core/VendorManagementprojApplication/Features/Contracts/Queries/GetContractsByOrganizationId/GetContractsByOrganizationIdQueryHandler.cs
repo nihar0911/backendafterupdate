@@ -41,34 +41,66 @@ public class GetContractsByOrganizationIdQueryHandler : IRequestHandler<GetContr
         var allContracts = await _contractRepository.GetAllAsync();
         var orgContracts = allContracts.Where(c => orgOutletIds.Contains(c.OutletID)).ToList();
 
-        var dtos = orgContracts.Select(c => new ContractDto
+        var dtos = orgContracts.Select(c =>
         {
-            ContractID = c.ContractID,
-            OutletID = c.OutletID,
-            OutletName = c.Outlet?.OutletName ?? $"Outlet #{c.OutletID}",
-            OrganizationID = c.Outlet?.OrganizationID ?? request.OrganizationID,
-            OrganizationName = c.Outlet?.Organization?.OrganizationName ?? "Organization",
-            ProductID = c.ProductID,
-            ProductName = c.Product?.ProductName ?? $"Product #{c.ProductID}",
-            Unit = c.Product?.Unit ?? "Kg",
-            TotalQuantity = c.TotalQuantity,
-            UsedQuantity = c.UsedQuantity,
-            StartDate = c.StartDate,
-            EndDate = c.EndDate,
-            PaymentMethod = c.PaymentMethod,
-            Status = c.Status,
-            VendorID = c.VendorAllocations.FirstOrDefault()?.VendorID,
-            VendorName = c.VendorAllocations.FirstOrDefault()?.Vendor?.VendorName ?? "Vendor",
-            Allocations = c.VendorAllocations.Select(a => new ContractVendorAllocationDto
+            var firstCp = c.ContractProducts?.FirstOrDefault();
+            int resolvedProductId = firstCp?.ProductID ?? c.ProductID;
+            string resolvedProductName = firstCp?.Product?.ProductName ?? c.Product?.ProductName ?? $"Product #{resolvedProductId}";
+            string resolvedUnit = firstCp?.Product?.Unit ?? c.Product?.Unit ?? "Kg";
+
+            int? vendorId = c.VendorID ?? c.VendorAllocations.FirstOrDefault()?.VendorID;
+            string vendorName = c.Vendor?.VendorName ?? c.VendorAllocations.FirstOrDefault()?.Vendor?.VendorName ?? "Vendor";
+
+            decimal totalQty = c.ContractProducts != null && c.ContractProducts.Count > 0
+                ? c.ContractProducts.Sum(cp => cp.ContractQuantity)
+                : c.TotalQuantity;
+
+            decimal usedQty = c.ContractProducts != null && c.ContractProducts.Count > 0
+                ? c.ContractProducts.Sum(cp => cp.PurchasedQuantity)
+                : c.UsedQuantity;
+
+            var products = c.ContractProducts?.Select(cp => new ContractProductDto
             {
-                ContractVendorAllocationID = a.ContractVendorAllocationID,
-                VendorID = a.VendorID,
-                VendorName = a.Vendor?.VendorName ?? $"Vendor #{a.VendorID}",
-                AllocationPercentage = a.AllocationPercentage,
-                AllocatedQuantity = a.AllocatedQuantity,
-                UsedQuantity = a.UsedQuantity,
-                Status = a.Status
-            }).ToList()
+                ContractProductID = cp.ContractProductID,
+                ContractID = cp.ContractID,
+                ProductID = cp.ProductID,
+                ProductName = cp.Product?.ProductName ?? $"Product #{cp.ProductID}",
+                Unit = cp.Product?.Unit ?? "Kg",
+                ContractQuantity = cp.ContractQuantity,
+                PurchasedQuantity = cp.PurchasedQuantity,
+                UnitPrice = cp.UnitPrice
+            }).ToList() ?? new List<ContractProductDto>();
+
+            return new ContractDto
+            {
+                ContractID = c.ContractID,
+                OutletID = c.OutletID,
+                OutletName = c.Outlet?.OutletName ?? $"Outlet #{c.OutletID}",
+                OrganizationID = c.Outlet?.OrganizationID ?? request.OrganizationID,
+                OrganizationName = c.Outlet?.Organization?.OrganizationName ?? "Organization",
+                ProductID = resolvedProductId,
+                ProductName = resolvedProductName,
+                Unit = resolvedUnit,
+                TotalQuantity = totalQty,
+                UsedQuantity = usedQty,
+                StartDate = c.StartDate,
+                EndDate = c.EndDate,
+                PaymentMethod = c.PaymentMethod,
+                Status = c.Status,
+                VendorID = vendorId,
+                VendorName = vendorName,
+                Products = products,
+                Allocations = c.VendorAllocations.Select(a => new ContractVendorAllocationDto
+                {
+                    ContractVendorAllocationID = a.ContractVendorAllocationID,
+                    VendorID = a.VendorID,
+                    VendorName = a.Vendor?.VendorName ?? $"Vendor #{a.VendorID}",
+                    AllocationPercentage = a.AllocationPercentage,
+                    AllocatedQuantity = a.AllocatedQuantity,
+                    UsedQuantity = a.UsedQuantity,
+                    Status = a.Status
+                }).ToList()
+            };
         }).ToList();
 
         return new GetContractsByOrganizationIdResponse

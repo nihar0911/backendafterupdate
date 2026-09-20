@@ -41,6 +41,8 @@ public class VendorManagementDbContext : DbContext
 
     public DbSet<Contract> Contracts { get; set; }
 
+    public DbSet<ContractProduct> ContractProducts { get; set; }
+
     public DbSet<ContractVendorAllocation> ContractVendorAllocations { get; set; }
 
     public DbSet<DeliveryRecord> DeliveryRecords { get; set; }
@@ -501,10 +503,55 @@ public class VendorManagementDbContext : DbContext
                 .HasForeignKey(e => e.OutletID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            entity.HasOne(e => e.Vendor)
+                .WithMany()
+                .HasForeignKey(e => e.VendorID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasOne(e => e.Product)
                 .WithMany()
                 .HasForeignKey(e => e.ProductID)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.ContractProducts)
+                .WithOne(cp => cp.Contract)
+                .HasForeignKey(cp => cp.ContractID)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ContractProduct>(entity =>
+        {
+            entity.ToTable("Contract_Products");
+
+            entity.HasKey(e => e.ContractProductID);
+
+            entity.Property(e => e.ContractQuantity)
+                .HasColumnType("decimal(12,2)")
+                .IsRequired();
+
+            entity.Property(e => e.PurchasedQuantity)
+                .HasColumnType("decimal(12,2)")
+                .IsRequired();
+
+            entity.Property(e => e.UnitPrice)
+                .HasColumnType("decimal(10,2)");
+
+            entity.HasOne(e => e.Contract)
+                .WithMany(c => c.ContractProducts)
+                .HasForeignKey(e => e.ContractID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Product)
+                .WithMany()
+                .HasForeignKey(e => e.ProductID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => new
+            {
+                e.ContractID,
+                e.ProductID
+            })
+            .IsUnique();
         });
 
         modelBuilder.Entity<ContractVendorAllocation>(entity =>

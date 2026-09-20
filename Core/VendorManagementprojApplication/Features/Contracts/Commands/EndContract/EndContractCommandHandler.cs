@@ -1,18 +1,23 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using MediatR;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
 using VendorManagementprojDomain.Entities;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOutlet;
+namespace VendorManagementprojApplication.Features.Contracts.Commands.EndContract;
 
-public class GetContractsByOutletQueryHandler : IRequestHandler<GetContractsByOutletQuery, GetContractsByOutletResponse>
+public class EndContractCommandHandler : IRequestHandler<EndContractCommand, EndContractResponse>
 {
     private readonly IContractRepository _contractRepository;
     private readonly IOutletRepository _outletRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public GetContractsByOutletQueryHandler(
+    public EndContractCommandHandler(
         IContractRepository contractRepository,
         IOutletRepository outletRepository,
         ICurrentUserService currentUserService)
@@ -22,47 +27,78 @@ public class GetContractsByOutletQueryHandler : IRequestHandler<GetContractsByOu
         _currentUserService = currentUserService;
     }
 
-    public async Task<GetContractsByOutletResponse> Handle(GetContractsByOutletQuery request, CancellationToken cancellationToken)
+    public async Task<EndContractResponse> Handle(
+        EndContractCommand request,
+        CancellationToken cancellationToken)
     {
+        if (request.ContractID <= 0)
+            throw new InvalidOperationException("A valid contract ID is required.");
+
+        var contract = await _contractRepository.GetByIdAsync(request.ContractID);
+        if (contract == null)
+            throw new KeyNotFoundException($"Contract #{request.ContractID} does not exist.");
+
+        // Authorization checks
+        if (!_currentUserService.IsAdmin && !_currentUserService.IsOrganizationManager)
+        {
+            throw new UnauthorizedAccessException("Only an Organization Manager or Admin is authorized to end contracts.");
+        }
+
         if (_currentUserService.IsOrganizationManager)
         {
             if (!_currentUserService.OrganizationID.HasValue)
             {
-                return new GetContractsByOutletResponse { Contracts = new List<ContractDto>() };
+                throw new UnauthorizedAccessException("Organization context is missing.");
             }
-            var targetOutlet = await _outletRepository.GetByIdAsync(request.OutletID);
+
+            var targetOutlet = contract.Outlet ?? await _outletRepository.GetByIdAsync(contract.OutletID);
             if (targetOutlet == null || targetOutlet.OrganizationID != _currentUserService.OrganizationID.Value)
             {
-                return new GetContractsByOutletResponse { Contracts = new List<ContractDto>() };
+                throw new UnauthorizedAccessException("You cannot end contracts for an outlet outside your organization.");
             }
         }
-        else if (_currentUserService.IsOutletManager)
+
+        // Prevent ending an already ended or inactive contract
+        if (string.Equals(contract.Status, "Ended", StringComparison.OrdinalIgnoreCase))
         {
-            if (!_currentUserService.OutletID.HasValue || request.OutletID != _currentUserService.OutletID.Value)
+            throw new InvalidOperationException("Contract has already been ended.");
+        }
+
+        // Update status to Ended while strictly preserving all history, quantities, and products
+        contract.Status = "Ended";
+
+        if (contract.VendorAllocations != null)
+        {
+            foreach (var alloc in contract.VendorAllocations)
             {
-                return new GetContractsByOutletResponse { Contracts = new List<ContractDto>() };
+                alloc.Status = "Ended";
             }
         }
 
-        var allContracts = await _contractRepository.GetAllAsync();
-        var outletContracts = allContracts.Where(c => c.OutletID == request.OutletID).Select(MapToDto).ToList();
-
-        return new GetContractsByOutletResponse
+        var updated = await _contractRepository.UpdateAsync(contract);
+        if (updated == null)
         {
-            Contracts = outletContracts
+            throw new InvalidOperationException("Failed to update contract status.");
+        }
+
+        return new EndContractResponse
+        {
+            Contract = MapToDto(updated),
+            Success = true,
+            Message = "Contract has been successfully ended."
         };
     }
 
     private static ContractDto MapToDto(Contract contract)
     {
-        var firstAlloc = contract.VendorAllocations?.FirstOrDefault();
         var firstCp = contract.ContractProducts?.FirstOrDefault();
         int resolvedProductId = firstCp?.ProductID ?? contract.ProductID;
         string resolvedProductName = firstCp?.Product?.ProductName ?? contract.Product?.ProductName ?? $"Product #{resolvedProductId}";
         string resolvedUnit = firstCp?.Product?.Unit ?? contract.Product?.Unit ?? "Kg";
 
+        var firstAlloc = contract.VendorAllocations?.FirstOrDefault();
         int? vendorId = contract.VendorID ?? firstAlloc?.VendorID;
-        string vendorName = contract.Vendor?.VendorName ?? firstAlloc?.Vendor?.VendorName ?? "Vendor";
+        string vendorName = contract.Vendor?.VendorName ?? firstAlloc?.Vendor?.VendorName ?? $"Vendor #{vendorId}";
 
         decimal totalQty = contract.ContractProducts != null && contract.ContractProducts.Count > 0
             ? contract.ContractProducts.Sum(cp => cp.ContractQuantity)
@@ -95,14 +131,14 @@ public class GetContractsByOutletQueryHandler : IRequestHandler<GetContractsByOu
             ProductID = resolvedProductId,
             ProductName = resolvedProductName,
             Unit = resolvedUnit,
+            VendorID = vendorId,
+            VendorName = vendorName,
             TotalQuantity = totalQty,
             UsedQuantity = usedQty,
             StartDate = contract.StartDate,
             EndDate = contract.EndDate,
             PaymentMethod = contract.PaymentMethod,
             Status = contract.Status,
-            VendorID = vendorId,
-            VendorName = vendorName,
             Products = products,
             Allocations = contract.VendorAllocations?.Select(a => new ContractVendorAllocationDto
             {

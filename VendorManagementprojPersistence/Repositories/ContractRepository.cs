@@ -32,7 +32,10 @@ public class ContractRepository : IContractRepository
         return await _context.Contracts
             .Include(c => c.Outlet)
                 .ThenInclude(o => o!.Organization)
+            .Include(c => c.Vendor)
             .Include(c => c.Product)
+            .Include(c => c.ContractProducts)
+                .ThenInclude(cp => cp.Product)
             .Include(c => c.VendorAllocations)
                 .ThenInclude(a => a!.Vendor)
             .FirstOrDefaultAsync(c => c.ContractID == contractID);
@@ -43,7 +46,10 @@ public class ContractRepository : IContractRepository
         return await _context.Contracts
             .Include(c => c.Outlet)
                 .ThenInclude(o => o!.Organization)
+            .Include(c => c.Vendor)
             .Include(c => c.Product)
+            .Include(c => c.ContractProducts)
+                .ThenInclude(cp => cp.Product)
             .Include(c => c.VendorAllocations)
                 .ThenInclude(a => a!.Vendor)
             .ToListAsync();
@@ -75,12 +81,16 @@ public class ContractRepository : IContractRepository
     {
         var existing =
             await _context.Contracts
+                .Include(c => c.ContractProducts)
                 .Include(c => c.VendorAllocations)
                 .FirstOrDefaultAsync(
                     c => c.ContractID == contract.ContractID);
 
         if (existing == null)
             return null;
+
+        if (contract.VendorID.HasValue)
+            existing.VendorID = contract.VendorID;
 
         existing.TotalQuantity =
             contract.TotalQuantity;
@@ -99,6 +109,32 @@ public class ContractRepository : IContractRepository
 
         existing.UsedQuantity =
             contract.UsedQuantity;
+
+        // Synchronize ContractProducts
+        foreach (var cp in contract.ContractProducts)
+        {
+            var existingCp = existing.ContractProducts
+                .FirstOrDefault(x => x.ContractProductID == cp.ContractProductID || 
+                                    (cp.ContractProductID == 0 && x.ProductID == cp.ProductID));
+
+            if (existingCp != null)
+            {
+                existingCp.ContractQuantity = cp.ContractQuantity;
+                existingCp.PurchasedQuantity = cp.PurchasedQuantity;
+                existingCp.UnitPrice = cp.UnitPrice;
+            }
+            else if (cp.ContractProductID == 0)
+            {
+                existing.ContractProducts.Add(new ContractProduct
+                {
+                    ContractID = existing.ContractID,
+                    ProductID = cp.ProductID,
+                    ContractQuantity = cp.ContractQuantity,
+                    PurchasedQuantity = cp.PurchasedQuantity,
+                    UnitPrice = cp.UnitPrice
+                });
+            }
+        }
 
         foreach (var allocation in contract.VendorAllocations)
         {
@@ -160,5 +196,46 @@ public class ContractRepository : IContractRepository
                 a.Contract.ProductID == productID &&
                 a.Contract.OutletID == outletID)
             .ToListAsync();
+    }
+
+    public async Task<List<Contract>> GetActiveContractsByProductAndOutletAsync(
+        int outletID,
+        int productID)
+    {
+        var now = DateTime.Now;
+
+        return await _context.Contracts
+            .Include(c => c.Outlet)
+                .ThenInclude(o => o!.Organization)
+            .Include(c => c.Vendor)
+            .Include(c => c.Product)
+            .Include(c => c.ContractProducts)
+                .ThenInclude(cp => cp.Product)
+            .Include(c => c.VendorAllocations)
+                .ThenInclude(a => a!.Vendor)
+            .Where(c =>
+                c.OutletID == outletID &&
+                c.Status == "Active" &&
+                c.StartDate <= now &&
+                c.EndDate >= now &&
+                (c.ContractProducts.Any(cp => cp.ProductID == productID) || c.ProductID == productID))
+            .ToListAsync();
+    }
+
+    public async Task<List<Contract>> AddBatchAsync(List<Contract> contracts)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            await _context.Contracts.AddRangeAsync(contracts);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return contracts;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }

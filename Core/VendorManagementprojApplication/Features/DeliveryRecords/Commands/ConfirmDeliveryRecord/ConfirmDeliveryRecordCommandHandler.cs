@@ -155,38 +155,22 @@ public class ConfirmDeliveryRecordCommandHandler
                 $"Confirmed quantity cannot exceed the ordered quantity of {purchaseOrderItem.Quantity}.");
         }
 
-        // Check for active contract allocation if one exists for this order
+        // Check for active contract covering this purchase order's outlet, vendor, and product
         var contracts =
             await _contractRepository.GetAllAsync();
+        var now = DateTime.Now;
 
         var contract =
             contracts.FirstOrDefault(c =>
                 c.OutletID == purchaseOrder.OutletID &&
-                c.ProductID == purchaseOrderItem.ProductID &&
+                (c.VendorID == purchaseOrder.VendorID || c.VendorAllocations.Any(a => a.VendorID == purchaseOrder.VendorID)) &&
                 string.Equals(
                     c.Status,
                     "Active",
                     StringComparison.OrdinalIgnoreCase) &&
-                c.StartDate <= DateTime.Now &&
-                c.EndDate >= DateTime.Now &&
-                c.VendorAllocations.Any(a =>
-                    a.VendorID == purchaseOrder.VendorID &&
-                    string.Equals(
-                        a.Status,
-                        "Active",
-                        StringComparison.OrdinalIgnoreCase)));
-
-        ContractVendorAllocation? allocation = null;
-        if (contract != null)
-        {
-            allocation =
-                contract.VendorAllocations.FirstOrDefault(a =>
-                    a.VendorID == purchaseOrder.VendorID &&
-                    string.Equals(
-                        a.Status,
-                        "Active",
-                        StringComparison.OrdinalIgnoreCase));
-        }
+                c.StartDate <= now &&
+                c.EndDate >= now &&
+                (c.ContractProducts.Any(cp => cp.ProductID == purchaseOrderItem.ProductID) || c.ProductID == purchaseOrderItem.ProductID));
 
         delivery.Status = "Confirmed";
 
@@ -199,41 +183,36 @@ public class ConfirmDeliveryRecordCommandHandler
         await _deliveryRecordRepository
             .UpdateAsync(delivery);
 
-        // If a contract exists and has an active allocation, track contract usage (capped at remaining allocation)
-        if (contract != null && allocation != null)
+        // Phase 2B: Track purchased quantity through ContractProduct without capping or marking "Reached"
+        if (contract != null)
         {
-            decimal remainingContractQuantity = allocation.AllocatedQuantity - allocation.UsedQuantity;
             decimal netReceived = delivery.ReceivedQuantity - delivery.SpoiledQuantity;
             if (netReceived < 0) netReceived = 0;
 
-            decimal contractConsumable = Math.Min(netReceived, Math.Max(0, remainingContractQuantity));
-            allocation.UsedQuantity += contractConsumable;
-
-            if (allocation.UsedQuantity >=
-                allocation.AllocatedQuantity)
+            if (netReceived > 0)
             {
-                allocation.UsedQuantity =
-                    allocation.AllocatedQuantity;
+                // 1. Primary Target: ContractProduct.PurchasedQuantity
+                var contractProduct = contract.ContractProducts
+                    .FirstOrDefault(cp => cp.ProductID == purchaseOrderItem.ProductID);
 
-                allocation.Status = "Reached";
+                if (contractProduct != null)
+                {
+                    contractProduct.PurchasedQuantity += netReceived; // NO CAPPING
+                }
+
+                // 2. Legacy tracking fields kept in sync without capping or setting "Reached"
+                contract.UsedQuantity += netReceived;
+
+                var allocation = contract.VendorAllocations
+                    .FirstOrDefault(a => a.VendorID == purchaseOrder.VendorID);
+                if (allocation != null)
+                {
+                    allocation.UsedQuantity += netReceived; // NO CAPPING
+                }
+
+                // Contract remains "Active" until expiry/manual status lifecycle; do NOT mark "Reached"
+                await _contractRepository.UpdateAsync(contract);
             }
-
-            contract.UsedQuantity =
-                contract.VendorAllocations
-                    .Sum(a => a.UsedQuantity);
-
-            var allAllocationsReached =
-                contract.VendorAllocations.All(a =>
-                    string.Equals(
-                        a.Status,
-                        "Reached",
-                        StringComparison.OrdinalIgnoreCase));
-
-            if (allAllocationsReached)
-                contract.Status = "Reached";
-
-            await _contractRepository
-                .UpdateAsync(contract);
         }
 
         var allItemsFullyReceived = true;

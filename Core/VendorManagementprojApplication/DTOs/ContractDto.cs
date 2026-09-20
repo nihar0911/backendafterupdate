@@ -25,6 +25,21 @@ public class ContractDto
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string PaymentMethod { get; set; } = string.Empty;
-    public string Status { get; set; } = string.Empty;
+
+    private string _status = string.Empty;
+    public string Status
+    {
+        get
+        {
+            if (string.Equals(_status, "Active", StringComparison.OrdinalIgnoreCase) && DateTime.Now > EndDate)
+            {
+                return "Expired";
+            }
+            return _status;
+        }
+        set => _status = value;
+    }
+
+    public List<ContractProductDto> Products { get; set; } = new();
     public List<ContractVendorAllocationDto> Allocations { get; set; } = new();
 }

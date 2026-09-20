@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -105,6 +105,34 @@ public class GetContractByIdQueryHandler : IRequestHandler<GetContractByIdQuery,
         decimal taxAmount = qItem?.TaxAmount ?? 0;
         decimal totalAmount = qItem?.TotalAmount > 0 ? qItem.TotalAmount : (unitPrice * contract.TotalQuantity + taxAmount);
 
+        var firstCp = contract.ContractProducts?.FirstOrDefault();
+        int resolvedProductId = firstCp?.ProductID ?? contract.ProductID;
+        string resolvedProductName = firstCp?.Product?.ProductName ?? contract.Product?.ProductName ?? $"Product #{resolvedProductId}";
+        string resolvedUnit = firstCp?.Product?.Unit ?? contract.Product?.Unit ?? "Kg";
+
+        int? vendorId = contract.VendorID ?? firstAlloc?.VendorID ?? quotation?.VendorID;
+        string vendorName = contract.Vendor?.VendorName ?? firstAlloc?.Vendor?.VendorName ?? "Vendor";
+
+        decimal totalQty = contract.ContractProducts != null && contract.ContractProducts.Count > 0
+            ? contract.ContractProducts.Sum(cp => cp.ContractQuantity)
+            : contract.TotalQuantity;
+
+        decimal usedQty = contract.ContractProducts != null && contract.ContractProducts.Count > 0
+            ? contract.ContractProducts.Sum(cp => cp.PurchasedQuantity)
+            : contract.UsedQuantity;
+
+        var products = contract.ContractProducts?.Select(cp => new ContractProductDto
+        {
+            ContractProductID = cp.ContractProductID,
+            ContractID = cp.ContractID,
+            ProductID = cp.ProductID,
+            ProductName = cp.Product?.ProductName ?? $"Product #{cp.ProductID}",
+            Unit = cp.Product?.Unit ?? "Kg",
+            ContractQuantity = cp.ContractQuantity,
+            PurchasedQuantity = cp.PurchasedQuantity,
+            UnitPrice = cp.UnitPrice
+        }).ToList() ?? new List<ContractProductDto>();
+
         return new ContractDto
         {
             ContractID = contract.ContractID,
@@ -113,14 +141,14 @@ public class GetContractByIdQueryHandler : IRequestHandler<GetContractByIdQuery,
             OutletName = contract.Outlet?.OutletName ?? $"Outlet #{contract.OutletID}",
             OrganizationID = contract.Outlet?.OrganizationID ?? 0,
             OrganizationName = contract.Outlet?.Organization?.OrganizationName ?? "Organization",
-            ProductID = contract.ProductID,
-            ProductName = contract.Product?.ProductName ?? $"Product #{contract.ProductID}",
-            Unit = contract.Product?.Unit ?? "Kg",
+            ProductID = resolvedProductId,
+            ProductName = resolvedProductName,
+            Unit = resolvedUnit,
             RequestID = purchaseRequest?.RequestID ?? quotation?.RequestID,
-            VendorID = firstAlloc?.VendorID ?? quotation?.VendorID,
-            VendorName = firstAlloc?.Vendor?.VendorName ?? "Vendor",
-            TotalQuantity = contract.TotalQuantity,
-            UsedQuantity = contract.UsedQuantity,
+            VendorID = vendorId,
+            VendorName = vendorName,
+            TotalQuantity = totalQty,
+            UsedQuantity = usedQty,
             UnitPrice = unitPrice,
             TaxAmount = taxAmount,
             TotalAmount = totalAmount,
@@ -128,6 +156,7 @@ public class GetContractByIdQueryHandler : IRequestHandler<GetContractByIdQuery,
             EndDate = contract.EndDate,
             PaymentMethod = contract.PaymentMethod,
             Status = contract.Status,
+            Products = products,
             Allocations = contract.VendorAllocations?.Select(a => new ContractVendorAllocationDto
             {
                 ContractVendorAllocationID = a.ContractVendorAllocationID,

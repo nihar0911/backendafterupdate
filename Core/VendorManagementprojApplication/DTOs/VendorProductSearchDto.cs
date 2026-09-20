@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementprojApplication.DTOs;
 
 public class VendorProductSearchDto
 {
@@ -15,6 +15,16 @@ public class VendorProductSearchDto
     public string Status { get; set; } = string.Empty;
 
     public bool HasActiveContract { get; set; }
+
+    public int? ContractID { get; set; }
+
+    public decimal? ContractQuantity { get; set; }
+
+    public decimal? PurchasedQuantity { get; set; }
+
+    public decimal? VarianceQuantity => PurchasedQuantity.HasValue && ContractQuantity.HasValue
+        ? PurchasedQuantity.Value - ContractQuantity.Value
+        : null;
 
     public decimal AllocationPercentage { get; set; }
 

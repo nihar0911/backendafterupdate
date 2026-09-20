@@ -1,8 +1,25 @@
-﻿using VendorManagementprojApplication.DTOs;
+using System.Collections.Generic;
+using System.Linq;
+using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Features.Contracts.Commands.CreateContract;
 
 public class CreateContractResponse
 {
-    public ContractDto Contract { get; set; } = null!;
+    private ContractDto? _singleContract;
+
+    public List<ContractDto> Contracts { get; set; } = new();
+
+    public ContractDto Contract
+    {
+        get => _singleContract ?? Contracts.FirstOrDefault()!;
+        set
+        {
+            _singleContract = value;
+            if (value != null && !Contracts.Contains(value))
+            {
+                Contracts.Insert(0, value);
+            }
+        }
+    }
 }
