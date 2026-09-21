@@ -63,8 +63,7 @@ public class GetActiveContractsForProductQueryHandler : IRequestHandler<GetActiv
     private static ContractDto MapToDto(Contract contract, int targetProductId)
     {
         var firstAlloc = contract.VendorAllocations?.FirstOrDefault();
-        var targetCp = contract.ContractProducts?.FirstOrDefault(cp => cp.ProductID == targetProductId)
-                       ?? contract.ContractProducts?.FirstOrDefault();
+        var targetCp = contract.ContractProducts?.FirstOrDefault(cp => cp.ProductID == targetProductId);
 
         int resolvedProductId = targetCp?.ProductID ?? contract.ProductID;
         string resolvedProductName = targetCp?.Product?.ProductName ?? contract.Product?.ProductName ?? $"Product #{resolvedProductId}";
@@ -73,11 +72,20 @@ public class GetActiveContractsForProductQueryHandler : IRequestHandler<GetActiv
         int? vendorId = contract.VendorID ?? firstAlloc?.VendorID;
         string vendorName = contract.Vendor?.VendorName ?? firstAlloc?.Vendor?.VendorName ?? "Vendor";
 
-        decimal totalQty = contract.ContractProducts != null && contract.ContractProducts.Count > 0
+        // Product-specific quantities for the requested target product
+        decimal productContractQty = targetCp != null
+            ? targetCp.ContractQuantity
+            : ((contract.ContractProducts == null || contract.ContractProducts.Count == 0) ? contract.TotalQuantity : 0m);
+
+        decimal productPurchasedQty = targetCp != null
+            ? targetCp.PurchasedQuantity
+            : ((contract.ContractProducts == null || contract.ContractProducts.Count == 0) ? contract.UsedQuantity : 0m);
+
+        decimal contractLevelTotalQty = contract.ContractProducts != null && contract.ContractProducts.Count > 0
             ? contract.ContractProducts.Sum(cp => cp.ContractQuantity)
             : contract.TotalQuantity;
 
-        decimal usedQty = contract.ContractProducts != null && contract.ContractProducts.Count > 0
+        decimal contractLevelUsedQty = contract.ContractProducts != null && contract.ContractProducts.Count > 0
             ? contract.ContractProducts.Sum(cp => cp.PurchasedQuantity)
             : contract.UsedQuantity;
 
@@ -104,8 +112,12 @@ public class GetActiveContractsForProductQueryHandler : IRequestHandler<GetActiv
             ProductID = resolvedProductId,
             ProductName = resolvedProductName,
             Unit = resolvedUnit,
-            TotalQuantity = totalQty,
-            UsedQuantity = usedQty,
+            TotalQuantity = productContractQty,
+            UsedQuantity = productPurchasedQty,
+            ContractQuantity = productContractQty,
+            PurchasedQuantity = productPurchasedQty,
+            ContractTotalQuantity = contractLevelTotalQty,
+            UnitPrice = targetCp?.UnitPrice ?? 0m,
             StartDate = contract.StartDate,
             EndDate = contract.EndDate,
             PaymentMethod = contract.PaymentMethod,
@@ -119,8 +131,8 @@ public class GetActiveContractsForProductQueryHandler : IRequestHandler<GetActiv
                 VendorID = a.VendorID,
                 VendorName = a.Vendor?.VendorName ?? $"Vendor #{a.VendorID}",
                 AllocationPercentage = a.AllocationPercentage,
-                AllocatedQuantity = a.AllocatedQuantity,
-                UsedQuantity = a.UsedQuantity,
+                AllocatedQuantity = productContractQty,
+                UsedQuantity = productPurchasedQty,
                 Status = a.Status
             }).ToList() ?? new List<ContractVendorAllocationDto>()
         };

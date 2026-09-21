@@ -61,7 +61,8 @@ public class CreateOutletCommandHandler
             Address = request.Address,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
-            PurchaseOrderApproverRole = PurchaseOrderApprover.Normalize(request.PurchaseOrderApproverRole)
+            PurchaseOrderApproverRole = PurchaseOrderApprover.Normalize(request.PurchaseOrderApproverRole),
+            Status = "Active"
         };
 
         var created =
@@ -75,7 +76,8 @@ public class CreateOutletCommandHandler
             Address = created.Address,
             Latitude = created.Latitude,
             Longitude = created.Longitude,
-            PurchaseOrderApproverRole = created.PurchaseOrderApproverRole
+            PurchaseOrderApproverRole = created.PurchaseOrderApproverRole,
+            Status = created.Status
         };
 
         return new CreateOutletResponse

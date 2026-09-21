@@ -79,7 +79,8 @@ public class UpdateOutletCommandHandler
             Address = updated.Address,
             Latitude = updated.Latitude,
             Longitude = updated.Longitude,
-            PurchaseOrderApproverRole = updated.PurchaseOrderApproverRole
+            PurchaseOrderApproverRole = updated.PurchaseOrderApproverRole,
+            Status = updated.Status
         };
 
         return new UpdateOutletResponse

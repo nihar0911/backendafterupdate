@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojDomain.Entities;
 using VendorManagementprojPersistence.Data;
@@ -47,7 +47,7 @@ public class OrganizationRepository : IOrganizationRepository
 
     public async Task DeleteAsync(Organization organization)
     {
-        _context.Organizations.Remove(organization);
+        organization.Status = "Inactive";
         await _context.SaveChangesAsync();
     }
 }

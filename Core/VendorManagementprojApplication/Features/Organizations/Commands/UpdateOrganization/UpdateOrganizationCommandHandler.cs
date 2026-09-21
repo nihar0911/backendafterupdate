@@ -89,7 +89,10 @@ public class UpdateOrganizationCommandHandler
                     organization.Phone,
 
                 Email =
-                    organization.Email
+                    organization.Email,
+
+                Status =
+                    organization.Status
             }
         };
     }

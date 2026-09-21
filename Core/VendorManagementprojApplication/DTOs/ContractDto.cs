@@ -19,6 +19,14 @@ public class ContractDto
     public string VendorName { get; set; } = string.Empty;
     public decimal TotalQuantity { get; set; }
     public decimal UsedQuantity { get; set; }
+    public decimal RemainingQuantity => Math.Max(TotalQuantity - UsedQuantity, 0m);
+    public decimal ExtraOrderQuantity => Math.Max(UsedQuantity - TotalQuantity, 0m);
+    public decimal? ContractQuantity { get; set; }
+    public decimal? PurchasedQuantity { get; set; }
+    public decimal? VarianceQuantity => PurchasedQuantity.HasValue && ContractQuantity.HasValue
+        ? PurchasedQuantity.Value - ContractQuantity.Value
+        : null;
+    public decimal? ContractTotalQuantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal TotalAmount { get; set; }

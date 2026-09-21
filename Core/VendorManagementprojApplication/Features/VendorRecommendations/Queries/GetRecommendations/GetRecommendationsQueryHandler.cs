@@ -119,7 +119,7 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                 foreach (var contract in activeContracts)
                 {
                     int vendorId = contract.VendorID ?? contract.VendorAllocations.FirstOrDefault()?.VendorID ?? 0;
-                    var cp = contract.ContractProducts.FirstOrDefault(p => p.ProductID == item.ProductID);
+                    var cp = contract.ContractProducts?.FirstOrDefault(p => p.ProductID == item.ProductID);
                     var vp = activeVendorProducts.FirstOrDefault(v => v.VendorID == vendorId);
                     decimal price = cp?.UnitPrice ?? vp?.UnitPrice ?? 0m;
                     if (price > 0 && price < minContractPrice)
@@ -135,15 +135,19 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                     string vendorName = contract.Vendor?.VendorName 
                         ?? (allVendors.TryGetValue(vendorId, out var name) ? name : $"Vendor #{vendorId}");
 
-                    var cp = contract.ContractProducts.FirstOrDefault(p => p.ProductID == item.ProductID);
+                    var cp = contract.ContractProducts?.FirstOrDefault(p => p.ProductID == item.ProductID);
                     var vp = activeVendorProducts.FirstOrDefault(v => v.VendorID == vendorId);
 
                     decimal unitPrice = cp?.UnitPrice ?? vp?.UnitPrice ?? 0m;
                     int deliveryDays = vp?.EstimatedDeliveryDays ?? 1;
 
-                    decimal contractQty = cp?.ContractQuantity ?? contract.TotalQuantity;
-                    decimal purchasedQty = cp?.PurchasedQuantity ?? contract.UsedQuantity;
+                    bool hasContractProducts = contract.ContractProducts != null && contract.ContractProducts.Count > 0;
+                    decimal contractQty = cp?.ContractQuantity ?? (hasContractProducts ? 0m : contract.TotalQuantity);
+                    decimal purchasedQty = cp?.PurchasedQuantity ?? (hasContractProducts ? 0m : contract.UsedQuantity);
                     decimal remainingQty = Math.Max(0m, contractQty - purchasedQty);
+                    decimal contractTotalQty = hasContractProducts
+                        ? contract.ContractProducts!.Sum(p => p.ContractQuantity)
+                        : contract.TotalQuantity;
 
                     var feedbacks = await _vendorFeedbackRepository.GetByVendorIdAsync(vendorId);
                     int feedbackCount = feedbacks?.Count ?? 0;
@@ -195,7 +199,7 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                         AllocatedQuantity = contractQty,
                         UsedQuantity = purchasedQty,
                         RemainingQuantity = remainingQty,
-                        ContractTotalQuantity = contractQty,
+                        ContractTotalQuantity = contractTotalQty,
                         ContractStartDate = contract.StartDate,
                         ContractEndDate = contract.EndDate,
                         ContractStatus = contract.Status,

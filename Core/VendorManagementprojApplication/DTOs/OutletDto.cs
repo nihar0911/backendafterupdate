@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementprojApplication.DTOs;
 
 public class OutletDto
 {
@@ -17,4 +17,6 @@ public class OutletDto
     public decimal? Longitude { get; set; }
 
     public string PurchaseOrderApproverRole { get; set; } = "Organization Manager";
+
+    public string Status { get; set; } = "Active";
 }

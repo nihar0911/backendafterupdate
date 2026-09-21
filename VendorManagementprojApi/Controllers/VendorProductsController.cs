@@ -122,6 +122,46 @@ public class VendorProductsController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPost("{id:int}/activate")]
+    [Authorize(Roles = "Admin,Vendor Manager")]
+    public async Task<IActionResult> Activate(int id)
+    {
+        var response = await _mediator.Send(new GetVendorProductByIdQuery(id));
+        if (response.VendorProduct == null) return NotFound();
+
+        var updateCmd = new UpdateVendorProductCommand
+        {
+            VendorProductID = id,
+            VendorID = response.VendorProduct.VendorID,
+            ProductID = response.VendorProduct.ProductID,
+            UnitPrice = response.VendorProduct.UnitPrice,
+            EstimatedDeliveryDays = response.VendorProduct.EstimatedDeliveryDays,
+            Status = "Active"
+        };
+        var res = await _mediator.Send(updateCmd);
+        return Ok(res);
+    }
+
+    [HttpPost("{id:int}/deactivate")]
+    [Authorize(Roles = "Admin,Vendor Manager")]
+    public async Task<IActionResult> Deactivate(int id)
+    {
+        var response = await _mediator.Send(new GetVendorProductByIdQuery(id));
+        if (response.VendorProduct == null) return NotFound();
+
+        var updateCmd = new UpdateVendorProductCommand
+        {
+            VendorProductID = id,
+            VendorID = response.VendorProduct.VendorID,
+            ProductID = response.VendorProduct.ProductID,
+            UnitPrice = response.VendorProduct.UnitPrice,
+            EstimatedDeliveryDays = response.VendorProduct.EstimatedDeliveryDays,
+            Status = "Inactive"
+        };
+        var res = await _mediator.Send(updateCmd);
+        return Ok(res);
+    }
+
     [HttpDelete("{id:int}")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = "Admin,Vendor Manager")]

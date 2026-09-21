@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojDomain.Entities;
 using VendorManagementprojPersistence.Data;
@@ -91,7 +91,7 @@ public class VendorRepository : IVendorRepository
         if (vendor == null)
             return false;
 
-        _context.Vendors.Remove(vendor);
+        vendor.Status = "Inactive";
 
         await _context.SaveChangesAsync();
 

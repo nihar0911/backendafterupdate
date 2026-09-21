@@ -97,6 +97,7 @@ public class GetContractsByOutletQueryHandler : IRequestHandler<GetContractsByOu
             Unit = resolvedUnit,
             TotalQuantity = totalQty,
             UsedQuantity = usedQty,
+            ContractTotalQuantity = totalQty,
             StartDate = contract.StartDate,
             EndDate = contract.EndDate,
             PaymentMethod = contract.PaymentMethod,

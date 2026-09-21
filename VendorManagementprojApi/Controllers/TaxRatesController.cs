@@ -84,6 +84,42 @@ public class TaxRatesController : ControllerBase
         }
     }
 
+    [HttpPost("{taxRateID:int}/activate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Activate(int taxRateID)
+    {
+        var rate = await _mediator.Send(new GetTaxRateByIdQuery(taxRateID));
+        if (rate.TaxRate == null) return NotFound();
+
+        var updateCmd = new UpdateTaxRateCommand
+        {
+            TaxRateID = taxRateID,
+            TaxName = rate.TaxRate.TaxName,
+            Percentage = rate.TaxRate.Percentage,
+            Status = "Active"
+        };
+        var res = await _mediator.Send(updateCmd);
+        return Ok(res);
+    }
+
+    [HttpPost("{taxRateID:int}/deactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Deactivate(int taxRateID)
+    {
+        var rate = await _mediator.Send(new GetTaxRateByIdQuery(taxRateID));
+        if (rate.TaxRate == null) return NotFound();
+
+        var updateCmd = new UpdateTaxRateCommand
+        {
+            TaxRateID = taxRateID,
+            TaxName = rate.TaxRate.TaxName,
+            Percentage = rate.TaxRate.Percentage,
+            Status = "Inactive"
+        };
+        var res = await _mediator.Send(updateCmd);
+        return Ok(res);
+    }
+
     [HttpDelete("{taxRateID:int}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int taxRateID)

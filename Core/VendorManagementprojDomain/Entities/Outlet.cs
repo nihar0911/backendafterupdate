@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojDomain.Entities;
+namespace VendorManagementprojDomain.Entities;
 
 public class Outlet
 {
@@ -21,6 +21,8 @@ public class Outlet
     /// "Organization Manager" or "Outlet Manager".
   
     public string PurchaseOrderApproverRole { get; set; } = "Organization Manager";
+
+    public string Status { get; set; } = "Active";
 
     public Organization Organization { get; set; } = null!;
 }

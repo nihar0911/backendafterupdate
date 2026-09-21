@@ -113,9 +113,17 @@ public class GetContractEligibleVendorsQueryHandler : IRequestHandler<GetContrac
             decimal avgDelivery = feedbackCount > 0 ? Math.Round(feedbacks!.Average(f => f.DeliveryRating), 1) : 0m;
 
             var cp = matchingContract?.ContractProducts.FirstOrDefault(p => p.ProductID == request.ProductID);
-            decimal contractQty = cp?.ContractQuantity ?? matchingContract?.TotalQuantity ?? 0m;
-            decimal purchasedQty = cp?.PurchasedQuantity ?? matchingContract?.UsedQuantity ?? 0m;
+            decimal contractQty = cp != null 
+                ? cp.ContractQuantity 
+                : (matchingContract != null && (!matchingContract.ContractProducts.Any()) ? matchingContract.TotalQuantity : 0m);
+            decimal purchasedQty = cp != null 
+                ? cp.PurchasedQuantity 
+                : (matchingContract != null && (!matchingContract.ContractProducts.Any()) ? matchingContract.UsedQuantity : 0m);
             decimal remainingQty = Math.Max(0m, contractQty - purchasedQty);
+            decimal unitPrice = cp?.UnitPrice ?? vp.UnitPrice;
+            decimal contractTotalQty = matchingContract != null
+                ? (matchingContract.ContractProducts.Any() ? matchingContract.ContractProducts.Sum(p => p.ContractQuantity) : matchingContract.TotalQuantity)
+                : 0m;
 
             resultVendors.Add(new VendorRecommendationDto
             {
@@ -123,7 +131,7 @@ public class GetContractEligibleVendorsQueryHandler : IRequestHandler<GetContrac
                 VendorName = vendorName,
                 ProductID = request.ProductID,
                 ProductName = product.ProductName,
-                UnitPrice = vp.UnitPrice,
+                UnitPrice = unitPrice,
                 EstimatedDeliveryDays = vp.EstimatedDeliveryDays,
                 AverageRating = avgRating,
                 AverageQualityRating = avgQuality,
@@ -133,7 +141,10 @@ public class GetContractEligibleVendorsQueryHandler : IRequestHandler<GetContrac
                 ContractID = matchingContract?.ContractID,
                 ContractQuantity = matchingContract != null ? contractQty : null,
                 PurchasedQuantity = matchingContract != null ? purchasedQty : null,
+                AllocatedQuantity = matchingContract != null ? contractQty : 0m,
+                UsedQuantity = matchingContract != null ? purchasedQty : 0m,
                 RemainingQuantity = remainingQty,
+                ContractTotalQuantity = contractTotalQty,
                 ContractStartDate = matchingContract?.StartDate,
                 ContractEndDate = matchingContract?.EndDate,
                 ContractStatus = matchingContract?.Status
@@ -158,9 +169,12 @@ public class GetContractEligibleVendorsQueryHandler : IRequestHandler<GetContrac
                 decimal avgQuality = feedbackCount > 0 ? Math.Round(feedbacks!.Average(f => f.ProductQualityRating), 1) : 0m;
                 decimal avgDelivery = feedbackCount > 0 ? Math.Round(feedbacks!.Average(f => f.DeliveryRating), 1) : 0m;
 
-                decimal contractQty = cp?.ContractQuantity ?? contract.TotalQuantity;
-                decimal purchasedQty = cp?.PurchasedQuantity ?? contract.UsedQuantity;
+                decimal contractQty = cp?.ContractQuantity ?? (!contract.ContractProducts.Any() ? contract.TotalQuantity : 0m);
+                decimal purchasedQty = cp?.PurchasedQuantity ?? (!contract.ContractProducts.Any() ? contract.UsedQuantity : 0m);
                 decimal remainingQty = Math.Max(0m, contractQty - purchasedQty);
+                decimal contractTotalQty = contract.ContractProducts.Any()
+                    ? contract.ContractProducts.Sum(p => p.ContractQuantity)
+                    : contract.TotalQuantity;
 
                 resultVendors.Add(new VendorRecommendationDto
                 {
@@ -178,7 +192,10 @@ public class GetContractEligibleVendorsQueryHandler : IRequestHandler<GetContrac
                     ContractID = contract.ContractID,
                     ContractQuantity = contractQty,
                     PurchasedQuantity = purchasedQty,
+                    AllocatedQuantity = contractQty,
+                    UsedQuantity = purchasedQty,
                     RemainingQuantity = remainingQty,
+                    ContractTotalQuantity = contractTotalQty,
                     ContractStartDate = contract.StartDate,
                     ContractEndDate = contract.EndDate,
                     ContractStatus = contract.Status

@@ -17,4 +17,6 @@ public class UserDto
     public int? OutletID { get; set; }
 
     public int? VendorID { get; set; }
+
+    public string Status { get; set; } = "Active";
 }

@@ -79,8 +79,47 @@ public class ProductsController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPost("{id:int}/activate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Activate(int id)
+    {
+        var prod = await _mediator.Send(new GetProductByIdQuery(id));
+        if (prod.Product == null) return NotFound();
+
+        var updateCmd = new UpdateProductCommand
+        {
+            ProductID = id,
+            ProductName = prod.Product.ProductName,
+            Category = prod.Product.Category,
+            Unit = prod.Product.Unit,
+            TaxRateID = prod.Product.TaxRateID,
+            Status = "Active"
+        };
+        var res = await _mediator.Send(updateCmd);
+        return Ok(res);
+    }
+
+    [HttpPost("{id:int}/deactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Deactivate(int id)
+    {
+        var prod = await _mediator.Send(new GetProductByIdQuery(id));
+        if (prod.Product == null) return NotFound();
+
+        var updateCmd = new UpdateProductCommand
+        {
+            ProductID = id,
+            ProductName = prod.Product.ProductName,
+            Category = prod.Product.Category,
+            Unit = prod.Product.Unit,
+            TaxRateID = prod.Product.TaxRateID,
+            Status = "Inactive"
+        };
+        var res = await _mediator.Send(updateCmd);
+        return Ok(res);
+    }
+
     [HttpDelete("{id:int}")]
-   
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {

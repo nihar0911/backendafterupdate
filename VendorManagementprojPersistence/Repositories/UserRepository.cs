@@ -74,7 +74,7 @@ public class UserRepository : IUserRepository
         if (user == null)
             return false;
 
-        _context.Users.Remove(user);
+        user.Status = "Inactive";
 
         await _context.SaveChangesAsync();
 

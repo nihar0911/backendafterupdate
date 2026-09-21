@@ -36,7 +36,8 @@ public class GetAllOrganizationsQueryHandler
                 OrganizationName = organization.OrganizationName,
                 Address = organization.Address,
                 Phone = organization.Phone,
-                Email = organization.Email
+                Email = organization.Email,
+                Status = organization.Status
             }).ToList();
 
             return new GetAllOrganizationsResponse { Organizations = list };
@@ -61,7 +62,8 @@ public class GetAllOrganizationsQueryHandler
                 OrganizationName = organization.OrganizationName,
                 Address = organization.Address,
                 Phone = organization.Phone,
-                Email = organization.Email
+                Email = organization.Email,
+                Status = organization.Status
             }).ToList();
 
             return new GetAllOrganizationsResponse { Organizations = list };
@@ -95,7 +97,8 @@ public class GetAllOrganizationsQueryHandler
                 OrganizationName = organization.OrganizationName,
                 Address = organization.Address,
                 Phone = organization.Phone,
-                Email = organization.Email
+                Email = organization.Email,
+                Status = organization.Status
             }).ToList();
 
             return new GetAllOrganizationsResponse { Organizations = list };

@@ -170,7 +170,7 @@ public class ConfirmDeliveryRecordCommandHandler
                     StringComparison.OrdinalIgnoreCase) &&
                 c.StartDate <= now &&
                 c.EndDate >= now &&
-                (c.ContractProducts.Any(cp => cp.ProductID == purchaseOrderItem.ProductID) || c.ProductID == purchaseOrderItem.ProductID));
+                (c.ContractProducts.Any(cp => cp.ProductID == purchaseOrderItem.ProductID) || (!c.ContractProducts.Any() && c.ProductID == purchaseOrderItem.ProductID)));
 
         delivery.Status = "Confirmed";
 

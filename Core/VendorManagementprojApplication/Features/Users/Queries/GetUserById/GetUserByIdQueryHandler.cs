@@ -35,7 +35,8 @@ public class GetUserByIdQueryHandler
                 RoleName = user.Role?.RoleName,
                 OrganizationID = user.OrganizationID,
                 OutletID = user.OutletID,
-                VendorID = user.VendorID
+                VendorID = user.VendorID,
+                Status = user.Status
             }
         };
     }

@@ -80,9 +80,54 @@ public class VendorsController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPost("{vendorID:int}/activate")]
+    [Authorize(Roles = "Admin,Vendor Manager")]
+    public async Task<IActionResult> Activate(int vendorID)
+    {
+        var response = await _mediator.Send(new GetVendorByIdQuery(vendorID));
+        if (response.Vendor == null) return NotFound();
+
+        var updateCmd = new UpdateVendorCommand
+        {
+            VendorID = vendorID,
+            VendorName = response.Vendor.VendorName,
+            Email = response.Vendor.Email,
+            Phone = response.Vendor.Phone,
+            Address = response.Vendor.Address,
+            Latitude = response.Vendor.Latitude,
+            Longitude = response.Vendor.Longitude,
+            GSTIN = response.Vendor.GSTIN,
+            Status = "Active"
+        };
+        var res = await _mediator.Send(updateCmd);
+        return Ok(res);
+    }
+
+    [HttpPost("{vendorID:int}/deactivate")]
+    [Authorize(Roles = "Admin,Vendor Manager")]
+    public async Task<IActionResult> Deactivate(int vendorID)
+    {
+        var response = await _mediator.Send(new GetVendorByIdQuery(vendorID));
+        if (response.Vendor == null) return NotFound();
+
+        var updateCmd = new UpdateVendorCommand
+        {
+            VendorID = vendorID,
+            VendorName = response.Vendor.VendorName,
+            Email = response.Vendor.Email,
+            Phone = response.Vendor.Phone,
+            Address = response.Vendor.Address,
+            Latitude = response.Vendor.Latitude,
+            Longitude = response.Vendor.Longitude,
+            GSTIN = response.Vendor.GSTIN,
+            Status = "Inactive"
+        };
+        var res = await _mediator.Send(updateCmd);
+        return Ok(res);
+    }
+
     [HttpDelete("{vendorID:int}")]
     [Authorize(Roles = "Admin,Vendor Manager")]
-
     public async Task<IActionResult> Delete(
         int vendorID)
     {

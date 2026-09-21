@@ -55,14 +55,14 @@ public class GetVendorsByProductQueryHandler
                 string.Equals(c.Status, "Active", StringComparison.OrdinalIgnoreCase) &&
                 c.StartDate <= DateTime.Now &&
                 c.EndDate >= DateTime.Now &&
-                (c.ContractProducts.Any(cp => cp.ProductID == vendorProduct.ProductID) || c.ProductID == vendorProduct.ProductID));
+                (c.ContractProducts.Any(cp => cp.ProductID == vendorProduct.ProductID) || (!c.ContractProducts.Any() && c.ProductID == vendorProduct.ProductID)));
 
             bool hasActiveContract = matchingContract != null;
             var cp = matchingContract?.ContractProducts.FirstOrDefault(p => p.ProductID == vendorProduct.ProductID);
             var allocation = matchingContract?.VendorAllocations.FirstOrDefault(va => va.VendorID == vendorProduct.VendorID);
 
-            decimal allocatedQty = cp?.ContractQuantity ?? allocation?.AllocatedQuantity ?? (matchingContract != null ? matchingContract.TotalQuantity : 0m);
-            decimal usedQty = cp?.PurchasedQuantity ?? allocation?.UsedQuantity ?? (matchingContract != null ? matchingContract.UsedQuantity : 0m);
+            decimal allocatedQty = cp?.ContractQuantity ?? (matchingContract != null && !matchingContract.ContractProducts.Any() ? (allocation?.AllocatedQuantity ?? matchingContract.TotalQuantity) : 0m);
+            decimal usedQty = cp?.PurchasedQuantity ?? (matchingContract != null && !matchingContract.ContractProducts.Any() ? (allocation?.UsedQuantity ?? matchingContract.UsedQuantity) : 0m);
             decimal remainingQty = Math.Max(0m, allocatedQty - usedQty);
 
             result.Add(new VendorProductSearchDto
@@ -70,13 +70,13 @@ public class GetVendorsByProductQueryHandler
                 VendorProductID = vendorProduct.VendorProductID,
                 VendorID = vendorProduct.VendorID,
                 ProductID = vendorProduct.ProductID,
-                UnitPrice = vendorProduct.UnitPrice,
+                UnitPrice = cp?.UnitPrice ?? vendorProduct.UnitPrice,
                 EstimatedDeliveryDays = vendorProduct.EstimatedDeliveryDays,
                 Status = vendorProduct.Status,
                 HasActiveContract = hasActiveContract,
                 ContractID = matchingContract?.ContractID,
-                ContractQuantity = cp?.ContractQuantity ?? (matchingContract != null ? matchingContract.TotalQuantity : null),
-                PurchasedQuantity = cp?.PurchasedQuantity ?? (matchingContract != null ? matchingContract.UsedQuantity : null),
+                ContractQuantity = hasActiveContract ? (cp?.ContractQuantity ?? (!matchingContract!.ContractProducts.Any() ? matchingContract.TotalQuantity : null)) : null,
+                PurchasedQuantity = hasActiveContract ? (cp?.PurchasedQuantity ?? (!matchingContract!.ContractProducts.Any() ? matchingContract.UsedQuantity : null)) : null,
                 AllocationPercentage = hasActiveContract ? (allocation?.AllocationPercentage ?? 100m) : 0m,
                 AllocatedQuantity = allocatedQty,
                 UsedQuantity = usedQty,

@@ -121,7 +121,8 @@ public class CreateUserCommandHandler
             RoleID = roleId,
             OrganizationID = finalOrganizationId,
             OutletID = finalOutletId,
-            VendorID = request.VendorID
+            VendorID = request.VendorID,
+            Status = "Active"
         };
 
         var createdUser =
@@ -135,7 +136,8 @@ public class CreateUserCommandHandler
             RoleID = createdUser.RoleID,
             OrganizationID = createdUser.OrganizationID,
             OutletID = createdUser.OutletID,
-            VendorID = createdUser.VendorID
+            VendorID = createdUser.VendorID,
+            Status = createdUser.Status
         };
 
         return new CreateUserResponse

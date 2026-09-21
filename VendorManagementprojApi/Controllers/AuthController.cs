@@ -22,7 +22,7 @@ public class AuthController : ControllerBase
         var response = await _mediator.Send(command);
 
         if (response.Login == null)
-            return Unauthorized("Invalid email or password.");
+            return Unauthorized(new { message = response.ErrorMessage ?? "Invalid email or password." });
 
         return Ok(response);
     }

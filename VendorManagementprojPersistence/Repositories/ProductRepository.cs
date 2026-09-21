@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojDomain.Entities;
 using VendorManagementprojPersistence.Data;
@@ -59,7 +59,7 @@ public class ProductRepository : IProductRepository
         if (product == null)
             return false;
 
-        _context.Products.Remove(product);
+        product.Status = "Inactive";
         await _context.SaveChangesAsync();
 
         return true;

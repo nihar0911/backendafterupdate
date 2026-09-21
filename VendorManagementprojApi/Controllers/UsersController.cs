@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
@@ -122,5 +122,61 @@ public class UsersController : ControllerBase
             return Conflict(
                 new { message = ex.Message });
         }
+    }
+
+    [HttpPost("{userID:int}/activate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Activate(int userID, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IUserRepository repo)
+    {
+        var user = await repo.GetByIdAsync(userID);
+        if (user == null) return NotFound();
+
+        user.Status = "Active";
+        await repo.UpdateAsync(user);
+
+        return Ok(new VendorManagementprojApplication.DTOs.UserDto
+        {
+            UserID = user.UserID,
+            Name = user.Name,
+            Email = user.Email,
+            RoleID = user.RoleID,
+            RoleName = user.Role?.RoleName,
+            OrganizationID = user.OrganizationID,
+            OutletID = user.OutletID,
+            VendorID = user.VendorID,
+            Status = user.Status
+        });
+    }
+
+    [HttpPost("{userID:int}/deactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Deactivate(
+        int userID,
+        [FromServices] VendorManagementprojApplication.Contracts.Persistence.IUserRepository repo,
+        [FromServices] VendorManagementprojApplication.Contracts.Services.ICurrentUserService currentUserService)
+    {
+        if (currentUserService.UserID.HasValue && currentUserService.UserID.Value == userID)
+        {
+            return BadRequest(new { message = "You cannot deactivate your own currently logged-in account." });
+        }
+
+        var user = await repo.GetByIdAsync(userID);
+        if (user == null) return NotFound();
+
+        user.Status = "Inactive";
+        await repo.UpdateAsync(user);
+
+        return Ok(new VendorManagementprojApplication.DTOs.UserDto
+        {
+            UserID = user.UserID,
+            Name = user.Name,
+            Email = user.Email,
+            RoleID = user.RoleID,
+            RoleName = user.Role?.RoleName,
+            OrganizationID = user.OrganizationID,
+            OutletID = user.OutletID,
+            VendorID = user.VendorID,
+            Status = user.Status
+        });
     }
 }

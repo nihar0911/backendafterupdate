@@ -87,6 +87,11 @@ public class VendorManagementDbContext : DbContext
             entity.Property(e => e.Email)
                 .HasMaxLength(150);
 
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsRequired()
+                .HasDefaultValue("Active");
+
             entity.HasIndex(e => e.Email)
                 .IsUnique();
         });
@@ -114,6 +119,11 @@ public class VendorManagementDbContext : DbContext
                 .HasMaxLength(50)
                 .IsRequired()
                 .HasDefaultValue("Organization Manager");
+
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsRequired()
+                .HasDefaultValue("Active");
 
             entity.HasOne(e => e.Organization)
                 .WithMany()
@@ -152,6 +162,11 @@ public class VendorManagementDbContext : DbContext
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(255)
                 .IsRequired();
+
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .IsRequired()
+                .HasDefaultValue("Active");
 
             entity.HasIndex(e => e.Email)
                 .IsUnique();

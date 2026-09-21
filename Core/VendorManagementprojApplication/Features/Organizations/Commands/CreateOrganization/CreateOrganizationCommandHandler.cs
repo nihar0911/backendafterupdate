@@ -37,7 +37,8 @@ public class CreateOrganizationCommandHandler
             OrganizationName = request.OrganizationName,
             Address = request.Address,
             Phone = request.Phone,
-            Email = request.Email
+            Email = request.Email,
+            Status = "Active"
         };
 
         await _repository.AddAsync(organization);
@@ -48,7 +49,8 @@ public class CreateOrganizationCommandHandler
             OrganizationName = organization.OrganizationName,
             Address = organization.Address,
             Phone = organization.Phone,
-            Email = organization.Email
+            Email = organization.Email,
+            Status = organization.Status
         };
 
         return new CreateOrganizationResponse

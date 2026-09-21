@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojDomain.Entities;
 using VendorManagementprojPersistence.Data;
@@ -83,7 +83,7 @@ public class TaxRateRepository : ITaxRateRepository
         if (taxRate == null)
             return false;
 
-        _context.TaxRates.Remove(taxRate);
+        taxRate.Status = "Inactive";
 
         await _context.SaveChangesAsync();
 

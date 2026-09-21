@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojDomain.Entities;
+namespace VendorManagementprojDomain.Entities;
 
 public class User
 {
@@ -17,6 +17,8 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
 
     public int RoleID { get; set; }
+
+    public string Status { get; set; } = "Active";
 
     public Organization? Organization { get; set; }
 

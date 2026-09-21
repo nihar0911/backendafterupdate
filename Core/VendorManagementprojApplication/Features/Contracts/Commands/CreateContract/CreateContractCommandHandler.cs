@@ -47,6 +47,9 @@ public class CreateContractCommandHandler : IRequestHandler<CreateContractComman
         if (targetOutlet == null)
             throw new InvalidOperationException("Target outlet does not exist.");
 
+        if (!string.Equals(targetOutlet.Status, "Active", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"Outlet '{targetOutlet.OutletName}' (ID #{request.OutletID}) is not active.");
+
         // Authorization check
         if (_currentUserService.IsOrganizationManager)
         {
@@ -75,13 +78,13 @@ public class CreateContractCommandHandler : IRequestHandler<CreateContractComman
         // Resolve items (target multi-product format vs legacy allocation format)
         var resolvedItems = new List<ContractProductAssignmentDto>();
 
-        if (request.Items != null && request.Items.Count > 0)
-        {
-            resolvedItems.AddRange(request.Items);
-        }
-        else if (request.Assignments != null && request.Assignments.Count > 0)
+        if (request.Assignments != null && request.Assignments.Count > 0)
         {
             resolvedItems.AddRange(request.Assignments);
+        }
+        else if (request.Items != null && request.Items.Count > 0)
+        {
+            resolvedItems.AddRange(request.Items);
         }
         else if (request.ProductID > 0 && request.TotalQuantity > 0)
         {
@@ -137,6 +140,11 @@ public class CreateContractCommandHandler : IRequestHandler<CreateContractComman
             var vendorProduct = await _vendorProductRepository.GetByVendorAndProductAsync(item.VendorID, item.ProductID);
             if (vendorProduct == null || !string.Equals(vendorProduct.Status, "Active", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException($"Vendor '{vendor.VendorName}' does not actively supply product '{product.ProductName}'.");
+
+            if (!item.UnitPrice.HasValue || item.UnitPrice.Value <= 0)
+            {
+                item.UnitPrice = vendorProduct.UnitPrice;
+            }
         }
 
         // Check for duplicate assignments within the current request
@@ -166,7 +174,7 @@ public class CreateContractCommandHandler : IRequestHandler<CreateContractComman
                 c.EndDate >= now &&
                 c.StartDate < request.EndDate &&
                 c.EndDate > request.StartDate &&
-                (c.ContractProducts.Any(cp => cp.ProductID == item.ProductID) || c.ProductID == item.ProductID));
+                (c.ContractProducts.Any(cp => cp.ProductID == item.ProductID) || (!c.ContractProducts.Any() && c.ProductID == item.ProductID)));
 
             if (overlappingContract != null)
             {

@@ -64,11 +64,12 @@ public class ContractRepository : IContractRepository
 
         return await _context.ContractVendorAllocations
             .Include(a => a.Contract)
+                .ThenInclude(c => c!.ContractProducts)
             .Include(a => a.Vendor)
             .Where(a =>
                 a.VendorID == vendorID &&
                 a.Contract != null &&
-                a.Contract.ProductID == productID &&
+                (a.Contract.ContractProducts.Any(cp => cp.ProductID == productID) || (!a.Contract.ContractProducts.Any() && a.Contract.ProductID == productID)) &&
                 a.Contract.OutletID == outletID &&
                 a.Contract.Status == "Active" &&
                 a.Contract.StartDate <= now &&
@@ -189,11 +190,12 @@ public class ContractRepository : IContractRepository
     {
         return await _context.ContractVendorAllocations
             .Include(a => a.Contract)
+                .ThenInclude(c => c!.ContractProducts)
             .Include(a => a.Vendor)
             .Where(a =>
                 a.VendorID == vendorID &&
                 a.Contract != null &&
-                a.Contract.ProductID == productID &&
+                (a.Contract.ContractProducts.Any(cp => cp.ProductID == productID) || (!a.Contract.ContractProducts.Any() && a.Contract.ProductID == productID)) &&
                 a.Contract.OutletID == outletID)
             .ToListAsync();
     }
@@ -218,7 +220,7 @@ public class ContractRepository : IContractRepository
                 c.Status == "Active" &&
                 c.StartDate <= now &&
                 c.EndDate >= now &&
-                (c.ContractProducts.Any(cp => cp.ProductID == productID) || c.ProductID == productID))
+                (c.ContractProducts.Any(cp => cp.ProductID == productID) || (!c.ContractProducts.Any() && c.ProductID == productID)))
             .ToListAsync();
     }
 

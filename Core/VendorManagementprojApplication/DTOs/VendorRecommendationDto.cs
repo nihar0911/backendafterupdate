@@ -61,4 +61,8 @@ public class VendorRecommendationDto
     public decimal? VarianceQuantity => PurchasedQuantity.HasValue && ContractQuantity.HasValue
         ? PurchasedQuantity.Value - ContractQuantity.Value
         : null;
+
+    public decimal? ExtraOrderQuantity => PurchasedQuantity.HasValue && ContractQuantity.HasValue
+        ? Math.Max(PurchasedQuantity.Value - ContractQuantity.Value, 0m)
+        : null;
 }

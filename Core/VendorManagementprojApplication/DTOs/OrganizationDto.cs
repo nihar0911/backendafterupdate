@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementprojApplication.DTOs;
 
 public class OrganizationDto
 {
@@ -11,4 +11,6 @@ public class OrganizationDto
     public string? Phone { get; set; }
 
     public string? Email { get; set; }
+
+    public string Status { get; set; } = "Active";
 }

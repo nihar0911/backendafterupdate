@@ -77,7 +77,8 @@ public class GetAllOutletsQueryHandler
             Address = o.Address,
             Latitude = o.Latitude,
             Longitude = o.Longitude,
-            PurchaseOrderApproverRole = o.PurchaseOrderApproverRole
+            PurchaseOrderApproverRole = o.PurchaseOrderApproverRole,
+            Status = o.Status
         }).ToList();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VendorManagementprojApplication.Contracts.Persistence;
 using VendorManagementprojDomain.Entities;
 using VendorManagementprojPersistence.Data;
@@ -62,7 +62,7 @@ public class OutletRepository : IOutletRepository
         if (outlet == null)
             return false;
 
-        _context.Outlets.Remove(outlet);
+        outlet.Status = "Inactive";
         await _context.SaveChangesAsync();
 
         return true;

@@ -106,4 +106,50 @@ public class OutletsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("{id:int}/activate")]
+    [Authorize(Roles = "Admin,Organization Manager")]
+    public async Task<IActionResult> Activate(int id, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IOutletRepository repo)
+    {
+        var outlet = await repo.GetByIdAsync(id);
+        if (outlet == null) return NotFound();
+
+        outlet.Status = "Active";
+        var updated = await repo.UpdateAsync(outlet);
+
+        return Ok(new VendorManagementprojApplication.DTOs.OutletDto
+        {
+            OutletID = updated.OutletID,
+            OrganizationID = updated.OrganizationID,
+            OutletName = updated.OutletName,
+            Address = updated.Address,
+            Latitude = updated.Latitude,
+            Longitude = updated.Longitude,
+            PurchaseOrderApproverRole = updated.PurchaseOrderApproverRole,
+            Status = updated.Status
+        });
+    }
+
+    [HttpPost("{id:int}/deactivate")]
+    [Authorize(Roles = "Admin,Organization Manager")]
+    public async Task<IActionResult> Deactivate(int id, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IOutletRepository repo)
+    {
+        var outlet = await repo.GetByIdAsync(id);
+        if (outlet == null) return NotFound();
+
+        outlet.Status = "Inactive";
+        var updated = await repo.UpdateAsync(outlet);
+
+        return Ok(new VendorManagementprojApplication.DTOs.OutletDto
+        {
+            OutletID = updated.OutletID,
+            OrganizationID = updated.OrganizationID,
+            OutletName = updated.OutletName,
+            Address = updated.Address,
+            Latitude = updated.Latitude,
+            Longitude = updated.Longitude,
+            PurchaseOrderApproverRole = updated.PurchaseOrderApproverRole,
+            Status = updated.Status
+        });
+    }
 }

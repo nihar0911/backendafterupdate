@@ -10,5 +10,7 @@ public class ContractProductDto
     public decimal ContractQuantity { get; set; }
     public decimal PurchasedQuantity { get; set; }
     public decimal VarianceQuantity => PurchasedQuantity - ContractQuantity;
+    public decimal RemainingQuantity => Math.Max(ContractQuantity - PurchasedQuantity, 0m);
+    public decimal ExtraOrderQuantity => Math.Max(PurchasedQuantity - ContractQuantity, 0m);
     public decimal? UnitPrice { get; set; }
 }

@@ -155,7 +155,8 @@ public class UpdateUserCommandHandler
             RoleName = updatedUser.Role?.RoleName,
             OrganizationID = updatedUser.OrganizationID,
             OutletID = updatedUser.OutletID,
-            VendorID = updatedUser.VendorID
+            VendorID = updatedUser.VendorID,
+            Status = updatedUser.Status
         };
 
         return new UpdateUserResponse

@@ -83,6 +83,7 @@ public class GetContractsByOrganizationIdQueryHandler : IRequestHandler<GetContr
                 Unit = resolvedUnit,
                 TotalQuantity = totalQty,
                 UsedQuantity = usedQty,
+                ContractTotalQuantity = totalQty,
                 StartDate = c.StartDate,
                 EndDate = c.EndDate,
                 PaymentMethod = c.PaymentMethod,

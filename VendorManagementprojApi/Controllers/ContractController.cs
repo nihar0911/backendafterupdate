@@ -7,6 +7,7 @@ using VendorManagementprojApplication.DTOs;
 using VendorManagementprojApplication.Features.Contracts.Commands.CreateContract;
 using VendorManagementprojApplication.Features.Contracts.Commands.CreateContractFromQuotation;
 using VendorManagementprojApplication.Features.Contracts.Commands.EndContract;
+using VendorManagementprojApplication.Features.Contracts.Commands.RenewContract;
 using VendorManagementprojApplication.Features.Contracts.Commands.ResetContract;
 using VendorManagementprojApplication.Features.Contracts.Commands.UpdateContract;
 using VendorManagementprojApplication.Features.Contracts.Queries.GetAllContracts;
@@ -242,6 +243,30 @@ public class ContractController : ControllerBase
     {
         try
         {
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("{contractID:int}/renew")]
+    [Authorize(Roles = "Admin,Organization Manager")]
+    public async Task<IActionResult> Renew(int contractID, [FromBody] RenewContractCommand command)
+    {
+        try
+        {
+            command.ContractID = contractID;
             var result = await _mediator.Send(command);
             return Ok(result);
         }

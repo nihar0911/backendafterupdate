@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -135,6 +135,7 @@ public class EndContractCommandHandler : IRequestHandler<EndContractCommand, End
             VendorName = vendorName,
             TotalQuantity = totalQty,
             UsedQuantity = usedQty,
+            ContractTotalQuantity = totalQty,
             StartDate = contract.StartDate,
             EndDate = contract.EndDate,
             PaymentMethod = contract.PaymentMethod,

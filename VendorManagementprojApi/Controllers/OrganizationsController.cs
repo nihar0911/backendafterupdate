@@ -99,6 +99,48 @@ public class OrganizationsController : ControllerBase //controllerbase provides 
          }
      }
 
+    [HttpPost("{id:int}/activate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Activate(int id, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IOrganizationRepository repo)
+    {
+        var org = await repo.GetByIdAsync(id);
+        if (org == null) return NotFound();
+
+        org.Status = "Active";
+        await repo.UpdateAsync(org);
+
+        return Ok(new VendorManagementprojApplication.DTOs.OrganizationDto
+        {
+            OrganizationID = org.OrganizationID,
+            OrganizationName = org.OrganizationName,
+            Address = org.Address,
+            Phone = org.Phone,
+            Email = org.Email,
+            Status = org.Status
+        });
+    }
+
+    [HttpPost("{id:int}/deactivate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Deactivate(int id, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IOrganizationRepository repo)
+    {
+        var org = await repo.GetByIdAsync(id);
+        if (org == null) return NotFound();
+
+        org.Status = "Inactive";
+        await repo.UpdateAsync(org);
+
+        return Ok(new VendorManagementprojApplication.DTOs.OrganizationDto
+        {
+            OrganizationID = org.OrganizationID,
+            OrganizationName = org.OrganizationName,
+            Address = org.Address,
+            Phone = org.Phone,
+            Email = org.Email,
+            Status = org.Status
+        });
+    }
+
      // Only Admin can delete organizations
      [HttpDelete("{id:int}")]
     [Authorize(Roles = "Admin")]

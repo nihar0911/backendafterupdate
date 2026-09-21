@@ -77,7 +77,7 @@ public class VendorProductRepository : IVendorProductRepository
                 c.Status == "Active" &&
                 c.StartDate <= today &&
                 c.EndDate >= today &&
-                (c.ContractProducts.Any(cp => cp.ProductID == productID) || c.ProductID == productID));
+                (c.ContractProducts.Any(cp => cp.ProductID == productID) || (!c.ContractProducts.Any() && c.ProductID == productID)));
     }
     public async Task<VendorProduct> AddAsync(
         VendorProduct vendorProduct)
@@ -146,7 +146,7 @@ public class VendorProductRepository : IVendorProductRepository
         if (vendorProduct == null)
             return false;
 
-        _context.VendorProducts.Remove(vendorProduct);
+        vendorProduct.Status = "Inactive";
 
         await _context.SaveChangesAsync();
 

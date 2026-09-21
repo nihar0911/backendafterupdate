@@ -32,7 +32,16 @@ public class LoginUserCommandHandler
 
         if (user == null)
         {
-            return new LoginUserResponse { Login = null };
+            return new LoginUserResponse { Login = null, ErrorMessage = "Invalid email or password." };
+        }
+
+        if (!string.Equals(user.Status, "Active", StringComparison.OrdinalIgnoreCase))
+        {
+            return new LoginUserResponse
+            {
+                Login = null,
+                ErrorMessage = "Account is deactivated."
+            };
         }
 
         var passwordValid =
@@ -42,7 +51,7 @@ public class LoginUserCommandHandler
 
         if (!passwordValid)
         {
-            return new LoginUserResponse { Login = null };
+            return new LoginUserResponse { Login = null, ErrorMessage = "Invalid email or password." };
         }
 
         var token =
