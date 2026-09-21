@@ -14,19 +14,35 @@ namespace VendorManagementprojApplication.Services;
 public class GeminiAiService : IGeminiAiService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _apiKey;
+    private readonly IConfiguration _configuration;
     private readonly string _model;
 
     public GeminiAiService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
-        var cfgKey = configuration["GeminiSettings:ApiKey"];
-        if (string.IsNullOrWhiteSpace(cfgKey))
-        {
-            cfgKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? Environment.GetEnvironmentVariable("GeminiSettings__ApiKey") ?? string.Empty;
-        }
-        _apiKey = cfgKey;
-        _model = configuration["GeminiSettings:Model"] ?? "gemini-1.5-flash";
+        _configuration = configuration;
+        _model = configuration["GeminiSettings:Model"] ?? "gemini-2.5-flash";
+        Console.WriteLine($"[GeminiAiService] Service initialized. Model: '{_model}'. API key will be resolved per-call.");
+    }
+
+    /// <summary>
+    /// Resolves the Gemini API key fresh on every call.
+    /// Priority: GEMINI_API_KEY (User -> Process -> Machine) → appsettings.json.
+    /// </summary>
+    private string GetApiKey()
+    {
+        var envKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY", EnvironmentVariableTarget.User)
+            ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY", EnvironmentVariableTarget.Process)
+            ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY", EnvironmentVariableTarget.Machine);
+
+        if (!string.IsNullOrWhiteSpace(envKey))
+            return envKey.Trim();
+
+        var cfgKey = _configuration["GeminiSettings:ApiKey"];
+        if (!string.IsNullOrWhiteSpace(cfgKey))
+            return cfgKey.Trim();
+
+        return string.Empty;
     }
 
     public async Task<SpoilageAdvisorAiResultDto> GenerateSpoilageAdviceAsync(
@@ -44,10 +60,12 @@ public class GeminiAiService : IGeminiAiService
             };
         }
 
+        var _apiKey = GetApiKey();
         if (!string.IsNullOrWhiteSpace(_apiKey))
         {
             try
             {
+                Console.WriteLine($"[GeminiAiService] Starting Spoilage Advice Gemini generation using model '{_model}' for Purchase Order #{purchaseOrderID}...");
                 string prompt = BuildPrompt(vendorName, purchaseOrderID, isSingleProduct, products);
 
                 string endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
@@ -60,12 +78,15 @@ public class GeminiAiService : IGeminiAiService
                     generationConfig = new
                     {
                         temperature = 0.2,
-                        maxOutputTokens = 800
+                        maxOutputTokens = 2048,
+                        responseMimeType = "application/json"
                     }
                 };
 
                 var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
                 var response = await _httpClient.PostAsync(endpoint, content);
+
+                Console.WriteLine($"[GeminiAiService] Gemini HTTP response status: {response.StatusCode} ({(int)response.StatusCode})");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -96,10 +117,12 @@ public class GeminiAiService : IGeminiAiService
                                 ProductNarratives = new List<SpoilageAiNarrativeDto>()
                             };
 
-                            foreach (var p in products)
+                            for (int i = 0; i < products.Count; i++)
                             {
+                                var p = products[i];
                                 var match = parsedResponse.Products.FirstOrDefault(x => x.ProductID == p.ProductID)
-                                            ?? parsedResponse.Products.FirstOrDefault(x => string.Equals(x.ProductName, p.ProductName, StringComparison.OrdinalIgnoreCase));
+                                            ?? parsedResponse.Products.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.ProductName) && string.Equals(x.ProductName, p.ProductName, StringComparison.OrdinalIgnoreCase))
+                                            ?? (i < parsedResponse.Products.Count ? parsedResponse.Products[i] : null);
 
                                 if (match != null && !string.IsNullOrWhiteSpace(match.Why) && !string.IsNullOrWhiteSpace(match.RecommendedAction))
                                 {
@@ -117,9 +140,15 @@ public class GeminiAiService : IGeminiAiService
                                 }
                             }
 
+                            Console.WriteLine($"[GeminiAiService] Gemini response successfully parsed. Generated narratives for {result.ProductNarratives.Count} product(s). Gemini response used.");
                             return result;
                         }
                     }
+                }
+                else
+                {
+                    string errorBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[GeminiAiService] Gemini API returned error: {(int)response.StatusCode} {response.StatusCode} - {errorBody}");
                 }
             }
             catch (Exception ex)
@@ -129,6 +158,7 @@ public class GeminiAiService : IGeminiAiService
         }
 
         // Deterministic fallback
+        Console.WriteLine($"[GeminiAiService] Deterministic fallback advisory used for Purchase Order #{purchaseOrderID}.");
         return GenerateDeterministicFallback(isSingleProduct, products);
     }
 
@@ -204,7 +234,8 @@ public class GeminiAiService : IGeminiAiService
         sb.AppendLine("  \"overallSummary\": \"Concise overall dispatch summary.\",");
         sb.AppendLine("  \"products\": [");
         sb.AppendLine("    {");
-        sb.AppendLine("      \"productId\": 123,");
+        sb.AppendLine("      \"productId\": 1,");
+        sb.AppendLine("      \"productName\": \"Product Name\",");
         sb.AppendLine("      \"why\": \"Factual quantitative explanation.\",");
         sb.AppendLine("      \"recommendedAction\": \"Specific actionable dispatch recommendation.\"");
         sb.AppendLine("    }");
@@ -357,6 +388,7 @@ public class GeminiAiService : IGeminiAiService
             };
         }
 
+        var _apiKey = GetApiKey();
         if (!string.IsNullOrWhiteSpace(_apiKey))
         {
             try
@@ -415,6 +447,11 @@ public class GeminiAiService : IGeminiAiService
                             };
                         }
                     }
+                }
+                else
+                {
+                    string errorBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[GeminiAiService] Procurement Parsing Gemini API returned error: {(int)response.StatusCode} {response.StatusCode} - {errorBody}");
                 }
             }
             catch (Exception ex)
