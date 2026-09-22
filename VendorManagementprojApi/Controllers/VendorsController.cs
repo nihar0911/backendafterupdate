@@ -1,6 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.Features.Vendors.Commands.CreateVendor;
 using VendorManagementprojApplication.Features.Vendors.Commands.DeleteVendor;
 using VendorManagementprojApplication.Features.Vendors.Commands.UpdateVendor;
@@ -62,13 +64,20 @@ public class VendorsController : ControllerBase
     }
 
     [HttpPut("{vendorID:int}")]
-
     [Authorize(Roles = "Admin,Vendor Manager")]
-
     public async Task<IActionResult> Update(
         int vendorID,
-        UpdateVendorCommand command)
+        UpdateVendorCommand command,
+        [FromServices] ICurrentUserService currentUserService)
     {
+        if (!currentUserService.IsAdmin && currentUserService.IsVendorManager)
+        {
+            if (!currentUserService.VendorID.HasValue || currentUserService.VendorID.Value != vendorID)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You are not authorized to update another vendor's profile." });
+            }
+        }
+
         command.VendorID = vendorID;
 
         var response =
@@ -82,8 +91,18 @@ public class VendorsController : ControllerBase
 
     [HttpPost("{vendorID:int}/activate")]
     [Authorize(Roles = "Admin,Vendor Manager")]
-    public async Task<IActionResult> Activate(int vendorID)
+    public async Task<IActionResult> Activate(
+        int vendorID,
+        [FromServices] ICurrentUserService currentUserService)
     {
+        if (!currentUserService.IsAdmin && currentUserService.IsVendorManager)
+        {
+            if (!currentUserService.VendorID.HasValue || currentUserService.VendorID.Value != vendorID)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You are not authorized to modify another vendor's status." });
+            }
+        }
+
         var response = await _mediator.Send(new GetVendorByIdQuery(vendorID));
         if (response.Vendor == null) return NotFound();
 
@@ -105,8 +124,18 @@ public class VendorsController : ControllerBase
 
     [HttpPost("{vendorID:int}/deactivate")]
     [Authorize(Roles = "Admin,Vendor Manager")]
-    public async Task<IActionResult> Deactivate(int vendorID)
+    public async Task<IActionResult> Deactivate(
+        int vendorID,
+        [FromServices] ICurrentUserService currentUserService)
     {
+        if (!currentUserService.IsAdmin && currentUserService.IsVendorManager)
+        {
+            if (!currentUserService.VendorID.HasValue || currentUserService.VendorID.Value != vendorID)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You are not authorized to modify another vendor's status." });
+            }
+        }
+
         var response = await _mediator.Send(new GetVendorByIdQuery(vendorID));
         if (response.Vendor == null) return NotFound();
 
@@ -129,8 +158,17 @@ public class VendorsController : ControllerBase
     [HttpDelete("{vendorID:int}")]
     [Authorize(Roles = "Admin,Vendor Manager")]
     public async Task<IActionResult> Delete(
-        int vendorID)
+        int vendorID,
+        [FromServices] ICurrentUserService currentUserService)
     {
+        if (!currentUserService.IsAdmin && currentUserService.IsVendorManager)
+        {
+            if (!currentUserService.VendorID.HasValue || currentUserService.VendorID.Value != vendorID)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { message = "You are not authorized to delete another vendor." });
+            }
+        }
+
         var response =
             await _mediator.Send(
                 new DeleteVendorCommand(vendorID));

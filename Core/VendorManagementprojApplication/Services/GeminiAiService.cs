@@ -11,6 +11,7 @@ using VendorManagementprojApplication.DTOs;
 
 namespace VendorManagementprojApplication.Services;
 
+
 public class GeminiAiService : IGeminiAiService
 {
     private readonly HttpClient _httpClient;
@@ -21,8 +22,23 @@ public class GeminiAiService : IGeminiAiService
     {
         _httpClient = httpClient;
         _configuration = configuration;
-        _model = configuration["GeminiSettings:Model"] ?? "gemini-2.5-flash";
-        Console.WriteLine($"[GeminiAiService] Service initialized. Model: '{_model}'. API key will be resolved per-call.");
+        _model = configuration["GeminiSettings:Model"] ?? "gemini-3.5-flash";
+        Console.WriteLine($"[GeminiAiService] Service initialized. Configured Model: '{_model}'. API key will be resolved per-call.");
+    }
+
+    private List<string> GetCandidateModels()
+    {
+        var list = new List<string>();
+        if (!string.IsNullOrWhiteSpace(_model))
+            list.Add(_model.Trim());
+
+        var fallbacks = new[] { "gemini-3.5-flash", "gemini-flash-latest", "gemini-3.5-flash-lite", "gemini-2.5-flash" };
+        foreach (var f in fallbacks)
+        {
+            if (!list.Contains(f, StringComparer.OrdinalIgnoreCase))
+                list.Add(f);
+        }
+        return list;
     }
 
     /// <summary>
@@ -63,97 +79,102 @@ public class GeminiAiService : IGeminiAiService
         var _apiKey = GetApiKey();
         if (!string.IsNullOrWhiteSpace(_apiKey))
         {
-            try
+            var candidateModels = GetCandidateModels();
+            string prompt = BuildPrompt(vendorName, purchaseOrderID, isSingleProduct, products);
+
+            foreach (var currentModel in candidateModels)
             {
-                Console.WriteLine($"[GeminiAiService] Starting Spoilage Advice Gemini generation using model '{_model}' for Purchase Order #{purchaseOrderID}...");
-                string prompt = BuildPrompt(vendorName, purchaseOrderID, isSingleProduct, products);
-
-                string endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
-                var requestBody = new
+                try
                 {
-                    contents = new[]
+                    Console.WriteLine($"[GeminiAiService] Starting Spoilage Advice Gemini generation using model '{currentModel}' for Purchase Order #{purchaseOrderID}...");
+
+                    string endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{currentModel}:generateContent?key={_apiKey}";
+                    var requestBody = new
                     {
-                        new { parts = new[] { new { text = prompt } } }
-                    },
-                    generationConfig = new
-                    {
-                        temperature = 0.2,
-                        maxOutputTokens = 2048,
-                        responseMimeType = "application/json"
-                    }
-                };
-
-                var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync(endpoint, content);
-
-                Console.WriteLine($"[GeminiAiService] Gemini HTTP response status: {response.StatusCode} ({(int)response.StatusCode})");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string jsonResponse = await response.Content.ReadAsStringAsync();
-                    using var doc = JsonDocument.Parse(jsonResponse);
-
-                    if (doc.RootElement.TryGetProperty("candidates", out var candidates) &&
-                        candidates.GetArrayLength() > 0)
-                    {
-                        var textElement = candidates[0]
-                            .GetProperty("content")
-                            .GetProperty("parts")[0]
-                            .GetProperty("text");
-
-                        string rawText = textElement.GetString() ?? string.Empty;
-                        rawText = rawText.Replace("```json", "").Replace("```", "").Trim();
-
-                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                        var parsedResponse = JsonSerializer.Deserialize<GeminiAdvisorResponse>(rawText, options);
-
-                        if (parsedResponse != null && parsedResponse.Products != null && parsedResponse.Products.Count > 0)
+                        contents = new[]
                         {
-                            var result = new SpoilageAdvisorAiResultDto
-                            {
-                                OverallSummary = !string.IsNullOrWhiteSpace(parsedResponse.OverallSummary)
-                                    ? parsedResponse.OverallSummary
-                                    : BuildFallbackOverallSummary(isSingleProduct, products),
-                                ProductNarratives = new List<SpoilageAiNarrativeDto>()
-                            };
+                            new { parts = new[] { new { text = prompt } } }
+                        },
+                        generationConfig = new
+                        {
+                            temperature = 0.2,
+                            maxOutputTokens = 2048,
+                            responseMimeType = "application/json"
+                        }
+                    };
 
-                            for (int i = 0; i < products.Count; i++)
-                            {
-                                var p = products[i];
-                                var match = parsedResponse.Products.FirstOrDefault(x => x.ProductID == p.ProductID)
-                                            ?? parsedResponse.Products.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.ProductName) && string.Equals(x.ProductName, p.ProductName, StringComparison.OrdinalIgnoreCase))
-                                            ?? (i < parsedResponse.Products.Count ? parsedResponse.Products[i] : null);
+                    var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+                    var response = await _httpClient.PostAsync(endpoint, content);
 
-                                if (match != null && !string.IsNullOrWhiteSpace(match.Why) && !string.IsNullOrWhiteSpace(match.RecommendedAction))
+                    Console.WriteLine($"[GeminiAiService] Gemini ({currentModel}) HTTP response status: {response.StatusCode} ({(int)response.StatusCode})");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string jsonResponse = await response.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(jsonResponse);
+
+                        if (doc.RootElement.TryGetProperty("candidates", out var candidates) &&
+                            candidates.GetArrayLength() > 0)
+                        {
+                            var textElement = candidates[0]
+                                .GetProperty("content")
+                                .GetProperty("parts")[0]
+                                .GetProperty("text");
+
+                            string rawText = textElement.GetString() ?? string.Empty;
+                            rawText = rawText.Replace("```json", "").Replace("```", "").Trim();
+
+                            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                            var parsedResponse = JsonSerializer.Deserialize<GeminiAdvisorResponse>(rawText, options);
+
+                            if (parsedResponse != null && parsedResponse.Products != null && parsedResponse.Products.Count > 0)
+                            {
+                                var result = new SpoilageAdvisorAiResultDto
                                 {
-                                    result.ProductNarratives.Add(new SpoilageAiNarrativeDto
+                                    OverallSummary = !string.IsNullOrWhiteSpace(parsedResponse.OverallSummary)
+                                        ? parsedResponse.OverallSummary
+                                        : BuildFallbackOverallSummary(isSingleProduct, products),
+                                    ProductNarratives = new List<SpoilageAiNarrativeDto>()
+                                };
+
+                                for (int i = 0; i < products.Count; i++)
+                                {
+                                    var p = products[i];
+                                    var match = parsedResponse.Products.FirstOrDefault(x => x.ProductID == p.ProductID)
+                                                ?? parsedResponse.Products.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.ProductName) && string.Equals(x.ProductName, p.ProductName, StringComparison.OrdinalIgnoreCase))
+                                                ?? (i < parsedResponse.Products.Count ? parsedResponse.Products[i] : null);
+
+                                    if (match != null && !string.IsNullOrWhiteSpace(match.Why) && !string.IsNullOrWhiteSpace(match.RecommendedAction))
                                     {
-                                        ProductID = p.ProductID,
-                                        Why = match.Why,
-                                        RecommendedAction = match.RecommendedAction
-                                    });
+                                        result.ProductNarratives.Add(new SpoilageAiNarrativeDto
+                                        {
+                                            ProductID = p.ProductID,
+                                            Why = match.Why,
+                                            RecommendedAction = match.RecommendedAction
+                                        });
+                                    }
+                                    else
+                                    {
+                                        var fallback = GenerateFallbackForProduct(p, isSingleProduct);
+                                        result.ProductNarratives.Add(fallback);
+                                    }
                                 }
-                                else
-                                {
-                                    var fallback = GenerateFallbackForProduct(p, isSingleProduct);
-                                    result.ProductNarratives.Add(fallback);
-                                }
-                            }
 
-                            Console.WriteLine($"[GeminiAiService] Gemini response successfully parsed. Generated narratives for {result.ProductNarratives.Count} product(s). Gemini response used.");
-                            return result;
+                                Console.WriteLine($"[GeminiAiService] Gemini ({currentModel}) response successfully parsed. Generated narratives for {result.ProductNarratives.Count} product(s). Gemini response used.");
+                                return result;
+                            }
                         }
                     }
+                    else
+                    {
+                        string errorBody = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"[GeminiAiService] Gemini ({currentModel}) API returned error: {(int)response.StatusCode} {response.StatusCode} - {errorBody}");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    string errorBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[GeminiAiService] Gemini API returned error: {(int)response.StatusCode} {response.StatusCode} - {errorBody}");
+                    Console.WriteLine($"[GeminiAiService] Spoilage Advice Gemini API call error with model '{currentModel}': {ex.Message}");
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[GeminiAiService] Spoilage Advice Gemini API call error: {ex.Message}");
             }
         }
 
@@ -391,72 +412,77 @@ public class GeminiAiService : IGeminiAiService
         var _apiKey = GetApiKey();
         if (!string.IsNullOrWhiteSpace(_apiKey))
         {
-            try
+            var candidateModels = GetCandidateModels();
+            string procurementPrompt = BuildProcurementPrompt(prompt, referenceDate);
+
+            foreach (var currentModel in candidateModels)
             {
-                string procurementPrompt = BuildProcurementPrompt(prompt, referenceDate);
-                string endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{_model}:generateContent?key={_apiKey}";
-                var requestBody = new
+                try
                 {
-                    contents = new[]
+                    string endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{currentModel}:generateContent?key={_apiKey}";
+                    var requestBody = new
                     {
-                        new { parts = new[] { new { text = procurementPrompt } } }
-                    },
-                    generationConfig = new
-                    {
-                        temperature = 0.1,
-                        maxOutputTokens = 1000
-                    }
-                };
-
-                var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync(endpoint, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string jsonResponse = await response.Content.ReadAsStringAsync();
-                    using var doc = JsonDocument.Parse(jsonResponse);
-
-                    if (doc.RootElement.TryGetProperty("candidates", out var candidates) &&
-                        candidates.GetArrayLength() > 0)
-                    {
-                        var textElement = candidates[0]
-                            .GetProperty("content")
-                            .GetProperty("parts")[0]
-                            .GetProperty("text");
-
-                        string rawText = textElement.GetString() ?? string.Empty;
-                        rawText = rawText.Replace("```json", "").Replace("```", "").Trim();
-
-                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                        var parsedResponse = JsonSerializer.Deserialize<GeminiProcurementExtractionResponse>(rawText, options);
-
-                        if (parsedResponse != null && parsedResponse.Items != null && parsedResponse.Items.Count > 0)
+                        contents = new[]
                         {
-                            return new ParsedProcurementPromptDto
+                            new { parts = new[] { new { text = procurementPrompt } } }
+                        },
+                        generationConfig = new
+                        {
+                            temperature = 0.1,
+                            maxOutputTokens = 1000
+                        }
+                    };
+
+                    var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+                    var response = await _httpClient.PostAsync(endpoint, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string jsonResponse = await response.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(jsonResponse);
+
+                        if (doc.RootElement.TryGetProperty("candidates", out var candidates) &&
+                            candidates.GetArrayLength() > 0)
+                        {
+                            var textElement = candidates[0]
+                                .GetProperty("content")
+                                .GetProperty("parts")[0]
+                                .GetProperty("text");
+
+                            string rawText = textElement.GetString() ?? string.Empty;
+                            rawText = rawText.Replace("```json", "").Replace("```", "").Trim();
+
+                            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                            var parsedResponse = JsonSerializer.Deserialize<GeminiProcurementExtractionResponse>(rawText, options);
+
+                            if (parsedResponse != null && parsedResponse.Items != null && parsedResponse.Items.Count > 0)
                             {
-                                Success = true,
-                                Message = "Successfully parsed procurement request.",
-                                ExtractedOutletName = parsedResponse.OutletName?.Trim(),
-                                ParsedRequiredDate = parsedResponse.RequiredDate?.Trim(),
-                                ExtractedItems = parsedResponse.Items.Select(i => new ExtractedProcurementItemDto
+                                return new ParsedProcurementPromptDto
                                 {
-                                    ProductName = i.ProductName?.Trim() ?? string.Empty,
-                                    Quantity = i.Quantity,
-                                    Unit = !string.IsNullOrWhiteSpace(i.Unit) ? NormalizeUnit(i.Unit.Trim()) : "units"
-                                }).ToList()
-                            };
+                                    Success = true,
+                                    Message = "Successfully parsed procurement request.",
+                                    ExtractedOutletName = parsedResponse.OutletName?.Trim(),
+                                    ParsedRequiredDate = parsedResponse.RequiredDate?.Trim(),
+                                    ExtractedItems = parsedResponse.Items.Select(i => new ExtractedProcurementItemDto
+                                    {
+                                        ProductName = i.ProductName?.Trim() ?? string.Empty,
+                                        Quantity = i.Quantity,
+                                        Unit = !string.IsNullOrWhiteSpace(i.Unit) ? NormalizeUnit(i.Unit.Trim()) : "units"
+                                    }).ToList()
+                                };
+                            }
                         }
                     }
+                    else
+                    {
+                        string errorBody = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"[GeminiAiService] Procurement Parsing Gemini ({currentModel}) API returned error: {(int)response.StatusCode} {response.StatusCode} - {errorBody}");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    string errorBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[GeminiAiService] Procurement Parsing Gemini API returned error: {(int)response.StatusCode} {response.StatusCode} - {errorBody}");
+                    Console.WriteLine($"[GeminiAiService] Procurement Parsing Gemini API call error with model '{currentModel}': {ex.Message}");
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[GeminiAiService] Procurement Parsing Gemini API call error: {ex.Message}");
             }
         }
 
@@ -690,7 +716,6 @@ public class GeminiAiService : IGeminiAiService
         }
         ;
     }
-
     private class GeminiProcurementExtractionResponse
     {
         public string? OutletName { get; set; }
@@ -705,6 +730,3 @@ public class GeminiAiService : IGeminiAiService
         public string? Unit { get; set; }
     }
 }
-
-
-

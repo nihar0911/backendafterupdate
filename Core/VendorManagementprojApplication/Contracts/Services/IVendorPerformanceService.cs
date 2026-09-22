@@ -8,4 +8,5 @@ public interface IVendorPerformanceService
 {
     Task<List<VendorPerformanceSummaryDto>> GetOrganizationVendorsPerformanceAsync(int? organizationId = null);
     Task<VendorPerformanceSummaryDto?> GetVendorPerformanceAsync(int vendorId, int? organizationId = null);
+    Task<Dictionary<int, VendorPerformanceSummaryDto>> GetVendorsPerformanceBatchAsync(List<int> vendorIds, int? organizationId = null);
 }

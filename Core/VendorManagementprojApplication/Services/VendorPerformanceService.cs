@@ -74,6 +74,45 @@ public class VendorPerformanceService : IVendorPerformanceService
             .ToList();
     }
 
+    public async Task<Dictionary<int, VendorPerformanceSummaryDto>> GetVendorsPerformanceBatchAsync(List<int> vendorIds, int? organizationId = null)
+    {
+        if (vendorIds == null || vendorIds.Count == 0)
+            return new Dictionary<int, VendorPerformanceSummaryDto>();
+
+        var distinctIds = vendorIds.Distinct().ToList();
+        var allVendors = await _vendorRepository.GetAllAsync();
+        var vendors = allVendors.Where(v => distinctIds.Contains(v.VendorID)).ToList();
+
+        var allPOs = await _purchaseOrderRepository.GetAllAsync();
+        var allDeliveries = await _deliveryRecordRepository.GetAllAsync();
+        var allInvoices = await _invoiceRepository.GetAllAsync();
+        var allFeedback = await _feedbackRepository.GetAllAsync();
+
+        if (organizationId.HasValue && organizationId.Value > 0)
+        {
+            int orgId = organizationId.Value;
+            allPOs = allPOs.Where(po => po.Outlet != null && po.Outlet.OrganizationID == orgId).ToList();
+            allDeliveries = allDeliveries.Where(dr => dr.PurchaseOrder != null && dr.PurchaseOrder.Outlet != null && dr.PurchaseOrder.Outlet.OrganizationID == orgId).ToList();
+            allInvoices = allInvoices.Where(inv => inv.Outlet != null && inv.Outlet.OrganizationID == orgId).ToList();
+        }
+
+        var dict = new Dictionary<int, VendorPerformanceSummaryDto>();
+        foreach (var vendor in vendors)
+        {
+            var summary = CalculateSummary(
+                vendor.VendorID,
+                vendor.VendorName,
+                allPOs.Where(po => po.VendorID == vendor.VendorID).ToList(),
+                allDeliveries.Where(dr => dr.PurchaseOrder != null && dr.PurchaseOrder.VendorID == vendor.VendorID).ToList(),
+                allInvoices.Where(inv => inv.VendorID == vendor.VendorID).ToList(),
+                allFeedback.Where(f => f.VendorID == vendor.VendorID).ToList());
+
+            dict[vendor.VendorID] = summary;
+        }
+
+        return dict;
+    }
+
     public async Task<VendorPerformanceSummaryDto?> GetVendorPerformanceAsync(int vendorId, int? organizationId = null)
     {
         var vendor = await _vendorRepository.GetByIdAsync(vendorId);
@@ -222,14 +261,22 @@ public class VendorPerformanceService : IVendorPerformanceService
             summary.AverageRating = Math.Round(vendorFeedback.Average(f => f.Rating), 1);
             summary.AverageQualityRating = Math.Round(vendorFeedback.Average(f => f.ProductQualityRating), 1);
             summary.AverageDeliveryRating = Math.Round(vendorFeedback.Average(f => f.DeliveryRating), 1);
+            summary.RecentReviewSnippets = vendorFeedback
+                .Where(f => !string.IsNullOrWhiteSpace(f.Review))
+                .OrderByDescending(f => f.FeedbackDate)
+                .Take(5)
+                .Select(f => f.Review.Trim())
+                .ToList();
         }
         else
         {
             summary.AverageRating = null;
             summary.AverageQualityRating = null;
             summary.AverageDeliveryRating = null;
+            summary.RecentReviewSnippets = new List<string>();
         }
 
         return summary;
+
     }
 }

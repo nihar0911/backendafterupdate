@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace VendorManagementprojApplication.DTOs;
 
 public class VendorPerformanceSummaryDto
@@ -30,6 +32,7 @@ public class VendorPerformanceSummaryDto
     public decimal? AverageRating { get; set; }
     public decimal? AverageQualityRating { get; set; }
     public decimal? AverageDeliveryRating { get; set; }
+    public List<string> RecentReviewSnippets { get; set; } = new();
 
     // Flags for UI state
     public bool HasDeliveryHistory => CompletedDeliveries > 0;
@@ -37,3 +40,4 @@ public class VendorPerformanceSummaryDto
     public bool HasInvoiceHistory => TotalInvoices > 0;
     public bool HasReviewHistory => TotalReviews > 0;
 }
+

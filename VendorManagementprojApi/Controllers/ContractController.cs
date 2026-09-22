@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VendorManagementprojApplication.Contracts.Services;
 using VendorManagementprojApplication.DTOs;
 using VendorManagementprojApplication.Features.Contracts.Commands.CreateContract;
 using VendorManagementprojApplication.Features.Contracts.Commands.CreateContractFromQuotation;
@@ -25,10 +26,12 @@ namespace VendorManagementprojApi.Controllers;
 public class ContractController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ICurrentUserService _currentUserService;
 
-    public ContractController(IMediator mediator)
+    public ContractController(IMediator mediator, ICurrentUserService currentUserService)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
@@ -70,6 +73,18 @@ public class ContractController : ControllerBase
         {
             return StatusCode(403, new { message = ex.Message });
         }
+    }
+
+    [HttpGet("outlet/my")]
+    [HttpGet("my")]
+    [Authorize(Roles = "Outlet Manager")]
+    public async Task<IActionResult> GetMyContracts()
+    {
+        if (!_currentUserService.OutletID.HasValue)
+            return Ok(new GetContractsByOutletResponse { Contracts = new List<ContractDto>() });
+
+        var result = await _mediator.Send(new GetContractsByOutletQuery(_currentUserService.OutletID.Value));
+        return Ok(result);
     }
 
     [HttpGet("outlet/{outletID:int}")]

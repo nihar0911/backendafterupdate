@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VendorManagementprojApplication.DTOs;
@@ -16,4 +17,3 @@ public interface IGeminiAiService
         string prompt,
         DateTime referenceDate);
 }
-

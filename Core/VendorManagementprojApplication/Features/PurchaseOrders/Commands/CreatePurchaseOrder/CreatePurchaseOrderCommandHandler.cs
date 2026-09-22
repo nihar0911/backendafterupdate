@@ -92,7 +92,14 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
         if (outlet == null)
             throw new InvalidOperationException("Outlet does not exist.");
 
-        var approverRole = PurchaseOrderApprover.Normalize(outlet.PurchaseOrderApproverRole);
+        if (!string.IsNullOrWhiteSpace(request.ApproverRole) &&
+            !string.Equals(request.ApproverRole, PurchaseOrderApprover.OrganizationManager, StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(request.ApproverRole, PurchaseOrderApprover.OutletManager, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Invalid approval authority. Allowed values are 'Organization Manager' or 'Outlet Manager'.");
+        }
+
+        var approverRole = PurchaseOrderApprover.Normalize(!string.IsNullOrWhiteSpace(request.ApproverRole) ? request.ApproverRole : outlet.PurchaseOrderApproverRole);
 
         var purchaseOrder = new PurchaseOrder
         {

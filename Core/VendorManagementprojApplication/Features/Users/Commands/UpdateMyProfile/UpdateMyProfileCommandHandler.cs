@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -38,13 +38,35 @@ public class UpdateMyProfileCommandHandler
             throw new UnauthorizedAccessException("User is not authenticated.");
         }
 
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            throw new ArgumentException("Full name is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Email))
+        {
+            throw new ArgumentException("Email is required.");
+        }
+
+        var cleanName = request.Name.Trim();
+        var cleanEmail = request.Email.Trim();
+
+        if (cleanName.Length > 100)
+        {
+            throw new ArgumentException("Name cannot exceed 100 characters.");
+        }
+
+        if (cleanEmail.Length > 150 || !cleanEmail.Contains('@') || cleanEmail.StartsWith("@") || cleanEmail.EndsWith("@"))
+        {
+            throw new ArgumentException("Please enter a valid email address.");
+        }
+
         var user = await _userRepository.GetByIdAsync(currentUserId.Value);
         if (user == null)
         {
             throw new KeyNotFoundException("User not found.");
         }
 
-        var cleanEmail = request.Email.Trim();
         if (!string.Equals(user.Email, cleanEmail, StringComparison.OrdinalIgnoreCase))
         {
             var existingUser = await _userRepository.GetByEmailAsync(cleanEmail);
@@ -54,12 +76,12 @@ public class UpdateMyProfileCommandHandler
             }
         }
 
-        user.Name = request.Name.Trim();
+        user.Name = cleanName;
         user.Email = cleanEmail;
 
         if (!string.IsNullOrWhiteSpace(request.NewPassword))
         {
-            user.PasswordHash = _passwordHasher.Hash(request.NewPassword);
+            user.PasswordHash = _passwordHasher.Hash(request.NewPassword.Trim());
         }
 
         await _userRepository.UpdateAsync(user);
@@ -75,7 +97,8 @@ public class UpdateMyProfileCommandHandler
             Email = updatedUser.Email,
             Role = updatedUser.Role?.RoleName ?? _currentUserService.Role ?? "Admin",
             OrganizationID = updatedUser.OrganizationID,
-            OutletID = updatedUser.OutletID
+            OutletID = updatedUser.OutletID,
+            VendorID = updatedUser.VendorID
         };
 
         return new UpdateMyProfileResponse

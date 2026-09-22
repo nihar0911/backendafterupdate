@@ -8,6 +8,7 @@ using VendorManagementprojApplication.Features.Users.Commands.CreateUser;
 using VendorManagementprojApplication.Features.Users.Commands.UpdateMyProfile;
 using VendorManagementprojApplication.Features.Users.Commands.UpdateUser;
 using VendorManagementprojApplication.Features.Users.Queries.GetAllUsers;
+using VendorManagementprojApplication.Features.Users.Queries.GetMyProfile;
 using VendorManagementprojApplication.Features.Users.Queries.GetUserById;
 
 namespace VendorManagementprojApi.Controllers;
@@ -33,6 +34,32 @@ public class UsersController : ControllerBase
                 new GetAllUsersQuery());
 
         return Ok(response);
+    }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> GetMyProfile()
+    {
+        try
+        {
+            var response =
+                await _mediator.Send(
+                    new GetMyProfileQuery());
+
+            if (response.User == null)
+                return NotFound();
+
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(
+                new { message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(
+                new { message = ex.Message });
+        }
     }
 
     [HttpGet("{userID:int}")]
@@ -62,6 +89,11 @@ public class UsersController : ControllerBase
 
             return Ok(response);
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(
+                new { message = ex.Message });
+        }
         catch (InvalidOperationException ex)
         {
             return Conflict(
@@ -83,6 +115,11 @@ public class UsersController : ControllerBase
 
             return Ok(response);
         }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(
+                new { message = ex.Message });
+        }
         catch (KeyNotFoundException ex)
         {
             return NotFound(
@@ -96,7 +133,6 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("me")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateMyProfile(
         UpdateMyProfileCommand command)
     {
@@ -106,6 +142,11 @@ public class UsersController : ControllerBase
                 await _mediator.Send(command);
 
             return Ok(response);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(
+                new { message = ex.Message });
         }
         catch (UnauthorizedAccessException ex)
         {
