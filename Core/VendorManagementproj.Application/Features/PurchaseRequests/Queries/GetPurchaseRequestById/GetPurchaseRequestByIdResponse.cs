@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 
 public class GetPurchaseRequestByIdResponse
 {

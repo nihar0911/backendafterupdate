@@ -1,7 +1,7 @@
-using System.Threading.Tasks;
-using VendorManagementprojDomain.Entities;
+﻿using System.Threading.Tasks;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Contracts.Infrastructure;
+namespace VendorManagementproj.Application.Contracts.Infrastructure;
 
 public interface IInvoiceDocumentService
 {

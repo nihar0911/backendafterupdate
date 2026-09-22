@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Queries.GetUserById;
+namespace VendorManagementproj.Application.Features.Users.Queries.GetUserById;
 
 public class GetUserByIdQuery : IRequest<GetUserByIdResponse>
 {

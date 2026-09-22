@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorRecommendations.Queries.GetRecommendationsForProduct;
+namespace VendorManagementproj.Application.Features.VendorRecommendations.Queries.GetRecommendationsForProduct;
 
 public class GetRecommendationsForProductQueryHandler : IRequestHandler<GetRecommendationsForProductQuery, GetRecommendationsForProductResponse>
 {

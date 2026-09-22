@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Products.Commands.CreateProduct;
+namespace VendorManagementproj.Application.Features.Products.Commands.CreateProduct;
 
 public class CreateProductCommand : IRequest<CreateProductResponse>
 {

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.DispatchPurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.DispatchPurchaseOrder;
 
 public class DispatchPurchaseOrderCommand : IRequest<DispatchPurchaseOrderResponse>
 {

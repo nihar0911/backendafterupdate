@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.VendorFeedback.Commands.CreateVendorFeedback;
+namespace VendorManagementproj.Application.Features.VendorFeedback.Commands.CreateVendorFeedback;
 
 public class CreateVendorFeedbackCommand
     : IRequest<CreateVendorFeedbackResponse>

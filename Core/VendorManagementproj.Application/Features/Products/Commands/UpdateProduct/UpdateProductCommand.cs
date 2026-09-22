@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Products.Commands.UpdateProduct;
+namespace VendorManagementproj.Application.Features.Products.Commands.UpdateProduct;
 
 public class UpdateProductCommand : IRequest<UpdateProductResponse>
 {

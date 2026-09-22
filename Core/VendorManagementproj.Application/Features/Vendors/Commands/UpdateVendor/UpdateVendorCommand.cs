@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Vendors.Commands.UpdateVendor;
+namespace VendorManagementproj.Application.Features.Vendors.Commands.UpdateVendor;
 
 public class UpdateVendorCommand : IRequest<UpdateVendorResponse>
 {

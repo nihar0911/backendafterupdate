@@ -1,6 +1,6 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Quotations.Queries.GetAllQuotations;
+namespace VendorManagementproj.Application.Features.Quotations.Queries.GetAllQuotations;
 
 public record GetAllQuotationsQuery : IRequest<GetAllQuotationsResponse>;

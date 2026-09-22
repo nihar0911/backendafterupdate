@@ -1,10 +1,10 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.VendorRecommendations.Queries.GetRecommendations;
-using VendorManagementprojApplication.Features.VendorRecommendations.Queries.GetRecommendationsForProduct;
+using VendorManagementproj.Application.Features.VendorRecommendations.Queries.GetRecommendations;
+using VendorManagementproj.Application.Features.VendorRecommendations.Queries.GetRecommendationsForProduct;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -88,4 +88,4 @@ public class VendorRecommendationsController : ControllerBase
             return StatusCode(403, new { message = ex.Message });
         }
     }
-}
+}

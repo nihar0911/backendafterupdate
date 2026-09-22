@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
+namespace VendorManagementproj.Application.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
 
 public class GetDeliveriesByPurchaseOrderQueryHandler
     : IRequestHandler<

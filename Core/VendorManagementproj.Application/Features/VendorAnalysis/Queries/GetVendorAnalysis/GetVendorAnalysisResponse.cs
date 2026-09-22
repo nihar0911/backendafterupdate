@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorAnalysis.Queries.GetVendorAnalysis;
+namespace VendorManagementproj.Application.Features.VendorAnalysis.Queries.GetVendorAnalysis;
 
 public class GetVendorAnalysisResponse
 {

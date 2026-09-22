@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.AcceptQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.AcceptQuotation;
 
 public class AcceptQuotationResponse
 {

@@ -1,8 +1,8 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.TaxRates.Queries.GetTaxRateById;
+namespace VendorManagementproj.Application.Features.TaxRates.Queries.GetTaxRateById;
 
 public class GetTaxRateByIdQueryHandler : IRequestHandler<GetTaxRateByIdQuery, GetTaxRateByIdResponse>
 {

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Queries.GetPendingPurchaseOrders;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Queries.GetPendingPurchaseOrders;
 
 public class GetPendingPurchaseOrdersQuery : IRequest<GetPendingPurchaseOrdersResponse>
 {

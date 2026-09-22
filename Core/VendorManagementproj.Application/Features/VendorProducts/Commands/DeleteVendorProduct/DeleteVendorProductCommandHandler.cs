@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
 
-namespace VendorManagementprojApplication.Features.VendorProducts.Commands.DeleteVendorProduct;
+namespace VendorManagementproj.Application.Features.VendorProducts.Commands.DeleteVendorProduct;
 
 public class DeleteVendorProductCommandHandler : IRequestHandler<DeleteVendorProductCommand, DeleteVendorProductResponse>
 {

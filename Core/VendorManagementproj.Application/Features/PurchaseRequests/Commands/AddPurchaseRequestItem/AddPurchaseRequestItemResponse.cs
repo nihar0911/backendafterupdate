@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.AddPurchaseRequestItem;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.AddPurchaseRequestItem;
 
 public class AddPurchaseRequestItemResponse
 {

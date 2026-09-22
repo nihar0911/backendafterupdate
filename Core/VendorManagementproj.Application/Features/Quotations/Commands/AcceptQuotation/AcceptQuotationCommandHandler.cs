@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.AcceptQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.AcceptQuotation;
 
 public class AcceptQuotationCommandHandler : IRequestHandler<AcceptQuotationCommand, AcceptQuotationResponse>
 {

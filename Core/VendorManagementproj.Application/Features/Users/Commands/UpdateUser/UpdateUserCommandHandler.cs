@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.UpdateUser;
+namespace VendorManagementproj.Application.Features.Users.Commands.UpdateUser;
 
 public class UpdateUserCommandHandler
     : IRequestHandler<UpdateUserCommand, UpdateUserResponse>

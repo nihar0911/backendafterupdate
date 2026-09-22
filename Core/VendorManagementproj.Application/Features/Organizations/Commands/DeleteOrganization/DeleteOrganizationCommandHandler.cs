@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
 
-namespace VendorManagementprojApplication.Features.Organizations.Commands.DeleteOrganization;
+namespace VendorManagementproj.Application.Features.Organizations.Commands.DeleteOrganization;
 
 public class DeleteOrganizationCommandHandler
     : IRequestHandler<DeleteOrganizationCommand, DeleteOrganizationResponse>

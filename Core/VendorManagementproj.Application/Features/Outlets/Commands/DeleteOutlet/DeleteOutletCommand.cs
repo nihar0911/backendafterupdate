@@ -1,5 +1,5 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Outlets.Commands.DeleteOutlet;
+namespace VendorManagementproj.Application.Features.Outlets.Commands.DeleteOutlet;
 
 public record DeleteOutletCommand(int OutletID) : IRequest<DeleteOutletResponse>;

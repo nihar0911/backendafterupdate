@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using VendorManagementprojPersistence.Data;
+using VendorManagementproj.Persistence.Data;
 
 #nullable disable
 
-namespace VendorManagementprojPersistence.Migrations
+namespace VendorManagementproj.Persistence.Migrations
 {
     [DbContext(typeof(VendorManagementDbContext))]
     [Migration("20260810065250_AddProducts")]
@@ -24,7 +24,7 @@ namespace VendorManagementprojPersistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Organization", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Organization", b =>
                 {
                     b.Property<int>("OrganizationID")
                         .ValueGeneratedOnAdd()
@@ -62,7 +62,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Organizations", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Outlet", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Outlet", b =>
                 {
                     b.Property<int>("OutletID")
                         .ValueGeneratedOnAdd()
@@ -99,7 +99,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Outlets", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Product", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Product", b =>
                 {
                     b.Property<int>("ProductID")
                         .ValueGeneratedOnAdd()
@@ -138,7 +138,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Role", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Role", b =>
                 {
                     b.Property<int>("RoleID")
                         .ValueGeneratedOnAdd()
@@ -160,7 +160,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Roles", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.User", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.User", b =>
                 {
                     b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
@@ -208,7 +208,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Vendor", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Vendor", b =>
                 {
                     b.Property<int>("VendorID")
                         .ValueGeneratedOnAdd()
@@ -269,9 +269,9 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Vendors", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Outlet", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Outlet", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Organization", "Organization")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -280,19 +280,19 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.User", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.User", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Organization", "Organization")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationID")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Outlet", "Outlet")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Outlet", "Outlet")
                         .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Role", "Role")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleID")
                         .OnDelete(DeleteBehavior.Restrict)

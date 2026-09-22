@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+﻿using System.Collections.Generic;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductsByProductName;
+namespace VendorManagementproj.Application.Features.VendorProducts.Queries.GetVendorProductsByProductName;
 
 public class GetVendorProductsByProductNameResponse
 {

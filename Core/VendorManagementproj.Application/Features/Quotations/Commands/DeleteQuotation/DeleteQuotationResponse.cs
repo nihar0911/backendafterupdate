@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.Quotations.Commands.DeleteQuotation;
+﻿namespace VendorManagementproj.Application.Features.Quotations.Commands.DeleteQuotation;
 
 public class DeleteQuotationResponse
 {

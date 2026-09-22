@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Queries.GetAllOrganizations;
+namespace VendorManagementproj.Application.Features.Organizations.Queries.GetAllOrganizations;
 
 public class GetAllOrganizationsQueryHandler
     : IRequestHandler<GetAllOrganizationsQuery, GetAllOrganizationsResponse>

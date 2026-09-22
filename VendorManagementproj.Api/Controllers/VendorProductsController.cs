@@ -1,16 +1,16 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Features.VendorProducts.Commands.CreateVendorProduct;
-using VendorManagementprojApplication.Features.VendorProducts.Commands.DeleteVendorProduct;
-using VendorManagementprojApplication.Features.VendorProducts.Commands.UpdateVendorProduct;
-using VendorManagementprojApplication.Features.VendorProducts.Queries.GetAllVendorProducts;
-using VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductById;
-using VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorsByProduct;
-using VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductsByProductName;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Features.VendorProducts.Commands.CreateVendorProduct;
+using VendorManagementproj.Application.Features.VendorProducts.Commands.DeleteVendorProduct;
+using VendorManagementproj.Application.Features.VendorProducts.Commands.UpdateVendorProduct;
+using VendorManagementproj.Application.Features.VendorProducts.Queries.GetAllVendorProducts;
+using VendorManagementproj.Application.Features.VendorProducts.Queries.GetVendorProductById;
+using VendorManagementproj.Application.Features.VendorProducts.Queries.GetVendorsByProduct;
+using VendorManagementproj.Application.Features.VendorProducts.Queries.GetVendorProductsByProductName;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/vendorproducts")]

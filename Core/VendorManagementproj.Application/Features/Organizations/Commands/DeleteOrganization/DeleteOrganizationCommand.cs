@@ -1,5 +1,5 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Organizations.Commands.DeleteOrganization;
+namespace VendorManagementproj.Application.Features.Organizations.Commands.DeleteOrganization;
 
 public record DeleteOrganizationCommand(int OrganizationID) : IRequest<DeleteOrganizationResponse>;

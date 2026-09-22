@@ -1,6 +1,6 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Products.Queries.GetAllProducts;
+namespace VendorManagementproj.Application.Features.Products.Queries.GetAllProducts;
 
 public record GetAllProductsQuery : IRequest<GetAllProductsResponse>;

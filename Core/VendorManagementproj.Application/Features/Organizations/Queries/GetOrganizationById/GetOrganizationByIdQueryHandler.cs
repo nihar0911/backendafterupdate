@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Queries.GetOrganizationById;
+namespace VendorManagementproj.Application.Features.Organizations.Queries.GetOrganizationById;
 
 public class GetOrganizationByIdQueryHandler
     : IRequestHandler<GetOrganizationByIdQuery, GetOrganizationByIdResponse>
@@ -77,7 +77,7 @@ public class GetOrganizationByIdQueryHandler
     }
 
     private static OrganizationDto MapToDto(
-        VendorManagementprojDomain.Entities.Organization organization)
+        VendorManagementproj.Domain.Entities.Organization organization)
     {
         return new OrganizationDto
         {

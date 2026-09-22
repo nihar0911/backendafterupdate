@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Contracts.Services;
+﻿namespace VendorManagementproj.Application.Contracts.Services;
 
 public interface ICurrentUserService
 {

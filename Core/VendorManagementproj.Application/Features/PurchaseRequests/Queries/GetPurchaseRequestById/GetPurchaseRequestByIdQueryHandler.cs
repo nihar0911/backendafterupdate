@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
 
 public class GetPurchaseRequestByIdQueryHandler : IRequestHandler<GetPurchaseRequestByIdQuery, GetPurchaseRequestByIdResponse>
 {

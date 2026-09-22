@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using VendorManagementprojDomain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojPersistence.Data;
+namespace VendorManagementproj.Persistence.Data;
 
 public class VendorManagementDbContext : DbContext
 {

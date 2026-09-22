@@ -1,8 +1,8 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Products.Queries.GetAllProducts;
+namespace VendorManagementproj.Application.Features.Products.Queries.GetAllProducts;
 
 public class GetAllProductsQueryHandler : IRequestHandler<GetAllProductsQuery, GetAllProductsResponse>
 {

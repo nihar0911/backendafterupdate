@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+﻿using System.Collections.Generic;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Payments.Queries.GetPayments;
+namespace VendorManagementproj.Application.Features.Payments.Queries.GetPayments;
 
 public class GetPaymentsResponse
 {

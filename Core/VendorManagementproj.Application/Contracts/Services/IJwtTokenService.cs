@@ -1,6 +1,6 @@
-﻿using VendorManagementprojDomain.Entities;
+﻿using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Contracts.Services;
+namespace VendorManagementproj.Application.Contracts.Services;
 
 public interface IJwtTokenService
 {

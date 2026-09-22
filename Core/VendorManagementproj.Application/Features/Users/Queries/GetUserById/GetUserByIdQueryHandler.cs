@@ -1,8 +1,8 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Queries.GetUserById;
+namespace VendorManagementproj.Application.Features.Users.Queries.GetUserById;
 
 public class GetUserByIdQueryHandler
     : IRequestHandler<GetUserByIdQuery, GetUserByIdResponse>

@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Invoices.Commands.MarkInvoicePaid;
+namespace VendorManagementproj.Application.Features.Invoices.Commands.MarkInvoicePaid;
 
 public class MarkInvoicePaidResponse
 {

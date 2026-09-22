@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Invoices.Commands.CreateInvoice;
+namespace VendorManagementproj.Application.Features.Invoices.Commands.CreateInvoice;
 
 public class CreateInvoiceCommand : IRequest<CreateInvoiceResponse>
 {

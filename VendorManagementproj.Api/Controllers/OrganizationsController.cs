@@ -1,13 +1,13 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;//helps to define roles nd all
 using Microsoft.AspNetCore.Mvc;//gives api functionality hhtppost/httpget
-using VendorManagementprojApplication.Features.Organizations.Commands.CreateOrganization;
-using VendorManagementprojApplication.Features.Organizations.Commands.DeleteOrganization;
-using VendorManagementprojApplication.Features.Organizations.Commands.UpdateOrganization;
-using VendorManagementprojApplication.Features.Organizations.Queries.GetAllOrganizations;
-using VendorManagementprojApplication.Features.Organizations.Queries.GetOrganizationById;
+using VendorManagementproj.Application.Features.Organizations.Commands.CreateOrganization;
+using VendorManagementproj.Application.Features.Organizations.Commands.DeleteOrganization;
+using VendorManagementproj.Application.Features.Organizations.Commands.UpdateOrganization;
+using VendorManagementproj.Application.Features.Organizations.Queries.GetAllOrganizations;
+using VendorManagementproj.Application.Features.Organizations.Queries.GetOrganizationById;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -101,7 +101,7 @@ public class OrganizationsController : ControllerBase //controllerbase provides 
 
     [HttpPost("{id:int}/activate")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Activate(int id, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IOrganizationRepository repo)
+    public async Task<IActionResult> Activate(int id, [FromServices] VendorManagementproj.Application.Contracts.Persistence.IOrganizationRepository repo)
     {
         var org = await repo.GetByIdAsync(id);
         if (org == null) return NotFound();
@@ -109,7 +109,7 @@ public class OrganizationsController : ControllerBase //controllerbase provides 
         org.Status = "Active";
         await repo.UpdateAsync(org);
 
-        return Ok(new VendorManagementprojApplication.DTOs.OrganizationDto
+        return Ok(new VendorManagementproj.Application.DTOs.OrganizationDto
         {
             OrganizationID = org.OrganizationID,
             OrganizationName = org.OrganizationName,
@@ -122,7 +122,7 @@ public class OrganizationsController : ControllerBase //controllerbase provides 
 
     [HttpPost("{id:int}/deactivate")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Deactivate(int id, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IOrganizationRepository repo)
+    public async Task<IActionResult> Deactivate(int id, [FromServices] VendorManagementproj.Application.Contracts.Persistence.IOrganizationRepository repo)
     {
         var org = await repo.GetByIdAsync(id);
         if (org == null) return NotFound();
@@ -130,7 +130,7 @@ public class OrganizationsController : ControllerBase //controllerbase provides 
         org.Status = "Inactive";
         await repo.UpdateAsync(org);
 
-        return Ok(new VendorManagementprojApplication.DTOs.OrganizationDto
+        return Ok(new VendorManagementproj.Application.DTOs.OrganizationDto
         {
             OrganizationID = org.OrganizationID,
             OrganizationName = org.OrganizationName,

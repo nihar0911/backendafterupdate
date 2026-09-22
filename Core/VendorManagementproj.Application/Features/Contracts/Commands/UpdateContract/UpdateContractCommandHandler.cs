@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.UpdateContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.UpdateContract;
 
 public class UpdateContractCommandHandler
     : IRequestHandler<UpdateContractCommand, UpdateContractResponse>
@@ -82,7 +82,7 @@ public class UpdateContractCommandHandler
     }
 
     private static ContractDto MapToDto(
-        VendorManagementprojDomain.Entities.Contract contract)
+        VendorManagementproj.Domain.Entities.Contract contract)
     {
         return new ContractDto
         {

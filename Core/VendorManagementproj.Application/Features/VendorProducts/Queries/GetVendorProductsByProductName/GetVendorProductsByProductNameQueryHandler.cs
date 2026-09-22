@@ -1,11 +1,11 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductsByProductName;
+namespace VendorManagementproj.Application.Features.VendorProducts.Queries.GetVendorProductsByProductName;
 
 public class GetVendorProductsByProductNameQueryHandler
     : IRequestHandler<

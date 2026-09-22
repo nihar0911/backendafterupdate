@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
 
 public class UpdatePurchaseRequestResponse
 {

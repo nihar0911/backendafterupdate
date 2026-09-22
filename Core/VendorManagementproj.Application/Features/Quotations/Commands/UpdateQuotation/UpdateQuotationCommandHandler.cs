@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.UpdateQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.UpdateQuotation;
 
 public class UpdateQuotationCommandHandler : IRequestHandler<UpdateQuotationCommand, UpdateQuotationResponse>
 {

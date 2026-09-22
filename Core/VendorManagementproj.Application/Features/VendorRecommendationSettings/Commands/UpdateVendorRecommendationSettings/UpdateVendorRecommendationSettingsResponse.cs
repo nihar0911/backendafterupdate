@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorRecommendationSettings.Commands.UpdateVendorRecommendationSettings;
+namespace VendorManagementproj.Application.Features.VendorRecommendationSettings.Commands.UpdateVendorRecommendationSettings;
 
 public class UpdateVendorRecommendationSettingsResponse
 {

@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Invoices.Queries.GetInvoiceById;
+namespace VendorManagementproj.Application.Features.Invoices.Queries.GetInvoiceById;
 
 public class GetInvoiceByIdResponse
 {

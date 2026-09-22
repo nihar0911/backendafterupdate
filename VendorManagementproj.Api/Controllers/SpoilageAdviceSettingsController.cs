@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.SpoilageAdviceSettings.Commands.UpdateSpoilageAdviceSettings;
-using VendorManagementprojApplication.Features.SpoilageAdviceSettings.Queries.GetSpoilageAdviceSettings;
+using VendorManagementproj.Application.Features.SpoilageAdviceSettings.Commands.UpdateSpoilageAdviceSettings;
+using VendorManagementproj.Application.Features.SpoilageAdviceSettings.Queries.GetSpoilageAdviceSettings;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/spoilage-advice-settings")]

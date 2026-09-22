@@ -1,11 +1,11 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
-using VendorFeedbackEntity = VendorManagementprojDomain.Entities.VendorFeedback;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
+using VendorFeedbackEntity = VendorManagementproj.Domain.Entities.VendorFeedback;
 
-namespace VendorManagementprojApplication.Features.VendorFeedback.Commands.CreateVendorFeedback;
+namespace VendorManagementproj.Application.Features.VendorFeedback.Commands.CreateVendorFeedback;
 
 public class CreateVendorFeedbackCommandHandler
     : IRequestHandler<CreateVendorFeedbackCommand, CreateVendorFeedbackResponse>

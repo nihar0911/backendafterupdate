@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Invoices.Queries.GetInvoiceById;
+namespace VendorManagementproj.Application.Features.Invoices.Queries.GetInvoiceById;
 
 public class GetInvoiceByIdQuery : IRequest<GetInvoiceByIdResponse>
 {

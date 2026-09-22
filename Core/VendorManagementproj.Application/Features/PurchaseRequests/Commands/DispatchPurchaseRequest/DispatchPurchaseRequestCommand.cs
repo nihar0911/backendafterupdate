@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using MediatR;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.DispatchPurchaseRequest;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.DispatchPurchaseRequest;
 
 public class DispatchPurchaseRequestCommand : IRequest<DispatchPurchaseRequestResponse>
 {

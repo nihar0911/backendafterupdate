@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.SendPurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.SendPurchaseOrder;
 
 public class SendPurchaseOrderCommandHandler : IRequestHandler<SendPurchaseOrderCommand, SendPurchaseOrderResponse>
 {

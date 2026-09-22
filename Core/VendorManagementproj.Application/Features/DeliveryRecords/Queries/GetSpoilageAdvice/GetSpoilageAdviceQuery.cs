@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetSpoilageAdvice;
+namespace VendorManagementproj.Application.Features.DeliveryRecords.Queries.GetSpoilageAdvice;
 
 public class GetSpoilageAdviceQuery : IRequest<GetSpoilageAdviceResponse>
 {

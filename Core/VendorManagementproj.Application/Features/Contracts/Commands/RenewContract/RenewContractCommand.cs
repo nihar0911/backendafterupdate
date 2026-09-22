@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using MediatR;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.RenewContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.RenewContract;
 
 public class RenewContractCommand : IRequest<RenewContractResponse>
 {

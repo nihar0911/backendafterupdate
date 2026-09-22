@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.DeliveryRecords.Commands.CreateDeliveryRecord;
+namespace VendorManagementproj.Application.Features.DeliveryRecords.Commands.CreateDeliveryRecord;
 
 public class CreateDeliveryRecordResponse
 {

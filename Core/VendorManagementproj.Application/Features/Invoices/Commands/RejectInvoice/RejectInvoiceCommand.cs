@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Invoices.Commands.RejectInvoice;
+namespace VendorManagementproj.Application.Features.Invoices.Commands.RejectInvoice;
 
 public class RejectInvoiceCommand : IRequest<RejectInvoiceResponse>
 {

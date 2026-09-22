@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.Contracts.Commands.RenewContract;
+﻿namespace VendorManagementproj.Application.Features.Contracts.Commands.RenewContract;
 
 public class RenewContractProductItemDto
 {

@@ -1,12 +1,12 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.DeliveryRecords.Commands.ConfirmDeliveryRecord;
-using VendorManagementprojApplication.Features.DeliveryRecords.Commands.CreateDeliveryRecord;
-using VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
-using VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetSpoilageAdvice;
+using VendorManagementproj.Application.Features.DeliveryRecords.Commands.ConfirmDeliveryRecord;
+using VendorManagementproj.Application.Features.DeliveryRecords.Commands.CreateDeliveryRecord;
+using VendorManagementproj.Application.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
+using VendorManagementproj.Application.Features.DeliveryRecords.Queries.GetSpoilageAdvice;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

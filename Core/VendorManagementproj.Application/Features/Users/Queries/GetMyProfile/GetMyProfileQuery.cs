@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Users.Queries.GetMyProfile;
+namespace VendorManagementproj.Application.Features.Users.Queries.GetMyProfile;
 
 public class GetMyProfileQuery : IRequest<GetMyProfileResponse>
 {

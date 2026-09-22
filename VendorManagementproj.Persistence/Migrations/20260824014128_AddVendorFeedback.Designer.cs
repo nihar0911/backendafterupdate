@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using VendorManagementprojPersistence.Data;
+using VendorManagementproj.Persistence.Data;
 
 #nullable disable
 
-namespace VendorManagementprojPersistence.Migrations
+namespace VendorManagementproj.Persistence.Migrations
 {
     [DbContext(typeof(VendorManagementDbContext))]
     [Migration("20260824014128_AddVendorFeedback")]
@@ -25,7 +25,7 @@ namespace VendorManagementprojPersistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Complaint", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Complaint", b =>
                 {
                     b.Property<int>("ComplaintID")
                         .ValueGeneratedOnAdd()
@@ -91,7 +91,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Complaints", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Contract", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Contract", b =>
                 {
                     b.Property<int>("ContractID")
                         .ValueGeneratedOnAdd()
@@ -136,7 +136,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Contracts", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.ContractVendorAllocation", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.ContractVendorAllocation", b =>
                 {
                     b.Property<int>("ContractVendorAllocationID")
                         .ValueGeneratedOnAdd()
@@ -174,7 +174,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Contract_Vendor_Allocations", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.DeliveryRecord", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.DeliveryRecord", b =>
                 {
                     b.Property<int>("DeliveryRecordID")
                         .ValueGeneratedOnAdd()
@@ -225,7 +225,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Delivery_Records", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Discount", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Discount", b =>
                 {
                     b.Property<int>("DiscountID")
                         .ValueGeneratedOnAdd()
@@ -275,7 +275,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Discounts", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Invoice", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Invoice", b =>
                 {
                     b.Property<int>("InvoiceID")
                         .ValueGeneratedOnAdd()
@@ -334,7 +334,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Invoices");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.InvoiceItem", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.InvoiceItem", b =>
                 {
                     b.Property<int>("InvoiceItemID")
                         .ValueGeneratedOnAdd()
@@ -381,7 +381,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("InvoiceItems");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Organization", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Organization", b =>
                 {
                     b.Property<int>("OrganizationID")
                         .ValueGeneratedOnAdd()
@@ -415,7 +415,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Organizations", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Outlet", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Outlet", b =>
                 {
                     b.Property<int>("OutletID")
                         .ValueGeneratedOnAdd()
@@ -448,7 +448,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Outlets", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Payment", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Payment", b =>
                 {
                     b.Property<int>("PaymentID")
                         .ValueGeneratedOnAdd()
@@ -487,7 +487,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Payments", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Product", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Product", b =>
                 {
                     b.Property<int>("ProductID")
                         .ValueGeneratedOnAdd()
@@ -524,7 +524,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseOrder", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseOrder", b =>
                 {
                     b.Property<int>("PurchaseOrderID")
                         .ValueGeneratedOnAdd()
@@ -575,7 +575,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Purchase_Orders", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseOrderItem", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseOrderItem", b =>
                 {
                     b.Property<int>("POItemID")
                         .ValueGeneratedOnAdd()
@@ -619,7 +619,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Purchase_Order_Items", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseRequest", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseRequest", b =>
                 {
                     b.Property<int>("RequestID")
                         .ValueGeneratedOnAdd()
@@ -650,7 +650,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Purchase_Requests", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseRequestItem", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseRequestItem", b =>
                 {
                     b.Property<int>("RequestItemID")
                         .ValueGeneratedOnAdd()
@@ -681,7 +681,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Purchase_Request_Items", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Quotation", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Quotation", b =>
                 {
                     b.Property<int>("QuotationID")
                         .ValueGeneratedOnAdd()
@@ -712,7 +712,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Quotations", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.QuotationItem", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.QuotationItem", b =>
                 {
                     b.Property<int>("QuotationItemID")
                         .ValueGeneratedOnAdd()
@@ -753,7 +753,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Quotation_Items", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Role", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Role", b =>
                 {
                     b.Property<int>("RoleID")
                         .ValueGeneratedOnAdd()
@@ -774,7 +774,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Roles", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.TaxRate", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.TaxRate", b =>
                 {
                     b.Property<int>("TaxRateID")
                         .ValueGeneratedOnAdd()
@@ -800,7 +800,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Tax_Rates", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.User", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.User", b =>
                 {
                     b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
@@ -846,7 +846,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Vendor", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Vendor", b =>
                 {
                     b.Property<int>("VendorID")
                         .ValueGeneratedOnAdd()
@@ -899,7 +899,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Vendors", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.VendorFeedback", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.VendorFeedback", b =>
                 {
                     b.Property<int>("FeedbackID")
                         .ValueGeneratedOnAdd()
@@ -955,7 +955,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Vendor_Feedback", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.VendorProduct", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.VendorProduct", b =>
                 {
                     b.Property<int>("VendorProductID")
                         .ValueGeneratedOnAdd()
@@ -990,39 +990,39 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Vendor_Products", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Complaint", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Complaint", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Outlet", "Outlet")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Outlet", "Outlet")
                         .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseOrderItem", "POItem")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseOrderItem", "POItem")
                         .WithMany()
                         .HasForeignKey("POItemID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Product", "Product")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseOrder", "PurchaseOrder")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseOrder", "PurchaseOrder")
                         .WithMany()
                         .HasForeignKey("PurchaseOrderID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.User", "RaisedByUser")
+                    b.HasOne("VendorManagementproj.Domain.Entities.User", "RaisedByUser")
                         .WithMany()
                         .HasForeignKey("RaisedByUserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Vendor", "Vendor")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Vendor", "Vendor")
                         .WithMany()
                         .HasForeignKey("VendorID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1041,15 +1041,15 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Contract", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Contract", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Outlet", "Outlet")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Outlet", "Outlet")
                         .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Product", "Product")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1060,15 +1060,15 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.ContractVendorAllocation", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.ContractVendorAllocation", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Contract", "Contract")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Contract", "Contract")
                         .WithMany("VendorAllocations")
                         .HasForeignKey("ContractID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Vendor", "Vendor")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Vendor", "Vendor")
                         .WithMany()
                         .HasForeignKey("VendorID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1079,20 +1079,20 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.DeliveryRecord", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.DeliveryRecord", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.User", "ConfirmedByUser")
+                    b.HasOne("VendorManagementproj.Domain.Entities.User", "ConfirmedByUser")
                         .WithMany()
                         .HasForeignKey("ConfirmedByUserID")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseOrderItem", "PurchaseOrderItem")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseOrderItem", "PurchaseOrderItem")
                         .WithMany()
                         .HasForeignKey("POItemID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseOrder", "PurchaseOrder")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseOrder", "PurchaseOrder")
                         .WithMany()
                         .HasForeignKey("PurchaseOrderID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1105,15 +1105,15 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("PurchaseOrderItem");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Discount", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Discount", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Product", "Product")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Vendor", "Vendor")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Vendor", "Vendor")
                         .WithMany()
                         .HasForeignKey("VendorID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1124,21 +1124,21 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Invoice", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Invoice", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Outlet", "Outlet")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Outlet", "Outlet")
                         .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseOrder", "PurchaseOrder")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseOrder", "PurchaseOrder")
                         .WithMany()
                         .HasForeignKey("PurchaseOrderID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Vendor", "Vendor")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Vendor", "Vendor")
                         .WithMany()
                         .HasForeignKey("VendorID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1151,15 +1151,15 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.InvoiceItem", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.InvoiceItem", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Invoice", "Invoice")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Invoice", "Invoice")
                         .WithMany("Items")
                         .HasForeignKey("InvoiceID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Product", "Product")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1170,9 +1170,9 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Outlet", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Outlet", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Organization", "Organization")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1181,9 +1181,9 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Payment", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Payment", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Invoice", "Invoice")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Invoice", "Invoice")
                         .WithMany()
                         .HasForeignKey("InvoiceID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1192,36 +1192,36 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Invoice");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Product", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Product", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.TaxRate", null)
+                    b.HasOne("VendorManagementproj.Domain.Entities.TaxRate", null)
                         .WithMany()
                         .HasForeignKey("TaxRateID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseOrder", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseOrder", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Outlet", "Outlet")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Outlet", "Outlet")
                         .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Quotation", "Quotation")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Quotation", "Quotation")
                         .WithMany()
                         .HasForeignKey("QuotationID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseRequest", "Request")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseRequest", "Request")
                         .WithMany()
                         .HasForeignKey("RequestID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Vendor", "Vendor")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Vendor", "Vendor")
                         .WithMany()
                         .HasForeignKey("VendorID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1236,15 +1236,15 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseOrderItem", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseOrderItem", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Product", "Product")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseOrder", "PurchaseOrder")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseOrder", "PurchaseOrder")
                         .WithMany("Items")
                         .HasForeignKey("PurchaseOrderID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1255,30 +1255,30 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("PurchaseOrder");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseRequest", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseRequest", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.User", null)
+                    b.HasOne("VendorManagementproj.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("CreatedByUserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Outlet", null)
+                    b.HasOne("VendorManagementproj.Domain.Entities.Outlet", null)
                         .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseRequestItem", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseRequestItem", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Product", "Product")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseRequest", "Request")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseRequest", "Request")
                         .WithMany("Items")
                         .HasForeignKey("RequestID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1289,15 +1289,15 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Request");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Quotation", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Quotation", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseRequest", "Request")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseRequest", "Request")
                         .WithMany()
                         .HasForeignKey("RequestID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Vendor", null)
+                    b.HasOne("VendorManagementproj.Domain.Entities.Vendor", null)
                         .WithMany()
                         .HasForeignKey("VendorID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1306,15 +1306,15 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Request");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.QuotationItem", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.QuotationItem", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Product", "Product")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Quotation", "Quotation")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Quotation", "Quotation")
                         .WithMany("QuotationItems")
                         .HasForeignKey("QuotationID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1325,19 +1325,19 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Quotation");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.User", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.User", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Organization", "Organization")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Organization", "Organization")
                         .WithMany()
                         .HasForeignKey("OrganizationID")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Outlet", "Outlet")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Outlet", "Outlet")
                         .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Role", "Role")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1350,33 +1350,33 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.VendorFeedback", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.VendorFeedback", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Outlet", "Outlet")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Outlet", "Outlet")
                         .WithMany()
                         .HasForeignKey("OutletID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseOrderItem", "POItem")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseOrderItem", "POItem")
                         .WithMany()
                         .HasForeignKey("POItemID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.PurchaseOrder", "PurchaseOrder")
+                    b.HasOne("VendorManagementproj.Domain.Entities.PurchaseOrder", "PurchaseOrder")
                         .WithMany()
                         .HasForeignKey("PurchaseOrderID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.User", "RatedByUser")
+                    b.HasOne("VendorManagementproj.Domain.Entities.User", "RatedByUser")
                         .WithMany()
                         .HasForeignKey("RatedByUserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Vendor", "Vendor")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Vendor", "Vendor")
                         .WithMany()
                         .HasForeignKey("VendorID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1393,15 +1393,15 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Vendor");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.VendorProduct", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.VendorProduct", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Product", "Product")
+                    b.HasOne("VendorManagementproj.Domain.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("VendorManagementprojDomain.Entities.Vendor", null)
+                    b.HasOne("VendorManagementproj.Domain.Entities.Vendor", null)
                         .WithMany()
                         .HasForeignKey("VendorID")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1410,32 +1410,32 @@ namespace VendorManagementprojPersistence.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Contract", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Contract", b =>
                 {
                     b.Navigation("VendorAllocations");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Invoice", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Invoice", b =>
                 {
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseOrder", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseOrder", b =>
                 {
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.PurchaseRequest", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.PurchaseRequest", b =>
                 {
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Quotation", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Quotation", b =>
                 {
                     b.Navigation("QuotationItems");
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Role", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Role", b =>
                 {
                     b.Navigation("Users");
                 });

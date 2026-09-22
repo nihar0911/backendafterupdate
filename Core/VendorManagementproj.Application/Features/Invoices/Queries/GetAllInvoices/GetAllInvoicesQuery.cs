@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Invoices.Queries.GetAllInvoices;
+namespace VendorManagementproj.Application.Features.Invoices.Queries.GetAllInvoices;
 
 public class GetAllInvoicesQuery : IRequest<GetAllInvoicesResponse>
 {

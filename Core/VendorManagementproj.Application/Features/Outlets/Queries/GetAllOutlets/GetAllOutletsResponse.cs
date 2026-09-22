@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Queries.GetAllOutlets;
+namespace VendorManagementproj.Application.Features.Outlets.Queries.GetAllOutlets;
 
 public class GetAllOutletsResponse
 {

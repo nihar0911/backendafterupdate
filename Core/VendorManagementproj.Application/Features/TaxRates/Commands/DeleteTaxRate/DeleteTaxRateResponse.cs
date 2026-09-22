@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.TaxRates.Commands.DeleteTaxRate;
+﻿namespace VendorManagementproj.Application.Features.TaxRates.Commands.DeleteTaxRate;
 
 public class DeleteTaxRateResponse
 {

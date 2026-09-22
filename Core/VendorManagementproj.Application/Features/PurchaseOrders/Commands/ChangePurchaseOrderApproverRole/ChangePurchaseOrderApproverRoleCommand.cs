@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.ChangePurchaseOrderApproverRole;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.ChangePurchaseOrderApproverRole;
 
 public class ChangePurchaseOrderApproverRoleCommand : IRequest<ChangePurchaseOrderApproverRoleResponse>
 {

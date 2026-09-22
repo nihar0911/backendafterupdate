@@ -1,22 +1,22 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.PurchaseRequests.Commands.AddPurchaseRequestItem;
-using VendorManagementprojApplication.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
-using VendorManagementprojApplication.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
-using VendorManagementprojApplication.Features.PurchaseRequests.Commands.DeletePurchaseRequestItem;
-using VendorManagementprojApplication.Features.PurchaseRequests.Commands.DispatchPurchaseRequest;
-using VendorManagementprojApplication.Features.PurchaseRequests.Commands.RespondToOpportunity;
-using VendorManagementprojApplication.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
-using VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetAllPurchaseRequests;
-using VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
-using VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetPurchaseRequestItems;
-using VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetVendorProcurementOpportunities;
-using VendorManagementprojApplication.Features.PurchaseRequests.Queries.ParseVoiceProcurementOrder;
+using VendorManagementproj.Application.Features.PurchaseRequests.Commands.AddPurchaseRequestItem;
+using VendorManagementproj.Application.Features.PurchaseRequests.Commands.CreatePurchaseRequest;
+using VendorManagementproj.Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
+using VendorManagementproj.Application.Features.PurchaseRequests.Commands.DeletePurchaseRequestItem;
+using VendorManagementproj.Application.Features.PurchaseRequests.Commands.DispatchPurchaseRequest;
+using VendorManagementproj.Application.Features.PurchaseRequests.Commands.RespondToOpportunity;
+using VendorManagementproj.Application.Features.PurchaseRequests.Commands.UpdatePurchaseRequest;
+using VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetAllPurchaseRequests;
+using VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetPurchaseRequestById;
+using VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetPurchaseRequestItems;
+using VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetVendorProcurementOpportunities;
+using VendorManagementproj.Application.Features.PurchaseRequests.Queries.ParseVoiceProcurementOrder;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/purchaserequests")]

@@ -1,11 +1,11 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.Common;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.Common;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.Outlets.Commands.CreateOutlet;
+namespace VendorManagementproj.Application.Features.Outlets.Commands.CreateOutlet;
 
 public class CreateOutletCommandHandler
     : IRequestHandler<CreateOutletCommand, CreateOutletResponse>

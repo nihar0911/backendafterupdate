@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+﻿using System.Collections.Generic;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Invoices.Queries.GetAllInvoices;
+namespace VendorManagementproj.Application.Features.Invoices.Queries.GetAllInvoices;
 
 public class GetAllInvoicesResponse
 {

@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Commands.UpdateOutlet;
+namespace VendorManagementproj.Application.Features.Outlets.Commands.UpdateOutlet;
 
 public class UpdateOutletCommand : IRequest<UpdateOutletResponse>
 {

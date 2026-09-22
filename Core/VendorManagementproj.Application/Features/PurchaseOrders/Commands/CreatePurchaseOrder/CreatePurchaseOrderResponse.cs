@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.CreatePurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.CreatePurchaseOrder;
 
 public class CreatePurchaseOrderResponse
 {

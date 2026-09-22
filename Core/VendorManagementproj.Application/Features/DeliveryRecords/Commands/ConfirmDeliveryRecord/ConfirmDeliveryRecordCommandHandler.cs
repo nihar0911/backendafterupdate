@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.DeliveryRecords.Commands.ConfirmDeliveryRecord;
+namespace VendorManagementproj.Application.Features.DeliveryRecords.Commands.ConfirmDeliveryRecord;
 
 public class ConfirmDeliveryRecordCommandHandler
     : IRequestHandler<
@@ -306,7 +306,7 @@ public class ConfirmDeliveryRecordCommandHandler
     }
 
     private static DeliveryRecordDto MapToDto(
-        VendorManagementprojDomain.Entities.DeliveryRecord delivery)
+        VendorManagementproj.Domain.Entities.DeliveryRecord delivery)
     {
         return new DeliveryRecordDto
         {

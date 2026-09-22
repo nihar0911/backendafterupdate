@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.SpoilageAdviceSettings.Commands.UpdateSpoilageAdviceSettings;
+namespace VendorManagementproj.Application.Features.SpoilageAdviceSettings.Commands.UpdateSpoilageAdviceSettings;
 
 public class UpdateSpoilageAdviceSettingsCommand : IRequest<UpdateSpoilageAdviceSettingsResponse>
 {

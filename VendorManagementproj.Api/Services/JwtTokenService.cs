@@ -1,11 +1,11 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApi.Services;
+namespace VendorManagementproj.Api.Services;
 
 public class JwtTokenService : IJwtTokenService
 {

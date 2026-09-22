@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.SpoilageAdviceSettings.Queries.GetSpoilageAdviceSettings;
+namespace VendorManagementproj.Application.Features.SpoilageAdviceSettings.Queries.GetSpoilageAdviceSettings;
 
 public class GetSpoilageAdviceSettingsResponse
 {

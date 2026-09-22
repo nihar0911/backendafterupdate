@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetContractEligibleVendors;
+namespace VendorManagementproj.Application.Features.Contracts.Queries.GetContractEligibleVendors;
 
 public class GetContractEligibleVendorsQuery : IRequest<GetContractEligibleVendorsResponse>
 {

@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetPurchaseRequestItems;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetPurchaseRequestItems;
 
 public record GetPurchaseRequestItemsQuery(
     int RequestID

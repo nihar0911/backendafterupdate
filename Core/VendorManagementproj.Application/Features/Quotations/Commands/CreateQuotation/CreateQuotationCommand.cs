@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.CreateQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.CreateQuotation;
 
 public class CreateQuotationCommand : IRequest<CreateQuotationResponse>
 {

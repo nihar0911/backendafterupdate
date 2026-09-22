@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using VendorManagementprojPersistence.Data;
+using VendorManagementproj.Persistence.Data;
 
 #nullable disable
 
-namespace VendorManagementprojPersistence.Migrations
+namespace VendorManagementproj.Persistence.Migrations
 {
     [DbContext(typeof(VendorManagementDbContext))]
     [Migration("20260809151421_AddOutlet")]
@@ -24,7 +24,7 @@ namespace VendorManagementprojPersistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Organization", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Organization", b =>
                 {
                     b.Property<int>("OrganizationID")
                         .ValueGeneratedOnAdd()
@@ -62,7 +62,7 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Organizations", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Outlet", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Outlet", b =>
                 {
                     b.Property<int>("OutletID")
                         .ValueGeneratedOnAdd()
@@ -99,9 +99,9 @@ namespace VendorManagementprojPersistence.Migrations
                     b.ToTable("Outlets", (string)null);
                 });
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Outlet", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Outlet", b =>
                 {
-                    b.HasOne("VendorManagementprojDomain.Entities.Organization", null)
+                    b.HasOne("VendorManagementproj.Domain.Entities.Organization", null)
                         .WithMany()
                         .HasForeignKey("OrganizationID")
                         .OnDelete(DeleteBehavior.Cascade)

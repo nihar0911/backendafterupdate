@@ -1,10 +1,10 @@
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using VendorManagementprojPersistence.Data;
+using VendorManagementproj.Persistence.Data;
 
 #nullable disable
 
-namespace VendorManagementprojPersistence.Migrations
+namespace VendorManagementproj.Persistence.Migrations
 {
     [DbContext(typeof(VendorManagementDbContext))]
     [Migration("20260906144500_MovePurchaseOrderApproverToOutlet")]

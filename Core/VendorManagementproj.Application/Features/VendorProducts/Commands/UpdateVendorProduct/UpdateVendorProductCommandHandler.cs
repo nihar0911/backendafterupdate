@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.VendorProducts.Commands.UpdateVendorProduct;
+namespace VendorManagementproj.Application.Features.VendorProducts.Commands.UpdateVendorProduct;
 
 public class UpdateVendorProductCommandHandler : IRequestHandler<UpdateVendorProductCommand, UpdateVendorProductResponse>
 {

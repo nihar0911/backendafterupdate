@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.Products.Commands.CreateProduct;
+namespace VendorManagementproj.Application.Features.Products.Commands.CreateProduct;
 
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, CreateProductResponse>
 {

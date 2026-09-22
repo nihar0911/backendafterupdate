@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.TaxRates.Commands.CreateTaxRate;
+namespace VendorManagementproj.Application.Features.TaxRates.Commands.CreateTaxRate;
 
 public class CreateTaxRateResponse
 {

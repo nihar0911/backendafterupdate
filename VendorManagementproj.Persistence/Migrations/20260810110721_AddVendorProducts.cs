@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace VendorManagementprojPersistence.Migrations
+namespace VendorManagementproj.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class AddVendorProducts : Migration

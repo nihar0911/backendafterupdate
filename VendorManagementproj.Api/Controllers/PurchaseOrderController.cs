@@ -1,18 +1,18 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.PurchaseOrders.Commands.ApprovePurchaseOrder;
-using VendorManagementprojApplication.Features.PurchaseOrders.Commands.ChangePurchaseOrderApproverRole;
-using VendorManagementprojApplication.Features.PurchaseOrders.Commands.CreatePurchaseOrder;
-using VendorManagementprojApplication.Features.PurchaseOrders.Commands.DispatchPurchaseOrder;
-using VendorManagementprojApplication.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
-using VendorManagementprojApplication.Features.PurchaseOrders.Commands.RespondToPurchaseOrder;
-using VendorManagementprojApplication.Features.PurchaseOrders.Commands.SendPurchaseOrder;
-using VendorManagementprojApplication.Features.PurchaseOrders.Queries.GetAllPurchaseOrders;
-using VendorManagementprojApplication.Features.PurchaseOrders.Queries.GetPendingPurchaseOrders;
-using VendorManagementprojApplication.Features.PurchaseOrders.Queries.GetPurchaseOrderById;
+using VendorManagementproj.Application.Features.PurchaseOrders.Commands.ApprovePurchaseOrder;
+using VendorManagementproj.Application.Features.PurchaseOrders.Commands.ChangePurchaseOrderApproverRole;
+using VendorManagementproj.Application.Features.PurchaseOrders.Commands.CreatePurchaseOrder;
+using VendorManagementproj.Application.Features.PurchaseOrders.Commands.DispatchPurchaseOrder;
+using VendorManagementproj.Application.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
+using VendorManagementproj.Application.Features.PurchaseOrders.Commands.RespondToPurchaseOrder;
+using VendorManagementproj.Application.Features.PurchaseOrders.Commands.SendPurchaseOrder;
+using VendorManagementproj.Application.Features.PurchaseOrders.Queries.GetAllPurchaseOrders;
+using VendorManagementproj.Application.Features.PurchaseOrders.Queries.GetPendingPurchaseOrders;
+using VendorManagementproj.Application.Features.PurchaseOrders.Queries.GetPurchaseOrderById;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

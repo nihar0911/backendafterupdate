@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Notifications.Queries.GetMyNotifications;
+namespace VendorManagementproj.Application.Features.Notifications.Queries.GetMyNotifications;
 
 public class GetMyNotificationsResponse
 {

@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductById;
+namespace VendorManagementproj.Application.Features.VendorProducts.Queries.GetVendorProductById;
 
 public class GetVendorProductByIdResponse
 {

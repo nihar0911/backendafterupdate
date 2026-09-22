@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.UpdateContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.UpdateContract;
 
 public class UpdateContractResponse
 {

@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.ApprovePurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.ApprovePurchaseOrder;
 
 public class ApprovePurchaseOrderCommand : IRequest<ApprovePurchaseOrderResponse>
 {

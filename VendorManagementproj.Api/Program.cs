@@ -1,17 +1,17 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
-using VendorManagementprojApi.Services;
-using VendorManagementprojApplication.Contracts.Infrastructure;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.Services;
-using VendorManagementprojDomain.Entities;
-using VendorManagementprojPersistence.Data;
-using VendorManagementprojPersistence.Repositories;
+using VendorManagementproj.Api.Services;
+using VendorManagementproj.Application.Contracts.Infrastructure;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.Services;
+using VendorManagementproj.Domain.Entities;
+using VendorManagementproj.Persistence.Data;
+using VendorManagementproj.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,7 +89,7 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(
         typeof(
-            VendorManagementprojApplication
+            VendorManagementproj.Application
                 .Features.Products.Queries.GetAllProducts.GetAllProductsQuery
         ).Assembly));
 

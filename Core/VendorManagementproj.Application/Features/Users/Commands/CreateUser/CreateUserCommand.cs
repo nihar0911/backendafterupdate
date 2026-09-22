@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.CreateUser;
+namespace VendorManagementproj.Application.Features.Users.Commands.CreateUser;
 
 public class CreateUserCommand : IRequest<CreateUserResponse>
 {

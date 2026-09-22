@@ -1,24 +1,24 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojApplication.Features.Contracts.Commands.CreateContract;
-using VendorManagementprojApplication.Features.Contracts.Commands.CreateContractFromQuotation;
-using VendorManagementprojApplication.Features.Contracts.Commands.EndContract;
-using VendorManagementprojApplication.Features.Contracts.Commands.RenewContract;
-using VendorManagementprojApplication.Features.Contracts.Commands.ResetContract;
-using VendorManagementprojApplication.Features.Contracts.Commands.UpdateContract;
-using VendorManagementprojApplication.Features.Contracts.Queries.GetAllContracts;
-using VendorManagementprojApplication.Features.Contracts.Queries.GetContractById;
-using VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOrganizationId;
-using VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOutlet;
-using VendorManagementprojApplication.Features.Contracts.Queries.GetActiveContractsForProduct;
-using VendorManagementprojApplication.Features.Contracts.Queries.GetContractEligibleVendors;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Application.Features.Contracts.Commands.CreateContract;
+using VendorManagementproj.Application.Features.Contracts.Commands.CreateContractFromQuotation;
+using VendorManagementproj.Application.Features.Contracts.Commands.EndContract;
+using VendorManagementproj.Application.Features.Contracts.Commands.RenewContract;
+using VendorManagementproj.Application.Features.Contracts.Commands.ResetContract;
+using VendorManagementproj.Application.Features.Contracts.Commands.UpdateContract;
+using VendorManagementproj.Application.Features.Contracts.Queries.GetAllContracts;
+using VendorManagementproj.Application.Features.Contracts.Queries.GetContractById;
+using VendorManagementproj.Application.Features.Contracts.Queries.GetContractsByOrganizationId;
+using VendorManagementproj.Application.Features.Contracts.Queries.GetContractsByOutlet;
+using VendorManagementproj.Application.Features.Contracts.Queries.GetActiveContractsForProduct;
+using VendorManagementproj.Application.Features.Contracts.Queries.GetContractEligibleVendors;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

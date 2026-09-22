@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOrganizationId;
+namespace VendorManagementproj.Application.Features.Contracts.Queries.GetContractsByOrganizationId;
 
 public class GetContractsByOrganizationIdQuery : IRequest<GetContractsByOrganizationIdResponse>
 {

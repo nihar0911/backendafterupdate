@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.EndContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.EndContract;
 
 public class EndContractCommand : IRequest<EndContractResponse>
 {

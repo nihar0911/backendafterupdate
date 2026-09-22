@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorFeedback.Commands.CreateVendorFeedback;
+namespace VendorManagementproj.Application.Features.VendorFeedback.Commands.CreateVendorFeedback;
 
 public class CreateVendorFeedbackResponse
 {

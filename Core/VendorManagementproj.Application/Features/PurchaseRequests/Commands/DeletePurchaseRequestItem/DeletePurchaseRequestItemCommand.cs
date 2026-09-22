@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.DeletePurchaseRequestItem;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.DeletePurchaseRequestItem;
 
 public record DeletePurchaseRequestItemCommand(int RequestItemID) : IRequest<DeletePurchaseRequestItemResponse>;
 

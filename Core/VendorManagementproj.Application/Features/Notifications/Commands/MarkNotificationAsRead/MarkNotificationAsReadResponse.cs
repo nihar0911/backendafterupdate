@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojApplication.Features.Notifications.Commands.MarkNotificationAsRead;
+﻿namespace VendorManagementproj.Application.Features.Notifications.Commands.MarkNotificationAsRead;
 
 public class MarkNotificationAsReadResponse
 {

@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Payments.Queries.GetPayments;
+namespace VendorManagementproj.Application.Features.Payments.Queries.GetPayments;
 
 public class GetPaymentsQuery : IRequest<GetPaymentsResponse>
 {

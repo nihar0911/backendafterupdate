@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetActiveContractsForProduct;
+namespace VendorManagementproj.Application.Features.Contracts.Queries.GetActiveContractsForProduct;
 
 public class GetActiveContractsForProductQuery : IRequest<GetActiveContractsForProductResponse>
 {

@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.CreateContractFromQuotation;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.CreateContractFromQuotation;
 
 public class CreateContractFromQuotationResponse
 {

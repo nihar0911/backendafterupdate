@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Contracts.Persistence;
+namespace VendorManagementproj.Application.Contracts.Persistence;
 
 public interface IPaymentRepository
 {

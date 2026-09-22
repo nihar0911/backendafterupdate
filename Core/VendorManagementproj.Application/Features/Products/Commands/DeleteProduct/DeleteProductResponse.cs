@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.Products.Commands.DeleteProduct;
+﻿namespace VendorManagementproj.Application.Features.Products.Commands.DeleteProduct;
 
 public class DeleteProductResponse
 {

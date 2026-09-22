@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Commands.UpdateOrganization;
+namespace VendorManagementproj.Application.Features.Organizations.Commands.UpdateOrganization;
 
 public class UpdateOrganizationCommand : IRequest<UpdateOrganizationResponse>
 {

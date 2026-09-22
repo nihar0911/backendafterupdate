@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
+using VendorManagementproj.Application.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
 
-namespace VendorManagementprojApplication.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
+namespace VendorManagementproj.Application.Features.DeliveryRecords.Queries.GetDeliveriesByPurchaseOrder;
 
 public class GetDeliveriesByPurchaseOrderQuery
     : IRequest<GetDeliveriesByPurchaseOrderResponse>

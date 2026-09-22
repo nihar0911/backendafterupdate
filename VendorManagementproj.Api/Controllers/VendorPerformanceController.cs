@@ -1,13 +1,13 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.Features.VendorPerformance.Queries.GetOrganizationVendorsPerformance;
-using VendorManagementprojApplication.Features.VendorPerformance.Queries.GetVendorPerformanceById;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.Features.VendorPerformance.Queries.GetOrganizationVendorsPerformance;
+using VendorManagementproj.Application.Features.VendorPerformance.Queries.GetVendorPerformanceById;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

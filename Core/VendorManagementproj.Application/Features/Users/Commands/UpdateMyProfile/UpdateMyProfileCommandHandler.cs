@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.UpdateMyProfile;
+namespace VendorManagementproj.Application.Features.Users.Commands.UpdateMyProfile;
 
 public class UpdateMyProfileCommandHandler
     : IRequestHandler<UpdateMyProfileCommand, UpdateMyProfileResponse>

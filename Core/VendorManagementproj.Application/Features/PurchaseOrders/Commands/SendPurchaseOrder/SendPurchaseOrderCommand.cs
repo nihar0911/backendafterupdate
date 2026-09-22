@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.SendPurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.SendPurchaseOrder;
 
 public class SendPurchaseOrderCommand : IRequest<SendPurchaseOrderResponse>
 {

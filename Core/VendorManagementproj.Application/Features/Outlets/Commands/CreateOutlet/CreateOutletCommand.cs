@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Commands.CreateOutlet;
+namespace VendorManagementproj.Application.Features.Outlets.Commands.CreateOutlet;
 
 public class CreateOutletCommand : IRequest<CreateOutletResponse>
 {

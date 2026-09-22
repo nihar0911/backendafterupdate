@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Queries.GetPurchaseOrderById;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Queries.GetPurchaseOrderById;
 
 public class GetPurchaseOrderByIdQuery : IRequest<GetPurchaseOrderByIdResponse>
 {

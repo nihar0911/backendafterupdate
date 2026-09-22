@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using VendorManagementprojApplication.Contracts.Services;
+using VendorManagementproj.Application.Contracts.Services;
 
-namespace VendorManagementprojApplication.Services;
+namespace VendorManagementproj.Application.Services;
 
 public class PasswordHasher : IPasswordHasher
 {

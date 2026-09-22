@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Products.Queries.GetAllProducts;
+namespace VendorManagementproj.Application.Features.Products.Queries.GetAllProducts;
 
 public class GetAllProductsResponse
 {

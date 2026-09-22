@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.VendorPerformance.Queries.GetVendorPerformanceById;
+namespace VendorManagementproj.Application.Features.VendorPerformance.Queries.GetVendorPerformanceById;
 
 public class GetVendorPerformanceByIdQuery : IRequest<GetVendorPerformanceByIdResponse>
 {

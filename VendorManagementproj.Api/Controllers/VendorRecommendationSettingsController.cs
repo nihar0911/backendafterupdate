@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.VendorRecommendationSettings.Commands.UpdateVendorRecommendationSettings;
-using VendorManagementprojApplication.Features.VendorRecommendationSettings.Queries.GetVendorRecommendationSettings;
+using VendorManagementproj.Application.Features.VendorRecommendationSettings.Commands.UpdateVendorRecommendationSettings;
+using VendorManagementproj.Application.Features.VendorRecommendationSettings.Queries.GetVendorRecommendationSettings;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/vendor-recommendation-settings")]

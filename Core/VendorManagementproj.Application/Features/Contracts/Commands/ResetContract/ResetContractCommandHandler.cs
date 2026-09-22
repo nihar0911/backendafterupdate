@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Linq;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.ResetContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.ResetContract;
 
 public class ResetContractCommandHandler : IRequestHandler<ResetContractCommand, ResetContractResponse>
 {
@@ -70,7 +70,7 @@ public class ResetContractCommandHandler : IRequestHandler<ResetContractCommand,
     }
 
     private static ContractDto MapToDto(
-        VendorManagementprojDomain.Entities.Contract contract)
+        VendorManagementproj.Domain.Entities.Contract contract)
     {
         return new ContractDto
         {

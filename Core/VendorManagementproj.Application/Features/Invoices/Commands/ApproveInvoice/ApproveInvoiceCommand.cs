@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Invoices.Commands.ApproveInvoice;
+namespace VendorManagementproj.Application.Features.Invoices.Commands.ApproveInvoice;
 
 public class ApproveInvoiceCommand : IRequest<ApproveInvoiceResponse>
 {

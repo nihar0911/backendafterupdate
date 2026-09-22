@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Queries.GetAllOutlets;
+namespace VendorManagementproj.Application.Features.Outlets.Queries.GetAllOutlets;
 
 public class GetAllOutletsQueryHandler
     : IRequestHandler<GetAllOutletsQuery, GetAllOutletsResponse>
@@ -65,7 +65,7 @@ public class GetAllOutletsQueryHandler
     }
 
     private static List<OutletDto> MapToDto(
-        IEnumerable<VendorManagementprojDomain.Entities.Outlet> outlets)
+        IEnumerable<VendorManagementproj.Domain.Entities.Outlet> outlets)
     {
         return outlets.Select(o => new OutletDto
         {

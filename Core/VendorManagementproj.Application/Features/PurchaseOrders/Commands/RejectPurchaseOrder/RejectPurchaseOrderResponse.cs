@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
 
 public class RejectPurchaseOrderResponse
 {

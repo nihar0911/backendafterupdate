@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Queries.GetOrganizationById;
+namespace VendorManagementproj.Application.Features.Organizations.Queries.GetOrganizationById;
 
 public class GetOrganizationByIdResponse
 {

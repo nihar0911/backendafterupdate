@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.RejectQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.RejectQuotation;
 
 public class RejectQuotationResponse
 {

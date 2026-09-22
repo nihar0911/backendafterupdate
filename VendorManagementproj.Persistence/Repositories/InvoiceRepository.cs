@@ -1,11 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojDomain.Entities;
-using VendorManagementprojPersistence.Data;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Domain.Entities;
+using VendorManagementproj.Persistence.Data;
 
-namespace VendorManagementprojPersistence.Repositories;
+namespace VendorManagementproj.Persistence.Repositories;
 
 public class InvoiceRepository : IInvoiceRepository
 {

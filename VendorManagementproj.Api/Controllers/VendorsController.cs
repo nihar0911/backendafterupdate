@@ -1,15 +1,15 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.Features.Vendors.Commands.CreateVendor;
-using VendorManagementprojApplication.Features.Vendors.Commands.DeleteVendor;
-using VendorManagementprojApplication.Features.Vendors.Commands.UpdateVendor;
-using VendorManagementprojApplication.Features.Vendors.Queries.GetAllVendors;
-using VendorManagementprojApplication.Features.Vendors.Queries.GetVendorById;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.Features.Vendors.Commands.CreateVendor;
+using VendorManagementproj.Application.Features.Vendors.Commands.DeleteVendor;
+using VendorManagementproj.Application.Features.Vendors.Commands.UpdateVendor;
+using VendorManagementproj.Application.Features.Vendors.Queries.GetAllVendors;
+using VendorManagementproj.Application.Features.Vendors.Queries.GetVendorById;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

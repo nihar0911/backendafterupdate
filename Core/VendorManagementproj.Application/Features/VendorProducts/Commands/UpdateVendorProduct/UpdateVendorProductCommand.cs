@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.VendorProducts.Commands.UpdateVendorProduct;
+namespace VendorManagementproj.Application.Features.VendorProducts.Commands.UpdateVendorProduct;
 
 public class UpdateVendorProductCommand : IRequest<UpdateVendorProductResponse>
 {

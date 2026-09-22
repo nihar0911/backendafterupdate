@@ -1,4 +1,4 @@
-﻿namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.RespondToOpportunity;
+﻿namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.RespondToOpportunity;
 
 public class RespondToOpportunityResponse
 {

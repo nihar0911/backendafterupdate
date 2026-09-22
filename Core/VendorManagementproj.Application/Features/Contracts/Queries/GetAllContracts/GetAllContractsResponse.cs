@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetAllContracts;
+namespace VendorManagementproj.Application.Features.Contracts.Queries.GetAllContracts;
 
 public class GetAllContractsResponse
 {

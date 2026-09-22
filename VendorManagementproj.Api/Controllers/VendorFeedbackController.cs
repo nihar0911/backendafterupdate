@@ -1,19 +1,19 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojApplication.Features.VendorFeedback.Commands.CreateVendorFeedback;
-using VendorManagementprojApplication.Features.VendorFeedback.Queries.GetAllVendorFeedback;
-using VendorManagementprojApplication.Features.VendorFeedback.Queries.GetEligibleReviewOrders;
-using VendorManagementprojApplication.Features.VendorFeedback.Queries.GetVendorFeedbackById;
-using VendorManagementprojApplication.Features.VendorFeedback.Queries.GetVendorFeedbackByVendor;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Application.Features.VendorFeedback.Commands.CreateVendorFeedback;
+using VendorManagementproj.Application.Features.VendorFeedback.Queries.GetAllVendorFeedback;
+using VendorManagementproj.Application.Features.VendorFeedback.Queries.GetEligibleReviewOrders;
+using VendorManagementproj.Application.Features.VendorFeedback.Queries.GetVendorFeedbackById;
+using VendorManagementproj.Application.Features.VendorFeedback.Queries.GetVendorFeedbackByVendor;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

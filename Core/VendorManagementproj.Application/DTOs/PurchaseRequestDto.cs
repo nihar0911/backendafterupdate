@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementproj.Application.DTOs;
 
 public class PurchaseRequestDto
 {

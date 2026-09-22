@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.DeletePurchaseRequestItem;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.DeletePurchaseRequestItem;
 
 public class DeletePurchaseRequestItemCommandHandler : IRequestHandler<DeletePurchaseRequestItemCommand, DeletePurchaseRequestItemResponse>
 {

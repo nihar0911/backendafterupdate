@@ -1,14 +1,14 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.Outlets.Commands.CreateOutlet;
-using VendorManagementprojApplication.Features.Outlets.Commands.DeleteOutlet;
-using VendorManagementprojApplication.Features.Outlets.Commands.UpdateOutlet;
-using VendorManagementprojApplication.Features.Outlets.Queries.GetAllOutlets;
-using VendorManagementprojApplication.Features.Outlets.Queries.GetOutletById;
-using VendorManagementprojApplication.Features.Outlets.Queries.GetOutletsByOrganizationId;
+using VendorManagementproj.Application.Features.Outlets.Commands.CreateOutlet;
+using VendorManagementproj.Application.Features.Outlets.Commands.DeleteOutlet;
+using VendorManagementproj.Application.Features.Outlets.Commands.UpdateOutlet;
+using VendorManagementproj.Application.Features.Outlets.Queries.GetAllOutlets;
+using VendorManagementproj.Application.Features.Outlets.Queries.GetOutletById;
+using VendorManagementproj.Application.Features.Outlets.Queries.GetOutletsByOrganizationId;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -109,7 +109,7 @@ public class OutletsController : ControllerBase
 
     [HttpPost("{id:int}/activate")]
     [Authorize(Roles = "Admin,Organization Manager")]
-    public async Task<IActionResult> Activate(int id, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IOutletRepository repo)
+    public async Task<IActionResult> Activate(int id, [FromServices] VendorManagementproj.Application.Contracts.Persistence.IOutletRepository repo)
     {
         var outlet = await repo.GetByIdAsync(id);
         if (outlet == null) return NotFound();
@@ -117,7 +117,7 @@ public class OutletsController : ControllerBase
         outlet.Status = "Active";
         var updated = await repo.UpdateAsync(outlet);
 
-        return Ok(new VendorManagementprojApplication.DTOs.OutletDto
+        return Ok(new VendorManagementproj.Application.DTOs.OutletDto
         {
             OutletID = updated.OutletID,
             OrganizationID = updated.OrganizationID,
@@ -132,7 +132,7 @@ public class OutletsController : ControllerBase
 
     [HttpPost("{id:int}/deactivate")]
     [Authorize(Roles = "Admin,Organization Manager")]
-    public async Task<IActionResult> Deactivate(int id, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IOutletRepository repo)
+    public async Task<IActionResult> Deactivate(int id, [FromServices] VendorManagementproj.Application.Contracts.Persistence.IOutletRepository repo)
     {
         var outlet = await repo.GetByIdAsync(id);
         if (outlet == null) return NotFound();
@@ -140,7 +140,7 @@ public class OutletsController : ControllerBase
         outlet.Status = "Inactive";
         var updated = await repo.UpdateAsync(outlet);
 
-        return Ok(new VendorManagementprojApplication.DTOs.OutletDto
+        return Ok(new VendorManagementproj.Application.DTOs.OutletDto
         {
             OutletID = updated.OutletID,
             OrganizationID = updated.OrganizationID,

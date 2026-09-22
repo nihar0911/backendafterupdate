@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.RejectQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.RejectQuotation;
 
 public class RejectQuotationCommand : IRequest<RejectQuotationResponse>
 {

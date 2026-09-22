@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorProducts.Commands.CreateVendorProduct;
+namespace VendorManagementproj.Application.Features.VendorProducts.Commands.CreateVendorProduct;
 
 public class CreateVendorProductResponse
 {

@@ -1,6 +1,6 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Queries.GetOrganizationById;
+namespace VendorManagementproj.Application.Features.Organizations.Queries.GetOrganizationById;
 
 public record GetOrganizationByIdQuery(int OrganizationID) : IRequest<GetOrganizationByIdResponse>;

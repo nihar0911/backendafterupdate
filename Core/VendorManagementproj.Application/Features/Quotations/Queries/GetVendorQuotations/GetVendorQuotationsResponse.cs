@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Quotations.Queries.GetVendorQuotations;
+namespace VendorManagementproj.Application.Features.Quotations.Queries.GetVendorQuotations;
 
 public class GetVendorQuotationsResponse
 {

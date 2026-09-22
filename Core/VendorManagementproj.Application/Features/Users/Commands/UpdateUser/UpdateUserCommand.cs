@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.UpdateUser;
+namespace VendorManagementproj.Application.Features.Users.Commands.UpdateUser;
 
 public class UpdateUserCommand : IRequest<UpdateUserResponse>
 {

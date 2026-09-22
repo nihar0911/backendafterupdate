@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Queries.GetAllOrganizations;
+namespace VendorManagementproj.Application.Features.Organizations.Queries.GetAllOrganizations;
 
 public class GetAllOrganizationsResponse
 {

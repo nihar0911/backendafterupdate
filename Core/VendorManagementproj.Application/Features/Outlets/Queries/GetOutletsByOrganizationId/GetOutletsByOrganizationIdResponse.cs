@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Queries.GetOutletsByOrganizationId;
+namespace VendorManagementproj.Application.Features.Outlets.Queries.GetOutletsByOrganizationId;
 
 public class GetOutletsByOrganizationIdResponse
 {

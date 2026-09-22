@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.TaxRates.Queries.GetAllTaxRates;
+namespace VendorManagementproj.Application.Features.TaxRates.Queries.GetAllTaxRates;
 
 public class GetAllTaxRatesResponse
 {

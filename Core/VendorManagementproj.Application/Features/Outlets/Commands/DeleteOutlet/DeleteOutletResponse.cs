@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.Outlets.Commands.DeleteOutlet;
+﻿namespace VendorManagementproj.Application.Features.Outlets.Commands.DeleteOutlet;
 
 public class DeleteOutletResponse
 {

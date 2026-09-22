@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Queries.GetMyProfile;
+namespace VendorManagementproj.Application.Features.Users.Queries.GetMyProfile;
 
 public class GetMyProfileResponse
 {

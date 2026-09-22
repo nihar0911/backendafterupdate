@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.DeletePurchaseRequestItem;
+﻿namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.DeletePurchaseRequestItem;
 
 public class DeletePurchaseRequestItemResponse
 {

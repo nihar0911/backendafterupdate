@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Notifications.Queries.GetMyNotifications;
+namespace VendorManagementproj.Application.Features.Notifications.Queries.GetMyNotifications;
 
 public class GetMyNotificationsQuery : IRequest<GetMyNotificationsResponse>
 {

@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Invoices.Commands.RejectInvoice;
+namespace VendorManagementproj.Application.Features.Invoices.Commands.RejectInvoice;
 
 public class RejectInvoiceResponse
 {

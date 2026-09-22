@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementproj.Application.DTOs;
 
 public class PaymentDto
 {

@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Queries.GetPendingPurchaseOrders;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Queries.GetPendingPurchaseOrders;
 
 public class GetPendingPurchaseOrdersResponse
 {

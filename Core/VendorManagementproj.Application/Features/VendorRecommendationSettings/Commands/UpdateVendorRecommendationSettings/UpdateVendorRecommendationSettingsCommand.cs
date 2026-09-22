@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.VendorRecommendationSettings.Commands.UpdateVendorRecommendationSettings;
+namespace VendorManagementproj.Application.Features.VendorRecommendationSettings.Commands.UpdateVendorRecommendationSettings;
 
 public class UpdateVendorRecommendationSettingsCommand : IRequest<UpdateVendorRecommendationSettingsResponse>
 {

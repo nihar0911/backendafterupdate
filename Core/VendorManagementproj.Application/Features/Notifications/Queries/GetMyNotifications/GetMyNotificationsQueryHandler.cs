@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Notifications.Queries.GetMyNotifications;
+namespace VendorManagementproj.Application.Features.Notifications.Queries.GetMyNotifications;
 
 public class GetMyNotificationsQueryHandler
     : IRequestHandler<GetMyNotificationsQuery, GetMyNotificationsResponse>

@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.RenewContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.RenewContract;
 
 public class RenewContractResponse
 {

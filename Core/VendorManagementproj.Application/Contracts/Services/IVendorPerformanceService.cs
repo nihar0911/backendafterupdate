@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Contracts.Services;
+namespace VendorManagementproj.Application.Contracts.Services;
 
 public interface IVendorPerformanceService
 {

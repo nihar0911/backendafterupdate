@@ -1,8 +1,8 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.Users.Commands.LoginUser;
+using VendorManagementproj.Application.Features.Users.Commands.LoginUser;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]

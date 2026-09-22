@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.RespondToOpportunity;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.RespondToOpportunity;
 
 public class RespondToOpportunityCommandHandler
     : IRequestHandler<RespondToOpportunityCommand, RespondToOpportunityResponse>

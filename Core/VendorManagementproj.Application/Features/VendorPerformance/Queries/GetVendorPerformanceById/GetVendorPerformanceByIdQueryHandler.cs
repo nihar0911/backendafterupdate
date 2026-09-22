@@ -1,9 +1,9 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Services;
+using VendorManagementproj.Application.Contracts.Services;
 
-namespace VendorManagementprojApplication.Features.VendorPerformance.Queries.GetVendorPerformanceById;
+namespace VendorManagementproj.Application.Features.VendorPerformance.Queries.GetVendorPerformanceById;
 
 public class GetVendorPerformanceByIdQueryHandler
     : IRequestHandler<GetVendorPerformanceByIdQuery, GetVendorPerformanceByIdResponse>

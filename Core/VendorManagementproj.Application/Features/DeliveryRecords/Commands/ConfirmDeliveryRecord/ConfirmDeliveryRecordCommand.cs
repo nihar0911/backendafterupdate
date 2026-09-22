@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.DeliveryRecords.Commands.ConfirmDeliveryRecord;
+namespace VendorManagementproj.Application.Features.DeliveryRecords.Commands.ConfirmDeliveryRecord;
 
 public class ConfirmDeliveryRecordCommand
     : IRequest<ConfirmDeliveryRecordResponse>

@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.TaxRates.Commands.UpdateTaxRate;
+namespace VendorManagementproj.Application.Features.TaxRates.Commands.UpdateTaxRate;
 
 public class UpdateTaxRateResponse
 {

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.RespondToQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.RespondToQuotation;
 
 public class RespondToQuotationCommand
     : IRequest<RespondToQuotationResponse>

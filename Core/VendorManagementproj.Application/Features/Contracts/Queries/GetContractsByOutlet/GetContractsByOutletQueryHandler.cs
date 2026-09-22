@@ -1,10 +1,10 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOutlet;
+namespace VendorManagementproj.Application.Features.Contracts.Queries.GetContractsByOutlet;
 
 public class GetContractsByOutletQueryHandler : IRequestHandler<GetContractsByOutletQuery, GetContractsByOutletResponse>
 {

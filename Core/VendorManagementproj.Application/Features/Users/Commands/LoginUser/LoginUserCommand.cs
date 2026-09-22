@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.LoginUser;
+namespace VendorManagementproj.Application.Features.Users.Commands.LoginUser;
 
 public class LoginUserCommand : IRequest<LoginUserResponse>
 {

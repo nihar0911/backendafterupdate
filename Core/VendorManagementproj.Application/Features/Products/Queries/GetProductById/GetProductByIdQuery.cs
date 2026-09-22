@@ -1,6 +1,6 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Products.Queries.GetProductById;
+namespace VendorManagementproj.Application.Features.Products.Queries.GetProductById;
 
 public record GetProductByIdQuery(int ProductID) : IRequest<GetProductByIdResponse>;

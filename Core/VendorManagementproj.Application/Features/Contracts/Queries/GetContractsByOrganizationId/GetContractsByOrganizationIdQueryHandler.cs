@@ -1,13 +1,13 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOrganizationId;
+namespace VendorManagementproj.Application.Features.Contracts.Queries.GetContractsByOrganizationId;
 
 public class GetContractsByOrganizationIdQueryHandler : IRequestHandler<GetContractsByOrganizationIdQuery, GetContractsByOrganizationIdResponse>
 {

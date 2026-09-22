@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.VendorAnalysis.Queries.GetVendorAnalysis;
+namespace VendorManagementproj.Application.Features.VendorAnalysis.Queries.GetVendorAnalysis;
 
 public class GetVendorAnalysisQuery: IRequest<GetVendorAnalysisResponse>
 {

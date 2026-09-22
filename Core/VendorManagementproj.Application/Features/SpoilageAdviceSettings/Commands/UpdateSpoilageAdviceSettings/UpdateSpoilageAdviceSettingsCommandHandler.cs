@@ -1,13 +1,13 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
-using SpoilageAdviceSettingsEntity = VendorManagementprojDomain.Entities.SpoilageAdviceSettings;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
+using SpoilageAdviceSettingsEntity = VendorManagementproj.Domain.Entities.SpoilageAdviceSettings;
 
-namespace VendorManagementprojApplication.Features.SpoilageAdviceSettings.Commands.UpdateSpoilageAdviceSettings;
+namespace VendorManagementproj.Application.Features.SpoilageAdviceSettings.Commands.UpdateSpoilageAdviceSettings;
 
 public class UpdateSpoilageAdviceSettingsCommandHandler : IRequestHandler<UpdateSpoilageAdviceSettingsCommand, UpdateSpoilageAdviceSettingsResponse>
 {

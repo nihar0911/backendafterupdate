@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Commands.UpdateOrganization;
+namespace VendorManagementproj.Application.Features.Organizations.Commands.UpdateOrganization;
 
 public class UpdateOrganizationCommandHandler
     : IRequestHandler<UpdateOrganizationCommand, UpdateOrganizationResponse>

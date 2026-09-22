@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.CreatePurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.CreatePurchaseOrder;
 
 public class CreatePurchaseOrderCommand : IRequest<CreatePurchaseOrderResponse>
 {

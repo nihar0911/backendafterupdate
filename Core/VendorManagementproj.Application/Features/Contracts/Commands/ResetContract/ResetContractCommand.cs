@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.ResetContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.ResetContract;
 
 public class ResetContractCommand : IRequest<ResetContractResponse>
 {

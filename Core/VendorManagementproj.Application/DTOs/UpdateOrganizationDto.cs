@@ -1,7 +1,7 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 
-namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementproj.Application.DTOs;
 
 public class UpdateOrganizationDto
 {

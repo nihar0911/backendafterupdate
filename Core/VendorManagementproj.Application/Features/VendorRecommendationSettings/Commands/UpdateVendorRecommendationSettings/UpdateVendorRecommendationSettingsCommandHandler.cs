@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
-using VendorRecommendationSettingsEntity = VendorManagementprojDomain.Entities.VendorRecommendationSettings;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
+using VendorRecommendationSettingsEntity = VendorManagementproj.Domain.Entities.VendorRecommendationSettings;
 
-namespace VendorManagementprojApplication.Features.VendorRecommendationSettings.Commands.UpdateVendorRecommendationSettings;
+namespace VendorManagementproj.Application.Features.VendorRecommendationSettings.Commands.UpdateVendorRecommendationSettings;
 
 public class UpdateVendorRecommendationSettingsCommandHandler : IRequestHandler<UpdateVendorRecommendationSettingsCommand, UpdateVendorRecommendationSettingsResponse>
 {

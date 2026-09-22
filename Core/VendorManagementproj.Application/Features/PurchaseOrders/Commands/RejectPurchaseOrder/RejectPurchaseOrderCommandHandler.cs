@@ -1,16 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Common;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Common;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
 
 public class RejectPurchaseOrderCommandHandler : IRequestHandler<RejectPurchaseOrderCommand, RejectPurchaseOrderResponse>
 {

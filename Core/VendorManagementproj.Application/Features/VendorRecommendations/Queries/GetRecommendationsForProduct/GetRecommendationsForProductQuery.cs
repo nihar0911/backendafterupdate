@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.VendorRecommendations.Queries.GetRecommendationsForProduct;
+namespace VendorManagementproj.Application.Features.VendorRecommendations.Queries.GetRecommendationsForProduct;
 
 public class GetRecommendationsForProductQuery : IRequest<GetRecommendationsForProductResponse>
 {

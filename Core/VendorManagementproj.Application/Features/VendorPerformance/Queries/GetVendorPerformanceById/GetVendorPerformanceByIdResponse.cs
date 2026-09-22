@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorPerformance.Queries.GetVendorPerformanceById;
+namespace VendorManagementproj.Application.Features.VendorPerformance.Queries.GetVendorPerformanceById;
 
 public class GetVendorPerformanceByIdResponse
 {

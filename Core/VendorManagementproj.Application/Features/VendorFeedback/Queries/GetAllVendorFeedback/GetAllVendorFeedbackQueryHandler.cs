@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorFeedbackEntity = VendorManagementprojDomain.Entities.VendorFeedback;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorFeedbackEntity = VendorManagementproj.Domain.Entities.VendorFeedback;
 
-namespace VendorManagementprojApplication.Features.VendorFeedback.Queries.GetAllVendorFeedback;
+namespace VendorManagementproj.Application.Features.VendorFeedback.Queries.GetAllVendorFeedback;
 
 public class GetAllVendorFeedbackQueryHandler
     : IRequestHandler<GetAllVendorFeedbackQuery, GetAllVendorFeedbackResponse>

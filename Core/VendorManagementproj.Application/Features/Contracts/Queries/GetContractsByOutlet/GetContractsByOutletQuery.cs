@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetContractsByOutlet;
+namespace VendorManagementproj.Application.Features.Contracts.Queries.GetContractsByOutlet;
 
 public class GetContractsByOutletQuery : IRequest<GetContractsByOutletResponse>
 {

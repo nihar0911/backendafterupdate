@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.CreateUser;
+namespace VendorManagementproj.Application.Features.Users.Commands.CreateUser;
 
 public class CreateUserResponse
 {

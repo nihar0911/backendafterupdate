@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Queries.GetOutletById;
+namespace VendorManagementproj.Application.Features.Outlets.Queries.GetOutletById;
 
 public class GetOutletByIdQueryHandler
     : IRequestHandler<GetOutletByIdQuery, GetOutletByIdResponse>
@@ -76,7 +76,7 @@ public class GetOutletByIdQueryHandler
     }
 
     private static OutletDto MapToDto(
-        VendorManagementprojDomain.Entities.Outlet outlet)
+        VendorManagementproj.Domain.Entities.Outlet outlet)
     {
         return new OutletDto
         {

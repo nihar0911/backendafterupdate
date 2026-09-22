@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Vendors.Commands.UpdateVendor;
+namespace VendorManagementproj.Application.Features.Vendors.Commands.UpdateVendor;
 
 public class UpdateVendorResponse
 {

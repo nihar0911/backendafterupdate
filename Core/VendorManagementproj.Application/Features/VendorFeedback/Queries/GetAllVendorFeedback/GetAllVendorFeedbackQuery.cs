@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.VendorFeedback.Queries.GetAllVendorFeedback;
+namespace VendorManagementproj.Application.Features.VendorFeedback.Queries.GetAllVendorFeedback;
 
 public class GetAllVendorFeedbackQuery
     : IRequest<GetAllVendorFeedbackResponse>

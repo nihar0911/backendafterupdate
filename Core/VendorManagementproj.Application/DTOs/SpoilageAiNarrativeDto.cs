@@ -1,6 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementproj.Application.DTOs;
 
 public class SpoilageAiNarrativeDto
 {

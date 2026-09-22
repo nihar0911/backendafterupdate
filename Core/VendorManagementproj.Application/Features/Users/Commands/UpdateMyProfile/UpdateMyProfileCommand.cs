@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.UpdateMyProfile;
+namespace VendorManagementproj.Application.Features.Users.Commands.UpdateMyProfile;
 
 public class UpdateMyProfileCommand : IRequest<UpdateMyProfileResponse>
 {

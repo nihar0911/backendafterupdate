@@ -1,7 +1,7 @@
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojDomain.Entities;
+﻿using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Common;
+namespace VendorManagementproj.Application.Common;
 
 public static class PurchaseOrderApprover
 {

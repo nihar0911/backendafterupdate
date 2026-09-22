@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Infrastructure;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Infrastructure;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.Invoices.Commands.ApproveInvoice;
+namespace VendorManagementproj.Application.Features.Invoices.Commands.ApproveInvoice;
 
 public class ApproveInvoiceCommandHandler : IRequestHandler<ApproveInvoiceCommand, ApproveInvoiceResponse>
 {

@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.DispatchPurchaseRequest;
+﻿namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.DispatchPurchaseRequest;
 
 public class DispatchPurchaseRequestResponse
 {

@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.TaxRates.Commands.UpdateTaxRate;
+namespace VendorManagementproj.Application.Features.TaxRates.Commands.UpdateTaxRate;
 
 public class UpdateTaxRateCommand : IRequest<UpdateTaxRateResponse>
 {

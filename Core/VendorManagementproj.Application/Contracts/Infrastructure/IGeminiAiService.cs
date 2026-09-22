@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Contracts.Infrastructure;
+namespace VendorManagementproj.Application.Contracts.Infrastructure;
 
 public interface IGeminiAiService
 {

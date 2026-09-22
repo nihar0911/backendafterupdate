@@ -1,9 +1,9 @@
-using Microsoft.EntityFrameworkCore;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojDomain.Entities;
-using VendorManagementprojPersistence.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Domain.Entities;
+using VendorManagementproj.Persistence.Data;
 
-namespace VendorManagementprojPersistence.Repositories;
+namespace VendorManagementproj.Persistence.Repositories;
 
 public class TaxRateRepository : ITaxRateRepository
 {

@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using VendorManagementprojApplication.Contracts.Infrastructure;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Infrastructure;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Services;
+namespace VendorManagementproj.Application.Services;
 
 public class InvoiceDocumentService : IInvoiceDocumentService
 {

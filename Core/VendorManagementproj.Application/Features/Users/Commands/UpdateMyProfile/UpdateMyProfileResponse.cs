@@ -1,6 +1,6 @@
-﻿using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.UpdateMyProfile;
+namespace VendorManagementproj.Application.Features.Users.Commands.UpdateMyProfile;
 
 public class UpdateMyProfileResponse
 {

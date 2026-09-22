@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.Notifications.Commands.ClearAllNotifications;
-using VendorManagementprojApplication.Features.Notifications.Commands.MarkAllNotificationsAsRead;
-using VendorManagementprojApplication.Features.Notifications.Commands.MarkNotificationAsRead;
-using VendorManagementprojApplication.Features.Notifications.Queries.GetMyNotifications;
+using VendorManagementproj.Application.Features.Notifications.Commands.ClearAllNotifications;
+using VendorManagementproj.Application.Features.Notifications.Commands.MarkAllNotificationsAsRead;
+using VendorManagementproj.Application.Features.Notifications.Commands.MarkNotificationAsRead;
+using VendorManagementproj.Application.Features.Notifications.Queries.GetMyNotifications;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/notifications")]

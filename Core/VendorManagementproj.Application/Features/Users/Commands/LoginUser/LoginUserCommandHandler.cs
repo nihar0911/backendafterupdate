@@ -1,9 +1,9 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.LoginUser;
+namespace VendorManagementproj.Application.Features.Users.Commands.LoginUser;
 
 public class LoginUserCommandHandler
     : IRequestHandler<LoginUserCommand, LoginUserResponse>

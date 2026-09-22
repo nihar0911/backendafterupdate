@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetVendorProcurementOpportunities;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetVendorProcurementOpportunities;
 
 public class GetVendorProcurementOpportunitiesResponse
 {

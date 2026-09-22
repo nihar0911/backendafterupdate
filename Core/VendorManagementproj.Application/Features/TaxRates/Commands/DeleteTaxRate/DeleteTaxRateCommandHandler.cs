@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
 
-namespace VendorManagementprojApplication.Features.TaxRates.Commands.DeleteTaxRate;
+namespace VendorManagementproj.Application.Features.TaxRates.Commands.DeleteTaxRate;
 
 public class DeleteTaxRateCommandHandler : IRequestHandler<DeleteTaxRateCommand, DeleteTaxRateResponse>
 {

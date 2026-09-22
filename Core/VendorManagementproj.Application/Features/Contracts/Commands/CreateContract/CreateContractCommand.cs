@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using MediatR;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.CreateContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.CreateContract;
 
 public class CreateContractCommand : IRequest<CreateContractResponse>
 {

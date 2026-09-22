@@ -1,17 +1,17 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.Users.Commands.CreateUser;
-using VendorManagementprojApplication.Features.Users.Commands.UpdateMyProfile;
-using VendorManagementprojApplication.Features.Users.Commands.UpdateUser;
-using VendorManagementprojApplication.Features.Users.Queries.GetAllUsers;
-using VendorManagementprojApplication.Features.Users.Queries.GetMyProfile;
-using VendorManagementprojApplication.Features.Users.Queries.GetUserById;
+using VendorManagementproj.Application.Features.Users.Commands.CreateUser;
+using VendorManagementproj.Application.Features.Users.Commands.UpdateMyProfile;
+using VendorManagementproj.Application.Features.Users.Commands.UpdateUser;
+using VendorManagementproj.Application.Features.Users.Queries.GetAllUsers;
+using VendorManagementproj.Application.Features.Users.Queries.GetMyProfile;
+using VendorManagementproj.Application.Features.Users.Queries.GetUserById;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/users")]
@@ -167,7 +167,7 @@ public class UsersController : ControllerBase
 
     [HttpPost("{userID:int}/activate")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Activate(int userID, [FromServices] VendorManagementprojApplication.Contracts.Persistence.IUserRepository repo)
+    public async Task<IActionResult> Activate(int userID, [FromServices] VendorManagementproj.Application.Contracts.Persistence.IUserRepository repo)
     {
         var user = await repo.GetByIdAsync(userID);
         if (user == null) return NotFound();
@@ -175,7 +175,7 @@ public class UsersController : ControllerBase
         user.Status = "Active";
         await repo.UpdateAsync(user);
 
-        return Ok(new VendorManagementprojApplication.DTOs.UserDto
+        return Ok(new VendorManagementproj.Application.DTOs.UserDto
         {
             UserID = user.UserID,
             Name = user.Name,
@@ -193,8 +193,8 @@ public class UsersController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Deactivate(
         int userID,
-        [FromServices] VendorManagementprojApplication.Contracts.Persistence.IUserRepository repo,
-        [FromServices] VendorManagementprojApplication.Contracts.Services.ICurrentUserService currentUserService)
+        [FromServices] VendorManagementproj.Application.Contracts.Persistence.IUserRepository repo,
+        [FromServices] VendorManagementproj.Application.Contracts.Services.ICurrentUserService currentUserService)
     {
         if (currentUserService.UserID.HasValue && currentUserService.UserID.Value == userID)
         {
@@ -207,7 +207,7 @@ public class UsersController : ControllerBase
         user.Status = "Inactive";
         await repo.UpdateAsync(user);
 
-        return Ok(new VendorManagementprojApplication.DTOs.UserDto
+        return Ok(new VendorManagementproj.Application.DTOs.UserDto
         {
             UserID = user.UserID,
             Name = user.Name,

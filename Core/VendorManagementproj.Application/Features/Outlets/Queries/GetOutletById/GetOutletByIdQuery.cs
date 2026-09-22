@@ -1,6 +1,6 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Queries.GetOutletById;
+namespace VendorManagementproj.Application.Features.Outlets.Queries.GetOutletById;
 
 public record GetOutletByIdQuery(int OutletID) : IRequest<GetOutletByIdResponse>;

@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using VendorManagementprojPersistence.Data;
+using VendorManagementproj.Persistence.Data;
 
 #nullable disable
 
-namespace VendorManagementprojPersistence.Migrations
+namespace VendorManagementproj.Persistence.Migrations
 {
     [DbContext(typeof(VendorManagementDbContext))]
     [Migration("20260809141623_InitialCreate")]
@@ -24,7 +24,7 @@ namespace VendorManagementprojPersistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("VendorManagementprojDomain.Entities.Organization", b =>
+            modelBuilder.Entity("VendorManagementproj.Domain.Entities.Organization", b =>
                 {
                     b.Property<int>("OrganizationID")
                         .ValueGeneratedOnAdd()

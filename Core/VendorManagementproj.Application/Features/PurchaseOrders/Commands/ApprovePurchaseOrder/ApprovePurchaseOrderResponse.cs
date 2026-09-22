@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.ApprovePurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.ApprovePurchaseOrder;
 
 public class ApprovePurchaseOrderResponse
 {

@@ -1,10 +1,10 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorRecommendationSettings.Queries.GetVendorRecommendationSettings;
+namespace VendorManagementproj.Application.Features.VendorRecommendationSettings.Queries.GetVendorRecommendationSettings;
 
 public class GetVendorRecommendationSettingsQueryHandler : IRequestHandler<GetVendorRecommendationSettingsQuery, GetVendorRecommendationSettingsResponse>
 {

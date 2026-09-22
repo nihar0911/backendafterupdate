@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Commands.CreateOrganization;
+namespace VendorManagementproj.Application.Features.Organizations.Commands.CreateOrganization;
 
 public class CreateOrganizationCommand : IRequest<CreateOrganizationResponse>
 {

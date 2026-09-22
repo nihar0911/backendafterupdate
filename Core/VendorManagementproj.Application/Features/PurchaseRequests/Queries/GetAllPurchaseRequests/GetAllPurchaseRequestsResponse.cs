@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Queries.GetAllPurchaseRequests;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Queries.GetAllPurchaseRequests;
 
 public class GetAllPurchaseRequestsResponse
 {

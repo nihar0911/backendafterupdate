@@ -1,13 +1,13 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.DispatchPurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.DispatchPurchaseOrder;
 
 public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurchaseOrderCommand, DispatchPurchaseOrderResponse>
 {
@@ -113,7 +113,7 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
     }
 
     private static PurchaseOrderDto MapToDto(
-        VendorManagementprojDomain.Entities.PurchaseOrder purchaseOrder)
+        VendorManagementproj.Domain.Entities.PurchaseOrder purchaseOrder)
     {
         return new PurchaseOrderDto
         {

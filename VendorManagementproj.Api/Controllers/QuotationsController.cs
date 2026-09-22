@@ -1,17 +1,17 @@
-using VendorManagementprojApplication.Features.Quotations.Queries.GetVendorQuotations;
+﻿using VendorManagementproj.Application.Features.Quotations.Queries.GetVendorQuotations;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.Quotations.Commands.AcceptQuotation;
-using VendorManagementprojApplication.Features.Quotations.Commands.CreateQuotation;
-using VendorManagementprojApplication.Features.Quotations.Commands.DeleteQuotation;
-using VendorManagementprojApplication.Features.Quotations.Commands.RejectQuotation;
-using VendorManagementprojApplication.Features.Quotations.Commands.RespondToQuotation;
-using VendorManagementprojApplication.Features.Quotations.Commands.UpdateQuotation;
-using VendorManagementprojApplication.Features.Quotations.Queries.GetAllQuotations;
-using VendorManagementprojApplication.Features.Quotations.Queries.GetQuotationById;
+using VendorManagementproj.Application.Features.Quotations.Commands.AcceptQuotation;
+using VendorManagementproj.Application.Features.Quotations.Commands.CreateQuotation;
+using VendorManagementproj.Application.Features.Quotations.Commands.DeleteQuotation;
+using VendorManagementproj.Application.Features.Quotations.Commands.RejectQuotation;
+using VendorManagementproj.Application.Features.Quotations.Commands.RespondToQuotation;
+using VendorManagementproj.Application.Features.Quotations.Commands.UpdateQuotation;
+using VendorManagementproj.Application.Features.Quotations.Queries.GetAllQuotations;
+using VendorManagementproj.Application.Features.Quotations.Queries.GetQuotationById;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

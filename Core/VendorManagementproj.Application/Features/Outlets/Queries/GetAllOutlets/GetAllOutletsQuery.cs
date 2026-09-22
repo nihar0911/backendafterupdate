@@ -1,6 +1,6 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Queries.GetAllOutlets;
+namespace VendorManagementproj.Application.Features.Outlets.Queries.GetAllOutlets;
 
 public record GetAllOutletsQuery : IRequest<GetAllOutletsResponse>;

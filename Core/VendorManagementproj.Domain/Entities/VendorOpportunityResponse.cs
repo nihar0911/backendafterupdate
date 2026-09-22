@@ -1,6 +1,6 @@
-using System;
+﻿using System;
 
-namespace VendorManagementprojDomain.Entities;
+namespace VendorManagementproj.Domain.Entities;
 
 public class VendorOpportunityResponse
 {

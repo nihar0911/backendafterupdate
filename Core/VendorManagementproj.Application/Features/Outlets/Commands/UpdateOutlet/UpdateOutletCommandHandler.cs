@@ -1,10 +1,10 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.Common;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.Common;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Commands.UpdateOutlet;
+namespace VendorManagementproj.Application.Features.Outlets.Commands.UpdateOutlet;
 
 public class UpdateOutletCommandHandler
     : IRequestHandler<UpdateOutletCommand, UpdateOutletResponse>

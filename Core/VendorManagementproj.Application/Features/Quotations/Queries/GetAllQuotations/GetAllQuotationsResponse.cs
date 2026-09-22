@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Quotations.Queries.GetAllQuotations;
+namespace VendorManagementproj.Application.Features.Quotations.Queries.GetAllQuotations;
 
 public class GetAllQuotationsResponse
 {

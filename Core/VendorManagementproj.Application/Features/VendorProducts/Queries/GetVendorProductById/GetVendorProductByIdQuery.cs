@@ -1,6 +1,6 @@
-using MediatR;
-using VendorManagementprojDomain.Entities;
+﻿using MediatR;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.VendorProducts.Queries.GetVendorProductById;
+namespace VendorManagementproj.Application.Features.VendorProducts.Queries.GetVendorProductById;
 
 public record GetVendorProductByIdQuery(int VendorProductID) : IRequest<GetVendorProductByIdResponse>;

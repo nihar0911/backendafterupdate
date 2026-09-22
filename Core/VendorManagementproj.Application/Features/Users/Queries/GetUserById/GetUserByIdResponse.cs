@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Queries.GetUserById;
+namespace VendorManagementproj.Application.Features.Users.Queries.GetUserById;
 
 public class GetUserByIdResponse
 {

@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.Vendors.Commands.DeleteVendor;
+﻿namespace VendorManagementproj.Application.Features.Vendors.Commands.DeleteVendor;
 
 public class DeleteVendorResponse
 {

@@ -1,13 +1,13 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.Products.Commands.CreateProduct;
-using VendorManagementprojApplication.Features.Products.Commands.DeleteProduct;
-using VendorManagementprojApplication.Features.Products.Commands.UpdateProduct;
-using VendorManagementprojApplication.Features.Products.Queries.GetAllProducts;
-using VendorManagementprojApplication.Features.Products.Queries.GetProductById;
+using VendorManagementproj.Application.Features.Products.Commands.CreateProduct;
+using VendorManagementproj.Application.Features.Products.Commands.DeleteProduct;
+using VendorManagementproj.Application.Features.Products.Commands.UpdateProduct;
+using VendorManagementproj.Application.Features.Products.Queries.GetAllProducts;
+using VendorManagementproj.Application.Features.Products.Queries.GetProductById;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/products")]

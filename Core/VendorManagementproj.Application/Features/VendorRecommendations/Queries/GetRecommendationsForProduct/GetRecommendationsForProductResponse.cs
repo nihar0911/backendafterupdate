@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+﻿using System.Collections.Generic;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorRecommendations.Queries.GetRecommendationsForProduct;
+namespace VendorManagementproj.Application.Features.VendorRecommendations.Queries.GetRecommendationsForProduct;
 
 public class GetRecommendationsForProductResponse
 {

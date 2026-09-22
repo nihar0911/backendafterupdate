@@ -1,13 +1,13 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.TaxRates.Commands.CreateTaxRate;
-using VendorManagementprojApplication.Features.TaxRates.Commands.DeleteTaxRate;
-using VendorManagementprojApplication.Features.TaxRates.Commands.UpdateTaxRate;
-using VendorManagementprojApplication.Features.TaxRates.Queries.GetAllTaxRates;
-using VendorManagementprojApplication.Features.TaxRates.Queries.GetTaxRateById;
+using VendorManagementproj.Application.Features.TaxRates.Commands.CreateTaxRate;
+using VendorManagementproj.Application.Features.TaxRates.Commands.DeleteTaxRate;
+using VendorManagementproj.Application.Features.TaxRates.Commands.UpdateTaxRate;
+using VendorManagementproj.Application.Features.TaxRates.Queries.GetAllTaxRates;
+using VendorManagementproj.Application.Features.TaxRates.Queries.GetTaxRateById;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/taxrates")]

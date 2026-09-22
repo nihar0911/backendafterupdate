@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Queries.ParseVoiceProcurementOrder;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Queries.ParseVoiceProcurementOrder;
 
 public class ParseVoiceProcurementOrderResponse
 {

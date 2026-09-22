@@ -1,10 +1,10 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
-using VendorManagementprojApplication.DTOs;
-using VendorManagementprojDomain.Entities;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
+using VendorManagementproj.Application.DTOs;
+using VendorManagementproj.Domain.Entities;
 
-namespace VendorManagementprojApplication.Features.Users.Commands.CreateUser;
+namespace VendorManagementproj.Application.Features.Users.Commands.CreateUser;
 
 public class CreateUserCommandHandler
     : IRequestHandler<CreateUserCommand, CreateUserResponse>

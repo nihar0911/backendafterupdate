@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.UpdateQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.UpdateQuotation;
 
 public class UpdateQuotationResponse
 {

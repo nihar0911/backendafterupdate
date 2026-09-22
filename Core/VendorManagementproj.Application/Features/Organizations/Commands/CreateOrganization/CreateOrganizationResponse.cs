@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Commands.CreateOrganization;
+namespace VendorManagementproj.Application.Features.Organizations.Commands.CreateOrganization;
 
 public class CreateOrganizationResponse
 {

@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+﻿using System.Collections.Generic;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Queries.GetContractEligibleVendors;
+namespace VendorManagementproj.Application.Features.Contracts.Queries.GetContractEligibleVendors;
 
 public class GetContractEligibleVendorsResponse
 {

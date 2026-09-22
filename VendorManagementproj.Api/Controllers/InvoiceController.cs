@@ -1,17 +1,17 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VendorManagementprojApplication.Features.Invoices.Commands.ApproveInvoice;
-using VendorManagementprojApplication.Features.Invoices.Commands.CreateInvoice;
-using VendorManagementprojApplication.Features.Invoices.Commands.MarkInvoicePaid;
-using VendorManagementprojApplication.Features.Invoices.Commands.RejectInvoice;
-using VendorManagementprojApplication.Features.Invoices.Queries.GetAllInvoices;
-using VendorManagementprojApplication.Features.Invoices.Queries.GetInvoiceById;
-using VendorManagementprojApplication.Features.Payments.Queries.GetPayments;
+using VendorManagementproj.Application.Features.Invoices.Commands.ApproveInvoice;
+using VendorManagementproj.Application.Features.Invoices.Commands.CreateInvoice;
+using VendorManagementproj.Application.Features.Invoices.Commands.MarkInvoicePaid;
+using VendorManagementproj.Application.Features.Invoices.Commands.RejectInvoice;
+using VendorManagementproj.Application.Features.Invoices.Queries.GetAllInvoices;
+using VendorManagementproj.Application.Features.Invoices.Queries.GetInvoiceById;
+using VendorManagementproj.Application.Features.Payments.Queries.GetPayments;
 
-namespace VendorManagementprojApi.Controllers;
+namespace VendorManagementproj.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

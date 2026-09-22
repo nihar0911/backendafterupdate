@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Users.Queries.GetAllUsers;
+namespace VendorManagementproj.Application.Features.Users.Queries.GetAllUsers;
 
 public class GetAllUsersResponse
 {

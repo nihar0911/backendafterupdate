@@ -1,8 +1,8 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using VendorManagementprojApplication.Contracts.Services;
+using VendorManagementproj.Application.Contracts.Services;
 
-namespace VendorManagementprojApi.Services;
+namespace VendorManagementproj.Api.Services;
 
 public class CurrentUserService : ICurrentUserService
 {

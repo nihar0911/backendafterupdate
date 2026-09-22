@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.UpdateContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.UpdateContract;
 
 public class UpdateContractCommand : IRequest<UpdateContractResponse>
 {

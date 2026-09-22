@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using MediatR;
 
-namespace VendorManagementprojApplication.Features.DeliveryRecords.Commands.CreateDeliveryRecord;
+namespace VendorManagementproj.Application.Features.DeliveryRecords.Commands.CreateDeliveryRecord;
 
 public class CreateDeliveryRecordCommand
     : IRequest<CreateDeliveryRecordResponse>

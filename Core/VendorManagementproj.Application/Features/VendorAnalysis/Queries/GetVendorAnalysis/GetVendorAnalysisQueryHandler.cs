@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using VendorManagementprojApplication.Contracts.Services;
+using VendorManagementproj.Application.Contracts.Services;
 
-namespace VendorManagementprojApplication.Features.VendorAnalysis.Queries.GetVendorAnalysis;
+namespace VendorManagementproj.Application.Features.VendorAnalysis.Queries.GetVendorAnalysis;
 
 public class GetVendorAnalysisQueryHandler
     : IRequestHandler<GetVendorAnalysisQuery, GetVendorAnalysisResponse>

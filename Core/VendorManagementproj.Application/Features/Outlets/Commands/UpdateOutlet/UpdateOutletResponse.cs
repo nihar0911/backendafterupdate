@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Commands.UpdateOutlet;
+namespace VendorManagementproj.Application.Features.Outlets.Commands.UpdateOutlet;
 
 public class UpdateOutletResponse
 {

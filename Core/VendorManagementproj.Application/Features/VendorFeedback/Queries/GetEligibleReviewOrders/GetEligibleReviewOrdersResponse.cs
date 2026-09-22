@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using VendorManagementprojApplication.DTOs;
+﻿using System.Collections.Generic;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorFeedback.Queries.GetEligibleReviewOrders;
+namespace VendorManagementproj.Application.Features.VendorFeedback.Queries.GetEligibleReviewOrders;
 
 public class GetEligibleReviewOrdersResponse
 {

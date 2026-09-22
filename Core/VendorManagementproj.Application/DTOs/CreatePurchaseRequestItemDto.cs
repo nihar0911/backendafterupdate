@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace VendorManagementprojApplication.DTOs;
+namespace VendorManagementproj.Application.DTOs;
 
 public class CreatePurchaseRequestItemDto
 {

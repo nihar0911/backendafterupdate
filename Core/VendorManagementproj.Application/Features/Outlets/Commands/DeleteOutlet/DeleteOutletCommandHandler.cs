@@ -1,8 +1,8 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
 
-namespace VendorManagementprojApplication.Features.Outlets.Commands.DeleteOutlet;
+namespace VendorManagementproj.Application.Features.Outlets.Commands.DeleteOutlet;
 
 public class DeleteOutletCommandHandler
     : IRequestHandler<DeleteOutletCommand, DeleteOutletResponse>

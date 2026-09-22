@@ -1,10 +1,10 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.Contracts.Services;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.Contracts.Services;
 
-namespace VendorManagementprojApplication.Features.Notifications.Commands.ClearAllNotifications;
+namespace VendorManagementproj.Application.Features.Notifications.Commands.ClearAllNotifications;
 
 public class ClearAllNotificationsCommandHandler
     : IRequestHandler<ClearAllNotificationsCommand, ClearAllNotificationsResponse>

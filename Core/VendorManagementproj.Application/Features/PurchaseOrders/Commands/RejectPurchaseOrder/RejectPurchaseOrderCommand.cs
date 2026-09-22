@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
+namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.RejectPurchaseOrder;
 
 public class RejectPurchaseOrderCommand : IRequest<RejectPurchaseOrderResponse>
 {

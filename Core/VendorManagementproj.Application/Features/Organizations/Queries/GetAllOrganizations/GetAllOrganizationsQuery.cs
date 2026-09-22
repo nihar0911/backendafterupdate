@@ -1,6 +1,6 @@
-using MediatR;
-using VendorManagementprojApplication.DTOs;
+﻿using MediatR;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Queries.GetAllOrganizations;
+namespace VendorManagementproj.Application.Features.Organizations.Queries.GetAllOrganizations;
 
 public record GetAllOrganizationsQuery : IRequest<GetAllOrganizationsResponse>;

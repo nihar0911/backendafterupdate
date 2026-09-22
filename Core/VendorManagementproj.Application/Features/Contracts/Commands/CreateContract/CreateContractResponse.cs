@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Contracts.Commands.CreateContract;
+namespace VendorManagementproj.Application.Features.Contracts.Commands.CreateContract;
 
 public class CreateContractResponse
 {

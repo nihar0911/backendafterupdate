@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Outlets.Commands.CreateOutlet;
+namespace VendorManagementproj.Application.Features.Outlets.Commands.CreateOutlet;
 
 public class CreateOutletResponse
 {

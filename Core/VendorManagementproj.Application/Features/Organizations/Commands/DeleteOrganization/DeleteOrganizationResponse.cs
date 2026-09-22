@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.Organizations.Commands.DeleteOrganization;
+﻿namespace VendorManagementproj.Application.Features.Organizations.Commands.DeleteOrganization;
 
 public class DeleteOrganizationResponse
 {

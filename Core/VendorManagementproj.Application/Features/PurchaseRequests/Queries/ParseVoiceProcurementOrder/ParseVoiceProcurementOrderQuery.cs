@@ -1,6 +1,6 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Queries.ParseVoiceProcurementOrder;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Queries.ParseVoiceProcurementOrder;
 
 public class ParseVoiceProcurementOrderQuery : IRequest<ParseVoiceProcurementOrderResponse>
 {

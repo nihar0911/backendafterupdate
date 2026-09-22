@@ -1,4 +1,4 @@
-namespace VendorManagementprojApplication.Features.Notifications.Commands.ClearAllNotifications;
+﻿namespace VendorManagementproj.Application.Features.Notifications.Commands.ClearAllNotifications;
 
 public class ClearAllNotificationsResponse
 {

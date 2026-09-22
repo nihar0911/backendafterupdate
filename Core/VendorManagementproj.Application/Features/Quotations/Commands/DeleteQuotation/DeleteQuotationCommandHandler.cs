@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.DeleteQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.DeleteQuotation;
 
 public class DeleteQuotationCommandHandler : IRequestHandler<DeleteQuotationCommand, DeleteQuotationResponse>
 {

@@ -1,5 +1,5 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Products.Commands.DeleteProduct;
+namespace VendorManagementproj.Application.Features.Products.Commands.DeleteProduct;
 
 public record DeleteProductCommand(int ProductID) : IRequest<DeleteProductResponse>;

@@ -1,5 +1,5 @@
-using MediatR;
+﻿using MediatR;
 
-namespace VendorManagementprojApplication.Features.Quotations.Commands.DeleteQuotation;
+namespace VendorManagementproj.Application.Features.Quotations.Commands.DeleteQuotation;
 
 public record DeleteQuotationCommand(int QuotationID) : IRequest<DeleteQuotationResponse>;

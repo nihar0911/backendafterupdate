@@ -1,12 +1,12 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
-using VendorManagementprojApplication.DTOs;
+using VendorManagementproj.Application.Contracts.Persistence;
+using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.VendorFeedback.Queries.GetVendorFeedbackByVendor;
+namespace VendorManagementproj.Application.Features.VendorFeedback.Queries.GetVendorFeedbackByVendor;
 
 public class GetVendorFeedbackByVendorQueryHandler
     : IRequestHandler<GetVendorFeedbackByVendorQuery, GetVendorFeedbackByVendorResponse>

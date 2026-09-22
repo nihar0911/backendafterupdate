@@ -1,6 +1,6 @@
-using VendorManagementprojApplication.DTOs;
+﻿using VendorManagementproj.Application.DTOs;
 
-namespace VendorManagementprojApplication.Features.Organizations.Commands.UpdateOrganization;
+namespace VendorManagementproj.Application.Features.Organizations.Commands.UpdateOrganization;
 
 public class UpdateOrganizationResponse
 {

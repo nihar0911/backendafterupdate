@@ -1,7 +1,7 @@
-using MediatR;
-using VendorManagementprojApplication.Contracts.Persistence;
+﻿using MediatR;
+using VendorManagementproj.Application.Contracts.Persistence;
 
-namespace VendorManagementprojApplication.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
+namespace VendorManagementproj.Application.Features.PurchaseRequests.Commands.DeletePurchaseRequest;
 
 public class DeletePurchaseRequestCommandHandler
     : IRequestHandler<DeletePurchaseRequestCommand, DeletePurchaseRequestResponse>
