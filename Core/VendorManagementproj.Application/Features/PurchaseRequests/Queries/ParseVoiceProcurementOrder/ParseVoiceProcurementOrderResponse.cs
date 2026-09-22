@@ -20,6 +20,10 @@ public class ParseVoiceProcurementOrderResponse
 
     public string? DateResolutionStatus { get; set; }
 
+    public string? DetectedLanguage { get; set; } // "hi" or "en"
+
+    public string? AssistantResponseText { get; set; }
+
     public List<ParsedProcurementItemDto> Items { get; set; } = new();
 
     // Single-item convenience properties

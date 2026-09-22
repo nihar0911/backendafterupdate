@@ -16,4 +16,8 @@ public interface IGeminiAiService
     Task<ParsedProcurementPromptDto> ParseProcurementPromptAsync(
         string prompt,
         DateTime referenceDate);
+
+    Task<List<string>> MatchSpokenPhraseToCatalogAsync(
+        string spokenPhrase,
+        List<string> catalogProductNames);
 }

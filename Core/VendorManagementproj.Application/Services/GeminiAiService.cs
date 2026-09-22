@@ -22,7 +22,7 @@ public class GeminiAiService : IGeminiAiService
     {
         _httpClient = httpClient;
         _configuration = configuration;
-        _model = configuration["GeminiSettings:Model"] ?? "gemini-3.5-flash";
+        _model = configuration["GeminiSettings:Model"] ?? "gemini-3.1-flash-lite";
         Console.WriteLine($"[GeminiAiService] Service initialized. Configured Model: '{_model}'. API key will be resolved per-call.");
     }
 
@@ -32,7 +32,7 @@ public class GeminiAiService : IGeminiAiService
         if (!string.IsNullOrWhiteSpace(_model))
             list.Add(_model.Trim());
 
-        var fallbacks = new[] { "gemini-3.5-flash", "gemini-flash-latest", "gemini-3.5-flash-lite", "gemini-2.5-flash" };
+        var fallbacks = new[] { "gemini-2.5-flash" };
         foreach (var f in fallbacks)
         {
             if (!list.Contains(f, StringComparer.OrdinalIgnoreCase))
@@ -409,6 +409,7 @@ public class GeminiAiService : IGeminiAiService
             };
         }
 
+        string detectedLang = IsHindiText(prompt) ? "hi" : "en";
         var _apiKey = GetApiKey();
         if (!string.IsNullOrWhiteSpace(_apiKey))
         {
@@ -457,15 +458,22 @@ public class GeminiAiService : IGeminiAiService
 
                             if (parsedResponse != null && parsedResponse.Items != null && parsedResponse.Items.Count > 0)
                             {
+                                string lang = !string.IsNullOrWhiteSpace(parsedResponse.Language) 
+                                    ? parsedResponse.Language.Trim().ToLowerInvariant() 
+                                    : detectedLang;
+
                                 return new ParsedProcurementPromptDto
                                 {
                                     Success = true,
                                     Message = "Successfully parsed procurement request.",
+                                    DetectedLanguage = lang,
+                                    AssistantMessage = parsedResponse.AssistantMessage?.Trim(),
                                     ExtractedOutletName = parsedResponse.OutletName?.Trim(),
                                     ParsedRequiredDate = parsedResponse.RequiredDate?.Trim(),
                                     ExtractedItems = parsedResponse.Items.Select(i => new ExtractedProcurementItemDto
                                     {
                                         ProductName = i.ProductName?.Trim() ?? string.Empty,
+                                        NormalizedName = !string.IsNullOrWhiteSpace(i.NormalizedName) ? i.NormalizedName.Trim() : null,
                                         Quantity = i.Quantity,
                                         Unit = !string.IsNullOrWhiteSpace(i.Unit) ? NormalizeUnit(i.Unit.Trim()) : "units"
                                     }).ToList()
@@ -490,25 +498,129 @@ public class GeminiAiService : IGeminiAiService
         return ParseDeterministicProcurementFallback(prompt, referenceDate);
     }
 
+    public async Task<List<string>> MatchSpokenPhraseToCatalogAsync(
+        string spokenPhrase,
+        List<string> catalogProductNames)
+    {
+        if (string.IsNullOrWhiteSpace(spokenPhrase) || catalogProductNames == null || catalogProductNames.Count == 0)
+        {
+            return new List<string>();
+        }
+
+        var _apiKey = GetApiKey();
+        if (string.IsNullOrWhiteSpace(_apiKey))
+        {
+            return new List<string>();
+        }
+
+        var candidateModels = GetCandidateModels();
+        var catalogJson = JsonSerializer.Serialize(catalogProductNames.Distinct());
+
+        string prompt = $$"""
+        You are a product catalog matcher for a restaurant and retail procurement system.
+        The user spoke or requested a product: "{{spokenPhrase}}" (which could be in Hindi, Hinglish, English, or transliteration).
+
+        You have this authoritative active product catalog:
+        {{catalogJson}}
+
+        TASK:
+        Identify which product name(s) from the catalog list match the user's requested item.
+        - If exact or specific single match (e.g. "शिमला मिर्च" or "capsicum" matches "Capsicum"), return ["Capsicum"].
+        - If ambiguous/generic matching multiple (e.g. "चिकन" or "chicken" when both "Fresh Chicken" and "Frozen Chicken" exist), return ["Fresh Chicken", "Frozen Chicken"].
+        - If the item does not exist in the catalog (e.g. "dragon fruit xyz" is not in list), return [].
+        - Return ONLY items that are verbatim in the provided catalog list. DO NOT invent product names.
+
+        Return a JSON array of strings ONLY (e.g. ["Capsicum"] or ["Fresh Chicken", "Frozen Chicken"] or []):
+        """;
+
+        foreach (var currentModel in candidateModels)
+        {
+            try
+            {
+                string endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{currentModel}:generateContent?key={_apiKey}";
+                var requestBody = new
+                {
+                    contents = new[]
+                    {
+                        new { parts = new[] { new { text = prompt } } }
+                    },
+                    generationConfig = new
+                    {
+                        temperature = 0.0,
+                        maxOutputTokens = 300
+                    }
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(endpoint, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(jsonResponse);
+
+                    if (doc.RootElement.TryGetProperty("candidates", out var candidates) &&
+                        candidates.GetArrayLength() > 0)
+                    {
+                        var textElement = candidates[0]
+                            .GetProperty("content")
+                            .GetProperty("parts")[0]
+                            .GetProperty("text");
+
+                        string rawText = textElement.GetString() ?? string.Empty;
+                        rawText = rawText.Replace("```json", "").Replace("```", "").Trim();
+
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var matchedList = JsonSerializer.Deserialize<List<string>>(rawText, options);
+
+                        if (matchedList != null)
+                        {
+                            var validMatches = matchedList
+                                .Select(m => catalogProductNames.FirstOrDefault(c => string.Equals(c, m, StringComparison.OrdinalIgnoreCase)))
+                                .Where(m => m != null)
+                                .Select(m => m!)
+                                .Distinct()
+                                .ToList();
+
+                            return validMatches;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GeminiAiService] Catalog matching call error with model '{currentModel}': {ex.Message}");
+            }
+        }
+
+        return new List<string>();
+    }
+
     private static string BuildProcurementPrompt(string prompt, DateTime referenceDate)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("You are an expert AI Procurement Assistant for a restaurant and retail supply chain management system.");
+        sb.AppendLine("You are an expert AI Multilingual Procurement Assistant for a restaurant and retail supply chain management system.");
         sb.AppendLine("Parse the user's natural-language procurement order request into structured JSON.");
+        sb.AppendLine("You must support English, Hindi (Devanagari script), and Hinglish (Hindi in Roman script) seamlessly.");
         sb.AppendLine();
         sb.AppendLine($"Reference Date: {referenceDate:yyyy-MM-dd} ({referenceDate.DayOfWeek})");
         sb.AppendLine();
         sb.AppendLine("INSTRUCTIONS:");
-        sb.AppendLine("1. Extract the target outlet/branch name into 'outletName' (null if not specified).");
-        sb.AppendLine("2. Extract the required delivery date into 'requiredDate' formatted as YYYY-MM-DD (null if not specified). Relative terms must be resolved relative to the Reference Date:");
-        sb.AppendLine("   - 'today' => Reference Date");
-        sb.AppendLine("   - 'tomorrow' => Reference Date + 1 day");
-        sb.AppendLine("   - Weekday names (e.g. 'Friday', 'next Monday') => next upcoming occurrence on or after Reference Date");
-        sb.AppendLine("   - 'in N days' => Reference Date + N days");
-        sb.AppendLine("3. Extract every requested product into the 'items' array. Each item must contain:");
-        sb.AppendLine("   - 'productName': natural-language product name");
-        sb.AppendLine("   - 'quantity': numeric quantity");
-        sb.AppendLine("   - 'unit': measurement unit (e.g., kg, Litre, units, box, packets). Default to 'units' if omitted.");
+        sb.AppendLine("1. Detect user's language: 'hi' for Hindi / Hinglish, or 'en' for English into 'language'.");
+        sb.AppendLine("2. Provide a short polite acknowledgment in the detected language in 'assistantMessage':");
+        sb.AppendLine("   - Hindi example: 'ठीक है। मैंने 5 kg शिमला मिर्च की आवश्यकता समझ ली है।'");
+        sb.AppendLine("   - English example: 'Understood procurement requirement for 5 kg Capsicum.'");
+        sb.AppendLine("3. Extract the target outlet/branch name into 'outletName' (null if not specified).");
+        sb.AppendLine("4. Extract the required delivery date into 'requiredDate' formatted as YYYY-MM-DD (null if not specified). Resolve relative terms relative to the Reference Date:");
+        sb.AppendLine("   - 'today' / 'आज' => Reference Date");
+        sb.AppendLine("   - 'tomorrow' / 'कल' => Reference Date + 1 day");
+        sb.AppendLine("   - Weekday names in English or Hindi (e.g. 'Friday', 'next Monday', 'शुक्रवार', 'सोमवार') => next upcoming occurrence on or after Reference Date");
+        sb.AppendLine("   - 'in N days' / 'N दिनों में' => Reference Date + N days");
+        sb.AppendLine("5. Extract every requested product into the 'items' array. For each item:");
+        sb.AppendLine("   - 'productName': Raw product name as spoken by user in original language/script (e.g., 'शिमला मिर्च', 'ताजा चिकन', 'चिकन', 'संतरे', 'टमाटर', 'आलू', 'दूध', 'पनीर', 'चावल', 'मशरूम', 'capsicum', 'fresh chicken').");
+        sb.AppendLine("   - 'normalizedName': Standard English/commercial name (e.g. 'Capsicum', 'Fresh Chicken', 'Frozen Chicken', 'Tomatoes', 'Potatoes', 'Onions', 'Mushroom', 'Oranges', 'Milk', 'Paneer', 'Rice', 'Cooking Oil', 'Eggs').");
+        sb.AppendLine("   - 'quantity': numeric quantity (convert Hindi numerals/words like दस->10, बीस->20 if needed).");
+        sb.AppendLine("   - 'unit': measurement unit (e.g., 'kg' for 'किलो'/'किग्रा'/'kg', 'g' for 'ग्राम', 'Litre' for 'लीटर', 'packets' for 'पैकेट', 'box' for 'डिब्बा'/'बॉक्स', 'crate' for 'पेटी'/'क्रेट्स', 'units' or 'pieces' for 'पीस'/'नग'/'इकाई'). Default to 'units' if omitted.");
         sb.AppendLine();
         sb.AppendLine("STRICT RESTRICTIONS:");
         sb.AppendLine("- DO NOT generate or invent ProductID, OutletID, VendorID, Price, Rating, Contract, PurchaseRequestID, or PurchaseOrderID.");
@@ -516,12 +628,15 @@ public class GeminiAiService : IGeminiAiService
         sb.AppendLine();
         sb.AppendLine("Return a STRICT JSON object ONLY (no markdown fences, no explanatory text):");
         sb.AppendLine("{");
+        sb.AppendLine("  \"language\": \"hi\",");
+        sb.AppendLine("  \"assistantMessage\": \"ठीक है। मैंने 5 kg शिमला मिर्च की आवश्यकता समझ ली है।\",");
         sb.AppendLine("  \"outletName\": \"Panaji\",");
         sb.AppendLine("  \"requiredDate\": \"YYYY-MM-DD\",");
         sb.AppendLine("  \"items\": [");
         sb.AppendLine("    {");
-        sb.AppendLine("      \"productName\": \"potatoes\",");
-        sb.AppendLine("      \"quantity\": 10,");
+        sb.AppendLine("      \"productName\": \"शिमला मिर्च\",");
+        sb.AppendLine("      \"normalizedName\": \"Capsicum\",");
+        sb.AppendLine("      \"quantity\": 5,");
         sb.AppendLine("      \"unit\": \"kg\"");
         sb.AppendLine("    }");
         sb.AppendLine("  ]");
@@ -531,21 +646,57 @@ public class GeminiAiService : IGeminiAiService
         return sb.ToString();
     }
 
+    private static bool IsHindiText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
+
+        // Check for Devanagari Unicode range (\u0900-\u097F)
+        if (System.Text.RegularExpressions.Regex.IsMatch(text, @"[\u0900-\u097F]"))
+            return true;
+
+        // Check for common Hinglish keywords
+        var hinglishKeywords = new[] { "mujhe", "chahiye", "kilo", "taaza", "tamatar", "aloo", "pyaaz", "santre", "kaun", "hai", "sabse", "sasta", "jaldi", "aur", "ke liye", "mangvao", "bhejo" };
+        string lower = text.ToLowerInvariant();
+        return hinglishKeywords.Any(k => System.Text.RegularExpressions.Regex.IsMatch(lower, $@"\b{System.Text.RegularExpressions.Regex.Escape(k)}\b"));
+    }
+
+    private static string ConvertDevanagariNumeralsToAscii(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return input;
+        var map = new Dictionary<char, char>
+        {
+            {'०', '0'}, {'१', '1'}, {'२', '2'}, {'३', '3'}, {'४', '4'},
+            {'५', '5'}, {'६', '6'}, {'७', '7'}, {'८', '8'}, {'९', '9'}
+        };
+
+        var sb = new StringBuilder(input.Length);
+        foreach (char c in input)
+        {
+            if (map.TryGetValue(c, out char asciiDigit))
+                sb.Append(asciiDigit);
+            else
+                sb.Append(c);
+        }
+        return sb.ToString();
+    }
+
     private static ParsedProcurementPromptDto ParseDeterministicProcurementFallback(string prompt, DateTime referenceDate)
     {
         var result = new ParsedProcurementPromptDto();
-        string cleanPrompt = prompt.Trim();
+        string cleanPrompt = ConvertDevanagariNumeralsToAscii(prompt.Trim());
+        bool isHindi = IsHindiText(cleanPrompt);
+        result.DetectedLanguage = isHindi ? "hi" : "en";
 
         // 1. Extract Date
         string? extractedDate = null;
         var dateMatch = System.Text.RegularExpressions.Regex.Match(
             cleanPrompt,
-            @"\b(?:by|before|on|due|for\s+date)\s+(today|tomorrow|next\s+[a-zA-Z]+|[a-zA-Z]+day|in\s+\d+\s+days|\d{4}-\d{2}-\d{2})\b",
+            @"(?:by|before|on|due|for\s+date|तक|को|के\s+लिए)?\s*(?<val>today|tomorrow|next\s+[a-zA-Z]+|[a-zA-Z]+day|in\s+\d+\s+days|\d{4}-\d{2}-\d{2}|आज|कल|सोमवार|मंगलवार|बुधवार|गुरुवार|शुक्रवार|शनिवार|रविवार|\d+\s+दिनों?\s+में)\s*(?:तक|को|के\s+लिए)?",
             System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-        if (dateMatch.Success)
+        if (dateMatch.Success && !string.IsNullOrWhiteSpace(dateMatch.Groups["val"].Value))
         {
-            string dateStr = dateMatch.Groups[1].Value.Trim().ToLowerInvariant();
+            string dateStr = dateMatch.Groups["val"].Value.Trim().ToLowerInvariant();
             extractedDate = ResolveRelativeDateString(dateStr, referenceDate);
         }
 
@@ -562,17 +713,29 @@ public class GeminiAiService : IGeminiAiService
         }
         else
         {
-            var outletAltMatch = System.Text.RegularExpressions.Regex.Match(
+            var hindiOutletMatch = System.Text.RegularExpressions.Regex.Match(
                 cleanPrompt,
-                @"\b(?:for|at|to)\s+(?:the\s+)?([a-zA-Z0-9\s\-]+?)(?=\s+(?:by|before|on|due|with)\b|\.|\z)",
+                @"([a-zA-Z0-9\s\u0900-\u097F\-]+?)\s+(?:आउटलेट|शाखा|स्टोर|branch|outlet)\s+(?:के\s+लिए|में|पर)",
                 System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-            if (outletAltMatch.Success)
+            if (hindiOutletMatch.Success)
             {
-                string candidate = outletAltMatch.Groups[1].Value.Trim();
-                if (!System.Text.RegularExpressions.Regex.IsMatch(candidate, @"^\d+$") && candidate.Length > 2)
+                extractedOutlet = hindiOutletMatch.Groups[1].Value.Trim();
+            }
+            else
+            {
+                var outletAltMatch = System.Text.RegularExpressions.Regex.Match(
+                    cleanPrompt,
+                    @"\b(?:for|at|to)\s+(?:the\s+)?([a-zA-Z0-9\s\-]+?)(?=\s+(?:by|before|on|due|with)\b|\.|\z)",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                if (outletAltMatch.Success)
                 {
-                    extractedOutlet = candidate;
+                    string candidate = outletAltMatch.Groups[1].Value.Trim();
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(candidate, @"^\d+$") && candidate.Length > 2)
+                    {
+                        extractedOutlet = candidate;
+                    }
                 }
             }
         }
@@ -581,11 +744,18 @@ public class GeminiAiService : IGeminiAiService
         string itemsText = cleanPrompt;
         itemsText = System.Text.RegularExpressions.Regex.Replace(
             itemsText,
-            @"^(?:please\s+)?(?:order|purchase|buy|need|get|request)\s+",
+            @"^(?:please\s+)?(?:order|purchase|buy|need|get|request|कृपया\s+)?(?:मुझे\s+)?(?:order\s+karo\s+|chahiye\s+)?",
             "",
             System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-        if (dateMatch.Success)
+        // Remove trailing Hindi "चाहिए" / "मंगवाएं" / "भेजें"
+        itemsText = System.Text.RegularExpressions.Regex.Replace(
+            itemsText,
+            @"\s+(?:चाहिए|मंगवाएं|भेजें|ऑर्डर\s+करें|chahiye|mangvao|bhejo)\s*[\.।]?\s*$",
+            "",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        if (dateMatch.Success && !string.IsNullOrWhiteSpace(dateMatch.Value))
         {
             itemsText = itemsText.Replace(dateMatch.Value, " ");
         }
@@ -593,21 +763,10 @@ public class GeminiAiService : IGeminiAiService
         {
             itemsText = itemsText.Replace(outletMatch.Value, " ");
         }
-        else
-        {
-            var outletClause = System.Text.RegularExpressions.Regex.Match(
-                itemsText,
-                @"\b(?:for|at|to)\s+(?:the\s+)?[a-zA-Z0-9\s\-]+?(?=\s+(?:by|before|on|due)\b|\.|\z)",
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-            if (outletClause.Success)
-            {
-                itemsText = itemsText.Replace(outletClause.Value, " ");
-            }
-        }
 
         var itemMatches = System.Text.RegularExpressions.Regex.Matches(
             itemsText,
-            @"(?<qty>\d+(?:\.\d+)?)\s*(?:(?<unit>kg|kgs|kilogram|kilograms|kilo|kilos|g|gm|gms|gram|grams|l|ltr|litre|litres|liter|liters|ml|packets?|packs?|boxes?|crates?|bottles?|units?|pieces?|pcs)\b)?\s*(?:of\s+)?(?<prod>[a-zA-Z0-9\s\-]+?)(?=\s+(?:and|\&|\,)\s+\d|\.|\;|\z)",
+            @"(?<qty>\d+(?:\.\d+)?)\s*(?:(?<unit>kg|kgs|kilogram|kilograms|kilo|kilos|किलो|किग्रा|किलोग्राम|g|gm|gms|gram|grams|ग्राम|l|ltr|litre|litres|liter|liters|लीटर|ली|ml|मिली|packets?|packs?|पैकेट|boxes?|डिब्बा|डिब्बे|बॉक्स|crates?|पेटी|क्रेट्स|bottles?|बोतल|बोतलें|units?|pieces?|pcs|नग|पीस|इकाई)(?:\s+|$|[^\w\u0900-\u097F]))?\s*(?:of\s+)?(?<prod>[a-zA-Z0-9\s\u0900-\u097F\-]+?)(?=\s+(?:and|\&|\,|और|तथा)\s+\d|\.|\;|\z)",
             System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
         var extractedItems = new List<ExtractedProcurementItemDto>();
@@ -623,7 +782,8 @@ public class GeminiAiService : IGeminiAiService
                     unitStr = "units";
 
                 unitStr = NormalizeUnit(unitStr);
-                prodStr = System.Text.RegularExpressions.Regex.Replace(prodStr, @"^(?:and|\&)\s+", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+                prodStr = System.Text.RegularExpressions.Regex.Replace(prodStr, @"^(?:and|\&|और|तथा)\s+", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+                prodStr = System.Text.RegularExpressions.Regex.Replace(prodStr, @"\s+(?:चाहिए|chahiye|kal\s+tak|aaj\s+tak|tak|ke\s+liye)$", "", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
 
                 if (!string.IsNullOrWhiteSpace(prodStr))
                 {
@@ -644,11 +804,18 @@ public class GeminiAiService : IGeminiAiService
             result.ExtractedOutletName = extractedOutlet;
             result.ParsedRequiredDate = extractedDate;
             result.ExtractedItems = extractedItems;
+            
+            string itemsSummary = string.Join(isHindi ? " और " : ", ", extractedItems.Select(i => $"{i.Quantity} {i.Unit} {i.ProductName}"));
+            result.AssistantMessage = isHindi
+                ? $"ठीक है। मैंने {itemsSummary} की आवश्यकता समझ ली है।"
+                : $"Understood procurement requirement for {itemsSummary}.";
         }
         else
         {
             result.Success = false;
-            result.Message = "Could not extract any procurement items from the prompt.";
+            result.Message = isHindi
+                ? "मुझे आपके अनुरोध में कोई उत्पाद या मात्रा नहीं मिली।"
+                : "Could not extract any procurement items from the prompt.";
         }
 
         return result;
@@ -657,12 +824,12 @@ public class GeminiAiService : IGeminiAiService
     private static string? ResolveRelativeDateString(string expr, DateTime referenceDate)
     {
         expr = expr.Trim().ToLowerInvariant();
-        if (expr == "today")
+        if (expr == "today" || expr == "आज")
             return referenceDate.ToString("yyyy-MM-dd");
-        if (expr == "tomorrow")
+        if (expr == "tomorrow" || expr == "कल")
             return referenceDate.AddDays(1).ToString("yyyy-MM-dd");
 
-        var inDaysMatch = System.Text.RegularExpressions.Regex.Match(expr, @"^in\s+(\d+)\s+days?$");
+        var inDaysMatch = System.Text.RegularExpressions.Regex.Match(expr, @"^(?:in\s+)?(\d+)\s+(?:days?|दिनों?\s+में)$");
         if (inDaysMatch.Success && int.TryParse(inDaysMatch.Groups[1].Value, out int days))
         {
             return referenceDate.AddDays(days).ToString("yyyy-MM-dd");
@@ -673,13 +840,33 @@ public class GeminiAiService : IGeminiAiService
             return directDate.ToString("yyyy-MM-dd");
         }
 
-        bool isNext = expr.StartsWith("next ");
-        string dayName = isNext ? expr.Substring(5).Trim() : expr;
+        bool isNext = expr.StartsWith("next ") || expr.StartsWith("अगले ");
+        string dayName = isNext 
+            ? expr.Replace("next ", "").Replace("अगले ", "").Trim() 
+            : expr;
 
-        if (Enum.TryParse<DayOfWeek>(dayName, true, out var targetDay))
+        DayOfWeek? targetDay = dayName switch
         {
+            "monday" or "सोमवार" => DayOfWeek.Monday,
+            "tuesday" or "मंगलवार" => DayOfWeek.Tuesday,
+            "wednesday" or "बुधवार" => DayOfWeek.Wednesday,
+            "thursday" or "गुरुवार" or "बृहस्पतिवार" => DayOfWeek.Thursday,
+            "friday" or "शुक्रवार" => DayOfWeek.Friday,
+            "saturday" or "शनिवार" => DayOfWeek.Saturday,
+            "sunday" or "रविवार" => DayOfWeek.Sunday,
+            _ => null
+        };
+
+        if (!targetDay.HasValue && Enum.TryParse<DayOfWeek>(dayName, true, out var parsedDay))
+        {
+            targetDay = parsedDay;
+        }
+
+        if (targetDay.HasValue)
+        {
+            var day = targetDay.Value;
             int currentDay = (int)referenceDate.DayOfWeek;
-            int target = (int)targetDay;
+            int target = (int)day;
             int daysToAdd = (target - currentDay + 7) % 7;
 
             if (isNext)
@@ -688,7 +875,6 @@ public class GeminiAiService : IGeminiAiService
             }
             else if (daysToAdd == 0)
             {
-                // By convention, if today is Friday and request is "by Friday", it's today
                 daysToAdd = 0;
             }
 
@@ -703,21 +889,23 @@ public class GeminiAiService : IGeminiAiService
         string u = unit.Trim().ToLowerInvariant();
         return u switch
         {
-            "kg" or "kgs" or "kilogram" or "kilograms" or "kilo" or "kilos" => "kg",
-            "g" or "gm" or "gms" or "gram" or "grams" => "g",
-            "l" or "ltr" or "litre" or "litres" or "liter" or "liters" => "Litre",
-            "ml" => "ml",
-            "pkt" or "pkts" or "packet" or "packets" or "pack" or "packs" => "packets",
-            "box" or "boxes" => "box",
-            "crate" or "crates" => "crate",
-            "bottle" or "bottles" => "bottles",
-            "piece" or "pieces" or "pcs" or "pc" => "pieces",
+            "kg" or "kgs" or "kilogram" or "kilograms" or "kilo" or "kilos" or "किलो" or "किग्रा" or "किलोग्राम" => "kg",
+            "g" or "gm" or "gms" or "gram" or "grams" or "ग्राम" => "g",
+            "l" or "ltr" or "litre" or "litres" or "liter" or "liters" or "लीटर" or "ली" => "Litre",
+            "ml" or "मिली" or "मिलीलीटर" => "ml",
+            "pkt" or "pkts" or "packet" or "packets" or "pack" or "packs" or "पैकेट" => "packets",
+            "box" or "boxes" or "डिब्बा" or "डिब्बे" or "बॉक्स" => "box",
+            "crate" or "crates" or "पेटी" or "क्रेट" or "क्रेट्स" => "crate",
+            "bottle" or "bottles" or "बोतल" or "बोतलें" => "bottles",
+            "piece" or "pieces" or "pcs" or "pc" or "नग" or "पीस" or "इकाई" => "pieces",
             _ => unit
-        }
-        ;
+        };
     }
+
     private class GeminiProcurementExtractionResponse
     {
+        public string? Language { get; set; }
+        public string? AssistantMessage { get; set; }
         public string? OutletName { get; set; }
         public string? RequiredDate { get; set; }
         public List<GeminiProcurementItemExtraction>? Items { get; set; }
@@ -726,6 +914,7 @@ public class GeminiAiService : IGeminiAiService
     private class GeminiProcurementItemExtraction
     {
         public string? ProductName { get; set; }
+        public string? NormalizedName { get; set; }
         public decimal Quantity { get; set; }
         public string? Unit { get; set; }
     }

@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\VendorManagementprojApplication\VendorManagementprojApplication.csproj" />
-    <ProjectReference Include="..\Core\VendorManagementprojDomain\VendorManagementprojDomain.csproj" />
+    <ProjectReference Include="..\Core\VendorManagementproj.Application\VendorManagementproj.Application.csproj" />
+    <ProjectReference Include="..\Core\VendorManagementproj.Domain\VendorManagementproj.Domain.csproj" />
   </ItemGroup>
 
 </Project>

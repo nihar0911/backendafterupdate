@@ -27,9 +27,9 @@
 
 	<ItemGroup>
 
-		<ProjectReference Include="..\Core\VendorManagementprojApplication\VendorManagementprojApplication.csproj" />
+		<ProjectReference Include="..\Core\VendorManagementproj.Application\VendorManagementproj.Application.csproj" />
 
-		<ProjectReference Include="..\VendorManagementprojPersistence\VendorManagementprojPersistence.csproj" />
+		<ProjectReference Include="..\VendorManagementproj.Persistence\VendorManagementproj.Persistence.csproj" />
 
 	</ItemGroup>
 

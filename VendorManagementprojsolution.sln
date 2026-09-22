@@ -12,15 +12,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{21E7B16F-0
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastruture", "Infrastruture", "{762BB24E-F299-4C15-8C14-4A28EF6F57DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementprojDomain", "Core\VendorManagementprojDomain\VendorManagementprojDomain.csproj", "{8969F02B-8190-44C7-8E39-7DDD5F53528D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementproj.Domain", "Core\VendorManagementproj.Domain\VendorManagementproj.Domain.csproj", "{8969F02B-8190-44C7-8E39-7DDD5F53528D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementprojApplication", "Core\VendorManagementprojApplication\VendorManagementprojApplication.csproj", "{A422A546-AAB1-4F85-A19A-0322AE7A2EDD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementproj.Application", "Core\VendorManagementproj.Application\VendorManagementproj.Application.csproj", "{A422A546-AAB1-4F85-A19A-0322AE7A2EDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementprojPersistence", "VendorManagementprojPersistence\VendorManagementprojPersistence.csproj", "{C5B76B21-F112-42F0-8F03-0CF1A84474A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementproj.Persistence", "VendorManagementproj.Persistence\VendorManagementproj.Persistence.csproj", "{C5B76B21-F112-42F0-8F03-0CF1A84474A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementprojInfrastructure", "VendorManagementprojInfrastructure\VendorManagementprojInfrastructure.csproj", "{FFD15641-DAD4-4BF2-88EF-E8E022651C09}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementproj.Infrastructure", "VendorManagementproj.Infrastructure\VendorManagementproj.Infrastructure.csproj", "{FFD15641-DAD4-4BF2-88EF-E8E022651C09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementprojApi", "VendorManagementprojApi\VendorManagementprojApi.csproj", "{7B228EC6-D205-4EA6-9144-66355A688BF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VendorManagementproj.Api", "VendorManagementproj.Api\VendorManagementproj.Api.csproj", "{7B228EC6-D205-4EA6-9144-66355A688BF7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
