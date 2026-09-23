@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -97,7 +97,7 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
             var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
             if (outlet != null)
             {
-                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID).ToList();
+                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2)).ToList();
                 foreach (var user in orgUsers)
                 {
                     await _notificationRepository.AddAsync(new Notification
@@ -115,7 +115,7 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
             }
 
             // 2. Notify Outlet Manager(s)
-            var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID).ToList();
+            var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 3 || u.RoleID == 7)).ToList();
             foreach (var user in outletUsers)
             {
                 await _notificationRepository.AddAsync(new Notification

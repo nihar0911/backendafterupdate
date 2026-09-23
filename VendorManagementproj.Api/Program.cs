@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -79,6 +79,7 @@ builder.Services.AddScoped<IDeliveryRecordRepository, DeliveryRecordRepository>(
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<IInvoiceDocumentService, InvoiceDocumentService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IPaymentDocumentService, PaymentDocumentService>();
 builder.Services.AddScoped<IVendorFeedbackRepository, VendorFeedbackRepository>();
 builder.Services.AddScoped<IVendorOpportunityResponseRepository, VendorOpportunityResponseRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();

@@ -97,9 +97,9 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
 
         foreach (var item in items)
         {
-            // =========================================================================
+            
             // STEP 1: Determine whether active contracts exist for Outlet + Product
-            // =========================================================================
+            
             var activeContracts = await _contractRepository.GetActiveContractsByProductAndOutletAsync(
                 purchaseRequest.OutletID,
                 item.ProductID);
@@ -108,9 +108,9 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                 item.ProductID,
                 purchaseRequest.OutletID);
 
-            // =========================================================================
+           
             // CASE A: Active Contracts Found (YES) -> Return contracted vendors
-            // =========================================================================
+           
             if (activeContracts.Count > 0)
             {
                 var contractedRecommendations = new List<VendorRecommendationDto>();
@@ -238,9 +238,9 @@ public class GetRecommendationsQueryHandler : IRequestHandler<GetRecommendations
                 continue;
             }
 
-            // =========================================================================
+           
             // CASE B: No Contract Fallback (NO) -> Existing recommendation system
-            // =========================================================================
+            
             if (!activeVendorProducts.Any())
                 continue;
 

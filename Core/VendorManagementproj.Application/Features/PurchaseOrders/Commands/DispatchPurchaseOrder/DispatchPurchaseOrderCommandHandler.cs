@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,7 +64,7 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
             var allUsers = await _userRepository.GetAllAsync();
 
             // 1. Notify Outlet Manager(s) for this Outlet
-            var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID).ToList();
+            var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 3 || u.RoleID == 7)).ToList();
             foreach (var user in outletUsers)
             {
                 await _notificationRepository.AddAsync(new Notification
@@ -84,7 +84,7 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
             var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
             if (outlet != null)
             {
-                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID).ToList();
+                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2)).ToList();
                 foreach (var user in orgUsers)
                 {
                     await _notificationRepository.AddAsync(new Notification

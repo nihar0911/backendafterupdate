@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -275,12 +275,28 @@ public class ConfirmDeliveryRecordCommandHandler
                 if (outlet != null)
                 {
                     var allUsers = await _userRepository.GetAllAsync();
-                    var orgManagers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID).ToList();
+                    var orgManagers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2)).ToList();
                     foreach (var orgUser in orgManagers)
                     {
                         await _notificationRepository.AddAsync(new Notification
                         {
                             UserID = orgUser.UserID,
+                            Title = "Purchase Order Delivered",
+                            Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been delivered and confirmed at {outlet.OutletName}.",
+                            NotificationType = "PurchaseOrderDelivered",
+                            RelatedRequestID = purchaseOrder.PurchaseOrderID,
+                            RelatedVendorID = purchaseOrder.VendorID,
+                            IsRead = false,
+                            CreatedDate = DateTime.Now
+                        });
+                    }
+
+                    var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 7 || u.RoleID == 3)).ToList();
+                    foreach (var outUser in outletUsers)
+                    {
+                        await _notificationRepository.AddAsync(new Notification
+                        {
+                            UserID = outUser.UserID,
                             Title = "Purchase Order Delivered",
                             Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been delivered and confirmed at {outlet.OutletName}.",
                             NotificationType = "PurchaseOrderDelivered",

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +35,9 @@ public class PaymentRepository : IPaymentRepository
                 .ThenInclude(i => i!.Vendor)
             .Include(p => p.Invoice)
                 .ThenInclude(i => i!.Outlet)
+            .Include(p => p.Invoice)
+                .ThenInclude(i => i!.Items)
+                    .ThenInclude(it => it.Product)
             .FirstOrDefaultAsync(p => p.PaymentID == paymentID);
     }
 

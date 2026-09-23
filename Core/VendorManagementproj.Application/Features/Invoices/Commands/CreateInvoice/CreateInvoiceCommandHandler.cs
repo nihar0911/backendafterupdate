@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -169,8 +169,24 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
             if (outlet != null)
             {
                 var allUsers = await _userRepository.GetAllAsync();
-                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID).ToList();
+                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2)).ToList();
                 foreach (var user in orgUsers)
+                {
+                    await _notificationRepository.AddAsync(new Notification
+                    {
+                        UserID = user.UserID,
+                        Title = "Invoice Submitted",
+                        Message = $"New invoice INV-{fullInvoice.InvoiceID} has been submitted by {vendorName} for PO-#{fullInvoice.PurchaseOrderID}.",
+                        NotificationType = "InvoiceSubmitted",
+                        RelatedRequestID = fullInvoice.PurchaseOrderID,
+                        RelatedVendorID = fullInvoice.VendorID,
+                        IsRead = false,
+                        CreatedDate = DateTime.Now
+                    });
+                }
+
+                var outletUsers = allUsers.Where(u => u.OutletID == fullInvoice.OutletID && (string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 7)).ToList();
+                foreach (var user in outletUsers)
                 {
                     await _notificationRepository.AddAsync(new Notification
                     {

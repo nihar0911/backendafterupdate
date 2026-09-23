@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +9,7 @@ using VendorManagementproj.Application.Features.Invoices.Commands.MarkInvoicePai
 using VendorManagementproj.Application.Features.Invoices.Commands.RejectInvoice;
 using VendorManagementproj.Application.Features.Invoices.Queries.GetAllInvoices;
 using VendorManagementproj.Application.Features.Invoices.Queries.GetInvoiceById;
+using VendorManagementproj.Application.Features.Payments.Queries.GetPaymentReceiptPdf;
 using VendorManagementproj.Application.Features.Payments.Queries.GetPayments;
 
 namespace VendorManagementproj.Api.Controllers;
@@ -178,6 +179,29 @@ public class InvoiceController : ControllerBase
     {
         var result = await _mediator.Send(new GetPaymentsQuery());
         return Ok(result);
+    }
+
+    [HttpGet("payments/{paymentID:int}/receipt")]
+    [Authorize(Roles = "Admin,Organization Manager,Purchase Manager,Outlet Manager")]
+    public async Task<IActionResult> DownloadPaymentReceipt(int paymentID)
+    {
+        try
+        {
+            var result = await _mediator.Send(new GetPaymentReceiptPdfQuery
+            {
+                PaymentID = paymentID
+            });
+
+            return File(result.PdfBytes, result.ContentType, result.FileName);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ex.Message);
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-﻿namespace VendorManagementproj.Application.DTOs;
+namespace VendorManagementproj.Application.DTOs;
 
 public class QuotationDto
 {
@@ -11,6 +11,12 @@ public class QuotationDto
     public DateTime ValidUntil { get; set; }
 
     public string Status { get; set; } = string.Empty;
+
+    public bool HasPurchaseOrder { get; set; }
+
+    public int? ExistingPurchaseOrderID { get; set; }
+
+    public string? ExistingPurchaseOrderStatus { get; set; }
 
     public List<QuotationItemDto> Items { get; set; }
         = new List<QuotationItemDto>();
