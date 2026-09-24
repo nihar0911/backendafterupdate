@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -120,30 +120,36 @@ public class DeliveryRecordRepository : IDeliveryRecordRepository
     public async Task<List<DeliveryRecord>> GetConfirmedByVendorAsync(int vendorID)
     {
         return await _context.DeliveryRecords
-            .Include(d => d.PurchaseOrder)
-            .Include(d => d.PurchaseOrderItem)
-                .ThenInclude(i => i!.Product)
-            .Include(d => d.ConfirmedByUser)
             .Where(d =>
                 d.PurchaseOrder != null &&
                 d.PurchaseOrder.VendorID == vendorID &&
                 d.Status == "Confirmed")
+            .Include(d => d.PurchaseOrder)
+                .ThenInclude(po => po!.Outlet)
+            .Include(d => d.PurchaseOrderItem)
+                .ThenInclude(i => i!.Product)
+            .Include(d => d.ConfirmedByUser)
+            .OrderByDescending(d => d.DeliveryDate)
+            .AsNoTracking()
             .ToListAsync();
     }
 
     public async Task<List<DeliveryRecord>> GetConfirmedByVendorAndProductAsync(int vendorID, int productID)
     {
         return await _context.DeliveryRecords
-            .Include(d => d.PurchaseOrder)
-            .Include(d => d.PurchaseOrderItem)
-                .ThenInclude(i => i!.Product)
-            .Include(d => d.ConfirmedByUser)
             .Where(d =>
                 d.PurchaseOrder != null &&
                 d.PurchaseOrder.VendorID == vendorID &&
                 d.PurchaseOrderItem != null &&
                 d.PurchaseOrderItem.ProductID == productID &&
                 d.Status == "Confirmed")
+            .Include(d => d.PurchaseOrder)
+                .ThenInclude(po => po!.Outlet)
+            .Include(d => d.PurchaseOrderItem)
+                .ThenInclude(i => i!.Product)
+            .Include(d => d.ConfirmedByUser)
+            .OrderByDescending(d => d.DeliveryDate)
+            .AsNoTracking()
             .ToListAsync();
     }
 
