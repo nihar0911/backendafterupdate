@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VendorManagementproj.Domain.Entities;
 
 namespace VendorManagementproj.Persistence.Data;
@@ -109,12 +109,6 @@ public class VendorManagementDbContext : DbContext
             entity.Property(e => e.Address)
                 .HasMaxLength(255);
 
-            entity.Property(e => e.Latitude)
-                .HasColumnType("decimal(9,6)");
-
-            entity.Property(e => e.Longitude)
-                .HasColumnType("decimal(9,6)");
-
             entity.Property(e => e.PurchaseOrderApproverRole)
                 .HasMaxLength(50)
                 .IsRequired()
@@ -205,12 +199,6 @@ public class VendorManagementDbContext : DbContext
 
             entity.Property(e => e.Address)
                 .HasMaxLength(255);
-
-            entity.Property(e => e.Latitude)
-                .HasColumnType("decimal(9,6)");
-
-            entity.Property(e => e.Longitude)
-                .HasColumnType("decimal(9,6)");
 
             entity.Property(e => e.GSTIN)
                 .HasMaxLength(20);

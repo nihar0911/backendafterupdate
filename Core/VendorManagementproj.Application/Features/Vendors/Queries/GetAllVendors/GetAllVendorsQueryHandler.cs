@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Application.DTOs;
 
@@ -29,8 +29,6 @@ public class GetAllVendorsQueryHandler
             Email = v.Email,
             Phone = v.Phone,
             Address = v.Address,
-            Latitude = v.Latitude,
-            Longitude = v.Longitude,
             GSTIN = v.GSTIN,
             Status = v.Status
         }).ToList();

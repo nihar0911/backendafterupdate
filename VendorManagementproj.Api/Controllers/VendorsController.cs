@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -113,8 +113,6 @@ public class VendorsController : ControllerBase
             Email = response.Vendor.Email,
             Phone = response.Vendor.Phone,
             Address = response.Vendor.Address,
-            Latitude = response.Vendor.Latitude,
-            Longitude = response.Vendor.Longitude,
             GSTIN = response.Vendor.GSTIN,
             Status = "Active"
         };
@@ -146,8 +144,6 @@ public class VendorsController : ControllerBase
             Email = response.Vendor.Email,
             Phone = response.Vendor.Phone,
             Address = response.Vendor.Address,
-            Latitude = response.Vendor.Latitude,
-            Longitude = response.Vendor.Longitude,
             GSTIN = response.Vendor.GSTIN,
             Status = "Inactive"
         };

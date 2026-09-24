@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace VendorManagementproj.Application.DTOs;
 
@@ -13,8 +13,4 @@ public class UpdateOutletDto
 
     [MaxLength(255)]
     public string? Address { get; set; }
-
-    public decimal? Latitude { get; set; }
-
-    public decimal? Longitude { get; set; }
 }

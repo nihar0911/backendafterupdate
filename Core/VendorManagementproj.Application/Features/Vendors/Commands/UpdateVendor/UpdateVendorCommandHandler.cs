@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Application.DTOs;
 using VendorManagementproj.Domain.Entities;
@@ -26,8 +26,6 @@ public class UpdateVendorCommandHandler
             Email = request.Email,
             Phone = request.Phone,
             Address = request.Address,
-            Latitude = request.Latitude,
-            Longitude = request.Longitude,
             GSTIN = request.GSTIN,
             Status = request.Status
         };
@@ -49,8 +47,6 @@ public class UpdateVendorCommandHandler
                 Email = updatedVendor.Email,
                 Phone = updatedVendor.Phone,
                 Address = updatedVendor.Address,
-                Latitude = updatedVendor.Latitude,
-                Longitude = updatedVendor.Longitude,
                 GSTIN = updatedVendor.GSTIN,
                 Status = updatedVendor.Status
             }

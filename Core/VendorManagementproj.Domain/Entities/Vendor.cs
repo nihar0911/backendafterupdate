@@ -1,4 +1,4 @@
-﻿namespace VendorManagementproj.Domain.Entities;
+namespace VendorManagementproj.Domain.Entities;
 
 public class Vendor
 {
@@ -11,10 +11,6 @@ public class Vendor
     public string? Phone { get; set; }
 
     public string? Address { get; set; }
-
-    public decimal? Latitude { get; set; }
-
-    public decimal? Longitude { get; set; }
 
     public string? GSTIN { get; set; }
 

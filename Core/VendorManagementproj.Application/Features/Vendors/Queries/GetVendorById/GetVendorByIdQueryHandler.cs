@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Application.DTOs;
 
@@ -29,8 +29,6 @@ public class GetVendorByIdQueryHandler : IRequestHandler<GetVendorByIdQuery, Get
                 Email = vendor.Email,
                 Phone = vendor.Phone,
                 Address = vendor.Address,
-                Latitude = vendor.Latitude,
-                Longitude = vendor.Longitude,
                 GSTIN = vendor.GSTIN,
                 Status = vendor.Status
             }

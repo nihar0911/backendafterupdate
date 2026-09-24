@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Application.Contracts.Services;
 using VendorManagementproj.Application.Common;
@@ -64,8 +64,6 @@ public class UpdateOutletCommandHandler
 
         outlet.OutletName = request.OutletName;
         outlet.Address = request.Address;
-        outlet.Latitude = request.Latitude;
-        outlet.Longitude = request.Longitude;
         outlet.PurchaseOrderApproverRole = PurchaseOrderApprover.Normalize(request.PurchaseOrderApproverRole);
 
         var updated =
@@ -77,8 +75,6 @@ public class UpdateOutletCommandHandler
             OrganizationID = updated.OrganizationID,
             OutletName = updated.OutletName,
             Address = updated.Address,
-            Latitude = updated.Latitude,
-            Longitude = updated.Longitude,
             PurchaseOrderApproverRole = updated.PurchaseOrderApproverRole,
             Status = updated.Status
         };

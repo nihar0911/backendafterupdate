@@ -1,4 +1,4 @@
-﻿namespace VendorManagementproj.Domain.Entities;
+namespace VendorManagementproj.Domain.Entities;
 
 public class Outlet
 {
@@ -11,10 +11,6 @@ public class Outlet
     public string OutletName { get; set; } = string.Empty;
 
     public string? Address { get; set; }
-
-    public decimal? Latitude { get; set; }
-
-    public decimal? Longitude { get; set; }
 
    
     /// Who must approve purchase orders for this outlet before they are placed with a vendor.

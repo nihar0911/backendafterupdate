@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VendorManagementproj.Persistence.Data;
 
@@ -11,9 +12,11 @@ using VendorManagementproj.Persistence.Data;
 namespace VendorManagementproj.Persistence.Migrations
 {
     [DbContext(typeof(VendorManagementDbContext))]
-    partial class VendorManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260923184623_RemoveLatitudeLongitudeFromVendorAndOutlet")]
+    partial class RemoveLatitudeLongitudeFromVendorAndOutlet
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

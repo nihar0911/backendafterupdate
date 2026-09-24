@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Domain.Entities;
 using VendorManagementproj.Persistence.Data;
@@ -62,12 +62,6 @@ public class VendorRepository : IVendorRepository
 
         existingVendor.Address =
             vendor.Address;
-
-        existingVendor.Latitude =
-            vendor.Latitude;
-
-        existingVendor.Longitude =
-            vendor.Longitude;
 
         existingVendor.GSTIN =
             vendor.GSTIN;

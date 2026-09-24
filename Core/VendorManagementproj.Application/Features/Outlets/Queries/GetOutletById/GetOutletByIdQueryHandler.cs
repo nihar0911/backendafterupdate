@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Application.Contracts.Services;
 using VendorManagementproj.Application.DTOs;
@@ -86,8 +86,6 @@ public class GetOutletByIdQueryHandler
                 outlet.Organization?.OrganizationName ?? string.Empty,
             OutletName = outlet.OutletName,
             Address = outlet.Address,
-            Latitude = outlet.Latitude,
-            Longitude = outlet.Longitude,
             PurchaseOrderApproverRole = outlet.PurchaseOrderApproverRole,
             Status = outlet.Status
         };

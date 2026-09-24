@@ -1,4 +1,4 @@
-﻿namespace VendorManagementproj.Application.DTOs;
+namespace VendorManagementproj.Application.DTOs;
 
 public class VendorDto
 {
@@ -7,8 +7,6 @@ public class VendorDto
     public string? Email { get; set; }
     public string? Phone { get; set; }
     public string? Address { get; set; }
-    public decimal? Latitude { get; set; }
-    public decimal? Longitude { get; set; }
     public string? GSTIN { get; set; }
     public string Status { get; set; } = string.Empty;
 }

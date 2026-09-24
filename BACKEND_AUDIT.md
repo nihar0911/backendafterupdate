@@ -82,8 +82,6 @@ erDiagram
         int OrganizationID FK
         string OutletName
         string Address
-        decimal Latitude
-        decimal Longitude
     }
     USER {
         int UserID PK

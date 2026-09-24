@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VendorManagementproj.Application.Features.Outlets.Commands.CreateOutlet;
@@ -123,8 +123,6 @@ public class OutletsController : ControllerBase
             OrganizationID = updated.OrganizationID,
             OutletName = updated.OutletName,
             Address = updated.Address,
-            Latitude = updated.Latitude,
-            Longitude = updated.Longitude,
             PurchaseOrderApproverRole = updated.PurchaseOrderApproverRole,
             Status = updated.Status
         });
@@ -146,8 +144,6 @@ public class OutletsController : ControllerBase
             OrganizationID = updated.OrganizationID,
             OutletName = updated.OutletName,
             Address = updated.Address,
-            Latitude = updated.Latitude,
-            Longitude = updated.Longitude,
             PurchaseOrderApproverRole = updated.PurchaseOrderApproverRole,
             Status = updated.Status
         });

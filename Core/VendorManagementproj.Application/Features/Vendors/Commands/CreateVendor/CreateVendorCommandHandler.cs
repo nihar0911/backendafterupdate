@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Application.DTOs;
 using VendorManagementproj.Domain.Entities;
@@ -26,8 +26,6 @@ public class CreateVendorCommandHandler
             Email = request.Email,
             Phone = request.Phone,
             Address = request.Address,
-            Latitude = request.Latitude,
-            Longitude = request.Longitude,
             GSTIN = request.GSTIN,
             Status = string.IsNullOrWhiteSpace(request.Status)
                 ? "Active"
@@ -44,8 +42,6 @@ public class CreateVendorCommandHandler
             Email = createdVendor.Email,
             Phone = createdVendor.Phone,
             Address = createdVendor.Address,
-            Latitude = createdVendor.Latitude,
-            Longitude = createdVendor.Longitude,
             GSTIN = createdVendor.GSTIN,
             Status = createdVendor.Status
         };
