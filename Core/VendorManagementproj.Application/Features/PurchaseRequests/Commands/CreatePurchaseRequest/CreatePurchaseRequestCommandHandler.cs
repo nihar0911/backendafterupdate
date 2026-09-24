@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -180,6 +180,7 @@ public class CreatePurchaseRequestCommandHandler
         {
             // Explicit Item-Level Vendor Assignment Routing
             var processedPairs = new HashSet<string>();
+            var notifiedVendorUserIds = new HashSet<int>();
 
             for (int i = 0; i < request.Items.Count; i++)
             {
@@ -222,31 +223,47 @@ public class CreatePurchaseRequestCommandHandler
                     };
                     await _opportunityResponseRepository.AddAsync(opp);
                 }
+            }
+
+            // Consolidate notification creation so the same recipient receives only ONE notification for this PR event
+            var distinctVendorIds = itemVendorAssignments
+                .Select(i => i.VendorID!.Value)
+                .Distinct()
+                .ToList();
+
+            foreach (var vendorId in distinctVendorIds)
+            {
+                var vendorItems = itemVendorAssignments.Where(i => i.VendorID == vendorId).ToList();
+                var firstItem = vendorItems[0];
+                loadedProducts.TryGetValue(firstItem.ProductID, out var prod);
+                string prodName = prod?.ProductName ?? $"Product #{firstItem.ProductID}";
+
+                string message = vendorItems.Count > 1
+                    ? $"You have received a new procurement opportunity for {vendorItems.Count} items from {outletName}."
+                    : $"You have received a new procurement opportunity for {firstItem.Quantity:N2} {firstItem.Unit} of {prodName} from {outletName}.";
 
                 var vendorManagers = allUsers.Where(u =>
                     u.VendorID == vendorId &&
                     (string.Equals(u.Role?.RoleName, "Vendor Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 4))
                     .ToList();
 
-                loadedProducts.TryGetValue(productId, out var prod);
-                string prodName = prod?.ProductName ?? $"Product #{productId}";
-                decimal qty = matchingItem?.Quantity ?? itemDto.Quantity;
-                string unit = matchingItem?.Unit ?? itemDto.Unit;
-
                 foreach (var vm in vendorManagers)
                 {
-                    var notif = new Notification
+                    if (notifiedVendorUserIds.Add(vm.UserID))
                     {
-                        UserID = vm.UserID,
-                        Title = $"New Procurement Opportunity #PR-{createdRequest.RequestID}",
-                        Message = $"You have received a new procurement opportunity for {qty:N2} {unit} of {prodName} from {outletName}.",
-                        NotificationType = "ProcurementOpportunity",
-                        RelatedRequestID = createdRequest.RequestID,
-                        RelatedVendorID = vendorId,
-                        IsRead = false,
-                        CreatedDate = DateTime.UtcNow
-                    };
-                    await _notificationRepository.AddAsync(notif);
+                        var notif = new Notification
+                        {
+                            UserID = vm.UserID,
+                            Title = $"New Procurement Opportunity #PR-{createdRequest.RequestID}",
+                            Message = message,
+                            NotificationType = "ProcurementOpportunity",
+                            RelatedRequestID = createdRequest.RequestID,
+                            RelatedVendorID = vendorId,
+                            IsRead = false,
+                            CreatedDate = DateTime.Now
+                        };
+                        await _notificationRepository.AddAsync(notif);
+                    }
                 }
             }
         }
@@ -268,17 +285,23 @@ public class CreatePurchaseRequestCommandHandler
 
             if (selectedVendorIds.Count > 0)
             {
+                var notifiedVendorUserIds = new HashSet<int>();
+
                 foreach (var vendorId in selectedVendorIds)
                 {
                     var vendor = await _vendorRepository.GetByIdAsync(vendorId);
                     if (vendor == null || !string.Equals(vendor.Status, "Active", StringComparison.OrdinalIgnoreCase))
                         continue;
 
+                    var activeVendorItems = new List<PurchaseRequestItem>();
+
                     foreach (var item in createdRequest.Items)
                     {
                         var vendorProduct = await _vendorProductRepository.GetByVendorAndProductAsync(vendorId, item.ProductID);
                         if (vendorProduct == null || !string.Equals(vendorProduct.Status, "Active", StringComparison.OrdinalIgnoreCase))
                             continue;
+
+                        activeVendorItems.Add(item);
 
                         var existingResp = await _opportunityResponseRepository.GetByRequestAndVendorAsync(
                             createdRequest.RequestID, vendorId, item.ProductID);
@@ -295,27 +318,38 @@ public class CreatePurchaseRequestCommandHandler
                             };
                             await _opportunityResponseRepository.AddAsync(opp);
                         }
+                    }
 
-                        var vendorManagers = allUsers.Where(u =>
-                            u.VendorID == vendorId &&
-                            (string.Equals(u.Role?.RoleName, "Vendor Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 4))
-                            .ToList();
+                    if (activeVendorItems.Count == 0)
+                        continue;
 
-                        loadedProducts.TryGetValue(item.ProductID, out var prod);
-                        string prodName = prod?.ProductName ?? $"Product #{item.ProductID}";
+                    var firstItem = activeVendorItems[0];
+                    loadedProducts.TryGetValue(firstItem.ProductID, out var prod);
+                    string prodName = prod?.ProductName ?? $"Product #{firstItem.ProductID}";
 
-                        foreach (var vm in vendorManagers)
+                    string message = activeVendorItems.Count > 1
+                        ? $"You have received a new procurement opportunity for {activeVendorItems.Count} items from {outletName}."
+                        : $"You have received a new procurement opportunity for {firstItem.Quantity:N2} {firstItem.Unit} of {prodName} from {outletName}.";
+
+                    var vendorManagers = allUsers.Where(u =>
+                        u.VendorID == vendorId &&
+                        (string.Equals(u.Role?.RoleName, "Vendor Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 4))
+                        .ToList();
+
+                    foreach (var vm in vendorManagers)
+                    {
+                        if (notifiedVendorUserIds.Add(vm.UserID))
                         {
                             var notif = new Notification
                             {
                                 UserID = vm.UserID,
                                 Title = $"New Procurement Opportunity #PR-{createdRequest.RequestID}",
-                                Message = $"You have received a new procurement opportunity for {item.Quantity:N2} {item.Unit} of {prodName} from {outletName}.",
+                                Message = message,
                                 NotificationType = "ProcurementOpportunity",
                                 RelatedRequestID = createdRequest.RequestID,
                                 RelatedVendorID = vendorId,
                                 IsRead = false,
-                                CreatedDate = DateTime.UtcNow
+                                CreatedDate = DateTime.Now
                             };
                             await _notificationRepository.AddAsync(notif);
                         }

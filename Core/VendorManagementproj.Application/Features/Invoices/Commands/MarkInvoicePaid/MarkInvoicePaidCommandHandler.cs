@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -152,21 +152,25 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
         {
             var allUsers = await _userRepository.GetAllAsync();
             var vendorUsers = allUsers.Where(u => u.VendorID == invoice.VendorID).ToList();
+            var targetUserIds = new HashSet<int>();
             string orgName = purchaseOrder.Outlet?.Organization?.OrganizationName ?? "Organization";
 
             foreach (var vendorUser in vendorUsers)
             {
-                await _notificationRepository.AddAsync(new Notification
+                if (targetUserIds.Add(vendorUser.UserID))
                 {
-                    UserID = vendorUser.UserID,
-                    Title = "Payment Received",
-                    Message = $"Payment of Rs. {payment.Amount:N2} for Invoice INV-{invoice.InvoiceID} has been completed by {orgName}.",
-                    NotificationType = "PaymentReceived",
-                    RelatedRequestID = invoice.PurchaseOrderID,
-                    RelatedVendorID = invoice.VendorID,
-                    IsRead = false,
-                    CreatedDate = DateTime.Now
-                });
+                    await _notificationRepository.AddAsync(new Notification
+                    {
+                        UserID = vendorUser.UserID,
+                        Title = "Payment Received",
+                        Message = $"Payment of Rs. {payment.Amount:N2} for Invoice INV-{invoice.InvoiceID} has been completed by {orgName}.",
+                        NotificationType = "PaymentReceived",
+                        RelatedRequestID = invoice.PurchaseOrderID,
+                        RelatedVendorID = invoice.VendorID,
+                        IsRead = false,
+                        CreatedDate = DateTime.Now
+                    });
+                }
             }
         }
         catch (Exception ex)

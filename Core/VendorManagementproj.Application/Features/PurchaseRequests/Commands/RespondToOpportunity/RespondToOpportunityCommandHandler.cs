@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -179,7 +179,7 @@ public class RespondToOpportunityCommandHandler
                             Message = $"Purchase Request PR-{pr.RequestID} for {outletName} has been accepted by {vendor.VendorName}.",
                             NotificationType = "OpportunityAccepted",
                             IsRead = false,
-                            CreatedDate = DateTime.UtcNow
+                            CreatedDate = DateTime.Now
                         };
                         await _notificationRepository.AddAsync(notif);
                     }
@@ -197,7 +197,7 @@ public class RespondToOpportunityCommandHandler
                         Message = $"Purchase Request PR-{pr.RequestID} for {outletName} has been accepted by {vendor.VendorName}.",
                         NotificationType = "OpportunityAccepted",
                         IsRead = false,
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = DateTime.Now
                     };
                     await _notificationRepository.AddAsync(creatorNotif);
                 }
@@ -222,7 +222,7 @@ public class RespondToOpportunityCommandHandler
                             Message = $"Purchase Request PR-{pr.RequestID} for {outletName} has been rejected by {vendor.VendorName}.{reasonText}",
                             NotificationType = "OpportunityRejected",
                             IsRead = false,
-                            CreatedDate = DateTime.UtcNow
+                            CreatedDate = DateTime.Now
                         };
                         await _notificationRepository.AddAsync(notif);
                     }
@@ -240,7 +240,7 @@ public class RespondToOpportunityCommandHandler
                         Message = $"Purchase Request PR-{pr.RequestID} for {outletName} has been rejected by {vendor.VendorName}.{reasonText}",
                         NotificationType = "OpportunityRejected",
                         IsRead = false,
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = DateTime.Now
                     };
                     await _notificationRepository.AddAsync(creatorNotif);
                 }

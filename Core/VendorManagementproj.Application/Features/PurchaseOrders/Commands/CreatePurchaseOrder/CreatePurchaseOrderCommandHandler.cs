@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -157,19 +157,23 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
                        string.Equals(roleName, PurchaseOrderApprover.OrganizationManager, StringComparison.OrdinalIgnoreCase);
             }).ToList();
 
+            var targetUserIds = new HashSet<int>();
             foreach (var user in approvers)
             {
-                await _notificationRepository.AddAsync(new Notification
+                if (targetUserIds.Add(user.UserID))
                 {
-                    UserID = user.UserID,
-                    Title = "Purchase Order Awaiting Approval",
-                    Message = $"Purchase Order PO-#{createdPurchaseOrder.PurchaseOrderID} is awaiting your approval before it is placed with the vendor.",
-                    NotificationType = "PurchaseOrderAwaitingApproval",
-                    RelatedRequestID = createdPurchaseOrder.PurchaseOrderID,
-                    RelatedVendorID = quotation.VendorID,
-                    IsRead = false,
-                    CreatedDate = DateTime.UtcNow
-                });
+                    await _notificationRepository.AddAsync(new Notification
+                    {
+                        UserID = user.UserID,
+                        Title = "Purchase Order Awaiting Approval",
+                        Message = $"Purchase Order PO-#{createdPurchaseOrder.PurchaseOrderID} is awaiting your approval before it is placed with the vendor.",
+                        NotificationType = "PurchaseOrderAwaitingApproval",
+                        RelatedRequestID = createdPurchaseOrder.PurchaseOrderID,
+                        RelatedVendorID = quotation.VendorID,
+                        IsRead = false,
+                        CreatedDate = DateTime.Now
+                    });
+                }
             }
         }
         catch (Exception ex)

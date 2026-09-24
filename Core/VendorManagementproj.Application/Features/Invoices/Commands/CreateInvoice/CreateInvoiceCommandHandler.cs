@@ -169,28 +169,25 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
             if (outlet != null)
             {
                 var allUsers = await _userRepository.GetAllAsync();
-                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2)).ToList();
+                var targetUserIds = new HashSet<int>();
+
+                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2));
                 foreach (var user in orgUsers)
                 {
-                    await _notificationRepository.AddAsync(new Notification
-                    {
-                        UserID = user.UserID,
-                        Title = "Invoice Submitted",
-                        Message = $"New invoice INV-{fullInvoice.InvoiceID} has been submitted by {vendorName} for PO-#{fullInvoice.PurchaseOrderID}.",
-                        NotificationType = "InvoiceSubmitted",
-                        RelatedRequestID = fullInvoice.PurchaseOrderID,
-                        RelatedVendorID = fullInvoice.VendorID,
-                        IsRead = false,
-                        CreatedDate = DateTime.Now
-                    });
+                    targetUserIds.Add(user.UserID);
                 }
 
-                var outletUsers = allUsers.Where(u => u.OutletID == fullInvoice.OutletID && (string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 7)).ToList();
+                var outletUsers = allUsers.Where(u => u.OutletID == fullInvoice.OutletID && (string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 7));
                 foreach (var user in outletUsers)
+                {
+                    targetUserIds.Add(user.UserID);
+                }
+
+                foreach (var userId in targetUserIds)
                 {
                     await _notificationRepository.AddAsync(new Notification
                     {
-                        UserID = user.UserID,
+                        UserID = userId,
                         Title = "Invoice Submitted",
                         Message = $"New invoice INV-{fullInvoice.InvoiceID} has been submitted by {vendorName} for PO-#{fullInvoice.PurchaseOrderID}.",
                         NotificationType = "InvoiceSubmitted",

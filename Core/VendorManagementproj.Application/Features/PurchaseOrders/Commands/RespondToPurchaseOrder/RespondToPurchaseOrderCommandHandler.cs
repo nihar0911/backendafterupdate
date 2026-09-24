@@ -92,42 +92,38 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
         try
         {
             var allUsers = await _userRepository.GetAllAsync();
+            var targetUserIds = new HashSet<int>();
 
-            // 1. Notify Organization Manager(s)
+            // 1. Organization Manager(s)
             var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
             if (outlet != null)
             {
-                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2)).ToList();
+                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2));
                 foreach (var user in orgUsers)
                 {
-                    await _notificationRepository.AddAsync(new Notification
-                    {
-                        UserID = user.UserID,
-                        Title = title,
-                        Message = message,
-                        NotificationType = type,
-                        RelatedRequestID = purchaseOrder.PurchaseOrderID,
-                        RelatedVendorID = purchaseOrder.VendorID,
-                        IsRead = false,
-                        CreatedDate = DateTime.UtcNow
-                    });
+                    targetUserIds.Add(user.UserID);
                 }
             }
 
-            // 2. Notify Outlet Manager(s)
-            var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 3 || u.RoleID == 7)).ToList();
+            // 2. Outlet Manager(s) and Purchase Manager(s)
+            var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 3 || u.RoleID == 7));
             foreach (var user in outletUsers)
+            {
+                targetUserIds.Add(user.UserID);
+            }
+
+            foreach (var userId in targetUserIds)
             {
                 await _notificationRepository.AddAsync(new Notification
                 {
-                    UserID = user.UserID,
+                    UserID = userId,
                     Title = title,
                     Message = message,
                     NotificationType = type,
                     RelatedRequestID = purchaseOrder.PurchaseOrderID,
                     RelatedVendorID = purchaseOrder.VendorID,
                     IsRead = false,
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = DateTime.Now
                 });
             }
         }

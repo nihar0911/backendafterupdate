@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -87,7 +87,7 @@ public class RejectPurchaseOrderCommandHandler : IRequestHandler<RejectPurchaseO
                     RelatedRequestID = purchaseOrder.PurchaseOrderID,
                     RelatedVendorID = purchaseOrder.VendorID,
                     IsRead = false,
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = DateTime.Now
                 });
             }
         }

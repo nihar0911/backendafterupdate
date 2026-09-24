@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Application.Contracts.Services;
 using VendorManagementproj.Application.DTOs;
@@ -154,19 +154,24 @@ public class CreateVendorFeedbackCommandHandler
         {
             var allUsers = await _userRepository.GetAllAsync();
             var vendorUsers = allUsers.Where(u => u.VendorID == request.VendorID).ToList();
+            var targetUserIds = new HashSet<int>();
+
             foreach (var vu in vendorUsers)
             {
-                await _notificationRepository.AddAsync(new Notification
+                if (targetUserIds.Add(vu.UserID))
                 {
-                    UserID = vu.UserID,
-                    Title = "New Vendor Review",
-                    Message = $"A review ({feedback.Rating:0.0}/5 stars) has been submitted for PO #{purchaseOrder.PurchaseOrderID}.",
-                    NotificationType = "VendorReview",
-                    RelatedRequestID = createdFeedback.FeedbackID,
-                    RelatedVendorID = request.VendorID,
-                    IsRead = false,
-                    CreatedDate = DateTime.Now
-                });
+                    await _notificationRepository.AddAsync(new Notification
+                    {
+                        UserID = vu.UserID,
+                        Title = "New Vendor Review",
+                        Message = $"A review ({feedback.Rating:0.0}/5 stars) has been submitted for PO #{purchaseOrder.PurchaseOrderID}.",
+                        NotificationType = "VendorReview",
+                        RelatedRequestID = createdFeedback.FeedbackID,
+                        RelatedVendorID = request.VendorID,
+                        IsRead = false,
+                        CreatedDate = DateTime.Now
+                    });
+                }
             }
         }
         catch (Exception ex)

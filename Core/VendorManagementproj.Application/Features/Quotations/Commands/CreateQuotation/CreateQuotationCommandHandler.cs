@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -313,7 +313,7 @@ public class CreateQuotationCommandHandler
                         Message = $"New quotation submitted for Purchase Request PR-{purchaseRequest.RequestID} by {vendorName}.",
                         NotificationType = "QuotationSubmitted",
                         IsRead = false,
-                        CreatedDate = DateTime.UtcNow
+                        CreatedDate = DateTime.Now
                     };
                     await _notificationRepository.AddAsync(notif);
                 }
@@ -331,7 +331,7 @@ public class CreateQuotationCommandHandler
                     Message = $"New quotation submitted for Purchase Request PR-{purchaseRequest.RequestID} by {vendorName}.",
                     NotificationType = "QuotationSubmitted",
                     IsRead = false,
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = DateTime.Now
                 };
                 await _notificationRepository.AddAsync(creatorNotif);
             }

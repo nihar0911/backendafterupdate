@@ -268,35 +268,32 @@ public class ConfirmDeliveryRecordCommandHandler
             await _purchaseOrderRepository
                 .UpdateAsync(purchaseOrder);
 
-            // Send notification to Organization Manager(s)
+            // Send notification to Organization Manager(s) and Outlet/Purchase Manager(s)
             try
             {
                 var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
                 if (outlet != null)
                 {
                     var allUsers = await _userRepository.GetAllAsync();
-                    var orgManagers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2)).ToList();
+                    var targetUserIds = new HashSet<int>();
+
+                    var orgManagers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2));
                     foreach (var orgUser in orgManagers)
                     {
-                        await _notificationRepository.AddAsync(new Notification
-                        {
-                            UserID = orgUser.UserID,
-                            Title = "Purchase Order Delivered",
-                            Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been delivered and confirmed at {outlet.OutletName}.",
-                            NotificationType = "PurchaseOrderDelivered",
-                            RelatedRequestID = purchaseOrder.PurchaseOrderID,
-                            RelatedVendorID = purchaseOrder.VendorID,
-                            IsRead = false,
-                            CreatedDate = DateTime.Now
-                        });
+                        targetUserIds.Add(orgUser.UserID);
                     }
 
-                    var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 7 || u.RoleID == 3)).ToList();
+                    var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 7 || u.RoleID == 3));
                     foreach (var outUser in outletUsers)
+                    {
+                        targetUserIds.Add(outUser.UserID);
+                    }
+
+                    foreach (var userId in targetUserIds)
                     {
                         await _notificationRepository.AddAsync(new Notification
                         {
-                            UserID = outUser.UserID,
+                            UserID = userId,
                             Title = "Purchase Order Delivered",
                             Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been delivered and confirmed at {outlet.OutletName}.",
                             NotificationType = "PurchaseOrderDelivered",

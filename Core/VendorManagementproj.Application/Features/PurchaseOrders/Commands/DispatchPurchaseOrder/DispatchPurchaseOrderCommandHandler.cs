@@ -62,43 +62,58 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
         try
         {
             var allUsers = await _userRepository.GetAllAsync();
+            var targetOutletUserIds = new HashSet<int>();
+            var targetOrgUserIds = new HashSet<int>();
 
-            // 1. Notify Outlet Manager(s) for this Outlet
-            var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 3 || u.RoleID == 7)).ToList();
+            // 1. Notify Outlet Manager(s) and Purchase Manager(s) for this Outlet
+            var outletUsers = allUsers.Where(u => u.OutletID == purchaseOrder.OutletID && (string.Equals(u.Role?.RoleName, "Outlet Manager", StringComparison.OrdinalIgnoreCase) || string.Equals(u.Role?.RoleName, "Purchase Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 3 || u.RoleID == 7));
             foreach (var user in outletUsers)
             {
-                await _notificationRepository.AddAsync(new Notification
-                {
-                    UserID = user.UserID,
-                    Title = "Purchase Order Dispatched",
-                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been dispatched and is on the way to your outlet.",
-                    NotificationType = "PurchaseOrderDispatched",
-                    RelatedRequestID = purchaseOrder.PurchaseOrderID,
-                    RelatedVendorID = purchaseOrder.VendorID,
-                    IsRead = false,
-                    CreatedDate = DateTime.UtcNow
-                });
+                targetOutletUserIds.Add(user.UserID);
             }
 
             // 2. Notify Organization Manager(s)
             var outlet = await _outletRepository.GetByIdAsync(purchaseOrder.OutletID);
             if (outlet != null)
             {
-                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2)).ToList();
+                var orgUsers = allUsers.Where(u => u.OrganizationID == outlet.OrganizationID && (string.Equals(u.Role?.RoleName, "Organization Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 2));
                 foreach (var user in orgUsers)
                 {
-                    await _notificationRepository.AddAsync(new Notification
+                    if (!targetOutletUserIds.Contains(user.UserID))
                     {
-                        UserID = user.UserID,
-                        Title = "Purchase Order Dispatched",
-                        Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been dispatched by {vendorName}.",
-                        NotificationType = "PurchaseOrderDispatched",
-                        RelatedRequestID = purchaseOrder.PurchaseOrderID,
-                        RelatedVendorID = purchaseOrder.VendorID,
-                        IsRead = false,
-                        CreatedDate = DateTime.UtcNow
-                    });
+                        targetOrgUserIds.Add(user.UserID);
+                    }
                 }
+            }
+
+            foreach (var userId in targetOutletUserIds)
+            {
+                await _notificationRepository.AddAsync(new Notification
+                {
+                    UserID = userId,
+                    Title = "Purchase Order Dispatched",
+                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been dispatched and is on the way to your outlet.",
+                    NotificationType = "PurchaseOrderDispatched",
+                    RelatedRequestID = purchaseOrder.PurchaseOrderID,
+                    RelatedVendorID = purchaseOrder.VendorID,
+                    IsRead = false,
+                    CreatedDate = DateTime.Now
+                });
+            }
+
+            foreach (var userId in targetOrgUserIds)
+            {
+                await _notificationRepository.AddAsync(new Notification
+                {
+                    UserID = userId,
+                    Title = "Purchase Order Dispatched",
+                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been dispatched by {vendorName}.",
+                    NotificationType = "PurchaseOrderDispatched",
+                    RelatedRequestID = purchaseOrder.PurchaseOrderID,
+                    RelatedVendorID = purchaseOrder.VendorID,
+                    IsRead = false,
+                    CreatedDate = DateTime.Now
+                });
             }
         }
         catch (Exception ex)

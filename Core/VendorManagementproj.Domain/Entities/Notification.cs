@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace VendorManagementproj.Domain.Entities;
 
@@ -20,7 +20,7 @@ public class Notification
 
     public bool IsRead { get; set; } = false;
 
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
 
     public User? User { get; set; }
 }

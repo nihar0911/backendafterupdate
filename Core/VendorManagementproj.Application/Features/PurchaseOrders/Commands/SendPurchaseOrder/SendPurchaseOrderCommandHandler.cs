@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -74,20 +74,24 @@ public class SendPurchaseOrderCommandHandler : IRequestHandler<SendPurchaseOrder
         {
             var allUsers = await _userRepository.GetAllAsync();
             var vendorUsers = allUsers.Where(u => u.VendorID == purchaseOrder.VendorID).ToList();
+            var targetVendorUserIds = new HashSet<int>();
 
             foreach (var user in vendorUsers)
             {
-                await _notificationRepository.AddAsync(new Notification
+                if (targetVendorUserIds.Add(user.UserID))
                 {
-                    UserID = user.UserID,
-                    Title = "New Purchase Order",
-                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been sent to you.",
-                    NotificationType = "PurchaseOrderSent",
-                    RelatedRequestID = purchaseOrder.PurchaseOrderID,
-                    RelatedVendorID = purchaseOrder.VendorID,
-                    IsRead = false,
-                    CreatedDate = DateTime.UtcNow
-                });
+                    await _notificationRepository.AddAsync(new Notification
+                    {
+                        UserID = user.UserID,
+                        Title = "New Purchase Order",
+                        Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been sent to you.",
+                        NotificationType = "PurchaseOrderSent",
+                        RelatedRequestID = purchaseOrder.PurchaseOrderID,
+                        RelatedVendorID = purchaseOrder.VendorID,
+                        IsRead = false,
+                        CreatedDate = DateTime.Now
+                    });
+                }
             }
         }
         catch (Exception ex)

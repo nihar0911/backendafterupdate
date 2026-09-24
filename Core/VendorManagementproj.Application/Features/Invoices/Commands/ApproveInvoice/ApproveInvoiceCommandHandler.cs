@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,19 +80,24 @@ public class ApproveInvoiceCommandHandler : IRequestHandler<ApproveInvoiceComman
         {
             var allUsers = await _userRepository.GetAllAsync();
             var vendorUsers = allUsers.Where(u => u.VendorID == invoice.VendorID).ToList();
+            var targetUserIds = new HashSet<int>();
+
             foreach (var user in vendorUsers)
             {
-                await _notificationRepository.AddAsync(new Notification
+                if (targetUserIds.Add(user.UserID))
                 {
-                    UserID = user.UserID,
-                    Title = "Invoice Approved",
-                    Message = $"Invoice #{invoice.InvoiceID} for PO-#{invoice.PurchaseOrderID} has been approved by the organization.",
-                    NotificationType = "InvoiceApproved",
-                    RelatedRequestID = invoice.PurchaseOrderID,
-                    RelatedVendorID = invoice.VendorID,
-                    IsRead = false,
-                    CreatedDate = DateTime.Now
-                });
+                    await _notificationRepository.AddAsync(new Notification
+                    {
+                        UserID = user.UserID,
+                        Title = "Invoice Approved",
+                        Message = $"Invoice #{invoice.InvoiceID} for PO-#{invoice.PurchaseOrderID} has been approved by the organization.",
+                        NotificationType = "InvoiceApproved",
+                        RelatedRequestID = invoice.PurchaseOrderID,
+                        RelatedVendorID = invoice.VendorID,
+                        IsRead = false,
+                        CreatedDate = DateTime.Now
+                    });
+                }
             }
         }
         catch (Exception ex)

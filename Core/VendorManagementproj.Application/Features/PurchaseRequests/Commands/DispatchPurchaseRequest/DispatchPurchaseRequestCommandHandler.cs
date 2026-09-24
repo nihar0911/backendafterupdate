@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -203,6 +203,9 @@ public class DispatchPurchaseRequestCommandHandler
         }
 
         // Create opportunities and notifications only for resolved (item, vendor) pairs
+        var notifiedVendorUserIds = new HashSet<int>();
+
+        // 1. Create opportunity responses for all resolved (item, vendor) pairs
         foreach (var (item, vendor) in resolvedPairs)
         {
             var existingResp = await _opportunityResponseRepository.GetByRequestItemAndVendorAsync(
@@ -222,31 +225,52 @@ public class DispatchPurchaseRequestCommandHandler
                 await _opportunityResponseRepository.AddAsync(opp);
                 oppsCreated++;
             }
+        }
 
-            // Send Notification ONLY to the Vendor Manager(s) assigned to THIS specific vendor
+        // 2. Send 1 consolidated notification per unique Vendor Manager for this PR dispatch event
+        var distinctVendors = resolvedPairs
+            .Select(p => p.Vendor)
+            .GroupBy(v => v.VendorID)
+            .Select(g => g.First())
+            .ToList();
+
+        foreach (var vendor in distinctVendors)
+        {
+            var vendorPairs = resolvedPairs.Where(p => p.Vendor.VendorID == vendor.VendorID).ToList();
+            if (vendorPairs.Count == 0)
+                continue;
+
+            var firstPair = vendorPairs[0];
+            var product = await _productRepository.GetByIdAsync(firstPair.Item.ProductID);
+            string prodName = product?.ProductName ?? $"Product #{firstPair.Item.ProductID}";
+
+            string message = vendorPairs.Count > 1
+                ? $"You have received a new procurement opportunity for {vendorPairs.Count} items from {outletName}."
+                : $"You have received a new procurement opportunity for {firstPair.Item.Quantity:N2} {firstPair.Item.Unit} of {prodName} from {outletName}.";
+
             var vendorManagers = allUsers.Where(u =>
                 u.VendorID == vendor.VendorID &&
                 (string.Equals(u.Role?.RoleName, "Vendor Manager", StringComparison.OrdinalIgnoreCase) || u.RoleID == 4))
                 .ToList();
 
-            var product = await _productRepository.GetByIdAsync(item.ProductID);
-            string prodName = product?.ProductName ?? $"Product #{item.ProductID}";
-
             foreach (var vm in vendorManagers)
             {
-                var notif = new Notification
+                if (notifiedVendorUserIds.Add(vm.UserID))
                 {
-                    UserID = vm.UserID,
-                    Title = $"New Procurement Opportunity #PR-{purchaseRequest.RequestID}",
-                    Message = $"You have received a new procurement opportunity for {item.Quantity:N2} {item.Unit} of {prodName} from {outletName}.",
-                    NotificationType = "ProcurementOpportunity",
-                    RelatedRequestID = purchaseRequest.RequestID,
-                    RelatedVendorID = vendor.VendorID,
-                    IsRead = false,
-                    CreatedDate = DateTime.UtcNow
-                };
-                await _notificationRepository.AddAsync(notif);
-                notifsSent++;
+                    var notif = new Notification
+                    {
+                        UserID = vm.UserID,
+                        Title = $"New Procurement Opportunity #PR-{purchaseRequest.RequestID}",
+                        Message = message,
+                        NotificationType = "ProcurementOpportunity",
+                        RelatedRequestID = purchaseRequest.RequestID,
+                        RelatedVendorID = vendor.VendorID,
+                        IsRead = false,
+                        CreatedDate = DateTime.Now
+                    };
+                    await _notificationRepository.AddAsync(notif);
+                    notifsSent++;
+                }
             }
         }
 
