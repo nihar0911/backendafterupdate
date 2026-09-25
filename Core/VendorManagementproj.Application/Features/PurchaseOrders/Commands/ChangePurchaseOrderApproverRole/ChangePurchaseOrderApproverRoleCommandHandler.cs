@@ -15,6 +15,8 @@ namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.Chan
 public class ChangePurchaseOrderApproverRoleCommandHandler : IRequestHandler<ChangePurchaseOrderApproverRoleCommand, ChangePurchaseOrderApproverRoleResponse>
 {
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+    private readonly IPurchaseRequestRepository _purchaseRequestRepository;
+    private readonly IVendorRepository _vendorRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly IUserRepository _userRepository;
     private readonly IOutletRepository _outletRepository;
@@ -22,12 +24,16 @@ public class ChangePurchaseOrderApproverRoleCommandHandler : IRequestHandler<Cha
 
     public ChangePurchaseOrderApproverRoleCommandHandler(
         IPurchaseOrderRepository purchaseOrderRepository,
+        IPurchaseRequestRepository purchaseRequestRepository,
+        IVendorRepository vendorRepository,
         INotificationRepository notificationRepository,
         IUserRepository userRepository,
         IOutletRepository outletRepository,
         ICurrentUserService currentUserService)
     {
         _purchaseOrderRepository = purchaseOrderRepository;
+        _purchaseRequestRepository = purchaseRequestRepository;
+        _vendorRepository = vendorRepository;
         _notificationRepository = notificationRepository;
         _userRepository = userRepository;
         _outletRepository = outletRepository;
@@ -135,6 +141,26 @@ public class ChangePurchaseOrderApproverRoleCommandHandler : IRequestHandler<Cha
                        string.Equals(roleName, PurchaseOrderApprover.OrganizationManager, StringComparison.OrdinalIgnoreCase);
             }).ToList();
 
+            var purchaseRequest = await _purchaseRequestRepository.GetByIdAsync(purchaseOrder.RequestID);
+            var vendor = await _vendorRepository.GetByIdAsync(purchaseOrder.VendorID);
+            string vendorName = vendor?.VendorName ?? "Vendor";
+            var poProducts = purchaseOrder.Items?.Select(poi =>
+            {
+                var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == poi.ProductID);
+                var name = poi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{poi.ProductID}";
+                var unit = poi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, poi.Quantity, (string?)unit);
+            });
+            var (titleProd, msgProd) = NotificationProductFormatter.FormatProductSummaries(poProducts);
+
+            string title = string.IsNullOrEmpty(titleProd)
+                ? $"Purchase Order Awaiting Approval: PO-{purchaseOrder.PurchaseOrderID}"
+                : $"Purchase Order Awaiting Approval: {titleProd}";
+
+            string message = string.IsNullOrEmpty(msgProd)
+                ? $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} with {vendorName} is awaiting your approval before it is placed with the vendor."
+                : $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {msgProd} with {vendorName} is awaiting your approval before it is placed with the vendor.";
+
             var targetUserIds = new HashSet<int>();
             foreach (var user in approvers)
             {
@@ -143,8 +169,8 @@ public class ChangePurchaseOrderApproverRoleCommandHandler : IRequestHandler<Cha
                     await _notificationRepository.AddAsync(new Notification
                     {
                         UserID = user.UserID,
-                        Title = "Purchase Order Awaiting Approval",
-                        Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} is awaiting your approval before it is placed with the vendor.",
+                        Title = title,
+                        Message = message,
                         NotificationType = "PurchaseOrderAwaitingApproval",
                         RelatedRequestID = purchaseOrder.PurchaseOrderID,
                         RelatedVendorID = purchaseOrder.VendorID,

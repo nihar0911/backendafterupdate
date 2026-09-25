@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VendorManagementproj.Application.Contracts.Persistence;
@@ -20,6 +20,7 @@ public class QuotationRepository : IQuotationRepository
     {
         return await _context.Quotations
             .Include(q => q.QuotationItems)
+                .ThenInclude(qi => qi.Product)
             .Include(q => q.Request)
             .AsNoTracking()
             .ToListAsync();
@@ -29,6 +30,7 @@ public class QuotationRepository : IQuotationRepository
     {
         return await _context.Quotations
             .Include(q => q.QuotationItems)
+                .ThenInclude(qi => qi.Product)
             .Include(q => q.Request)
             .FirstOrDefaultAsync(q => q.QuotationID == quotationID);
     }
@@ -37,6 +39,7 @@ public class QuotationRepository : IQuotationRepository
     {
         return await _context.Quotations
             .Include(q => q.QuotationItems)
+                .ThenInclude(qi => qi.Product)
             .Where(q => q.RequestID == requestId && q.VendorID == vendorId)
             .ToListAsync();
     }
@@ -54,6 +57,7 @@ public class QuotationRepository : IQuotationRepository
     {
         var existingQuotation = await _context.Quotations
             .Include(q => q.QuotationItems)
+                .ThenInclude(qi => qi.Product)
             .Include(q => q.Request)
             .FirstOrDefaultAsync(q => q.QuotationID == quotationID);
 
@@ -89,6 +93,7 @@ public class QuotationRepository : IQuotationRepository
         return await _context.Quotations
             .Where(q => q.Request != null && q.Request.OutletID == outletId)
             .Include(q => q.QuotationItems)
+                .ThenInclude(qi => qi.Product)
             .Include(q => q.Request)
             .AsNoTracking()
             .ToListAsync();
@@ -99,6 +104,7 @@ public class QuotationRepository : IQuotationRepository
         return await _context.Quotations
             .Where(q => q.Request != null && outletIds.Contains(q.Request.OutletID))
             .Include(q => q.QuotationItems)
+                .ThenInclude(qi => qi.Product)
             .Include(q => q.Request)
             .AsNoTracking()
             .ToListAsync();
@@ -109,6 +115,7 @@ public class QuotationRepository : IQuotationRepository
         return await _context.Quotations
             .Where(q => q.VendorID == vendorId)
             .Include(q => q.QuotationItems)
+                .ThenInclude(qi => qi.Product)
             .Include(q => q.Request)
             .AsNoTracking()
             .ToListAsync();

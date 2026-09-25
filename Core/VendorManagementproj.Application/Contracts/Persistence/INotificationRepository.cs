@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using VendorManagementproj.Domain.Entities;
 
@@ -14,4 +14,5 @@ public interface INotificationRepository
     Task MarkAllAsReadByUserIdAsync(int userId);
     Task ClearAllByUserIdAsync(int userId);
     Task RemoveUnreadByRelatedRequestIdAsync(string notificationType, int relatedRequestId);
+    Task<bool> ExistsAsync(string notificationType, int relatedRequestId, int relatedVendorId, int userId);
 }

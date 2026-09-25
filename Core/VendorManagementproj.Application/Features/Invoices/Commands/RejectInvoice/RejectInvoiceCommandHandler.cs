@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Linq;
 using System.Threading;
@@ -14,6 +15,8 @@ namespace VendorManagementproj.Application.Features.Invoices.Commands.RejectInvo
 public class RejectInvoiceCommandHandler : IRequestHandler<RejectInvoiceCommand, RejectInvoiceResponse>
 {
     private readonly IInvoiceRepository _invoiceRepository;
+    private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+    private readonly IPurchaseRequestRepository _purchaseRequestRepository;
     private readonly IOutletRepository _outletRepository;
     private readonly IUserRepository _userRepository;
     private readonly INotificationRepository _notificationRepository;
@@ -22,6 +25,8 @@ public class RejectInvoiceCommandHandler : IRequestHandler<RejectInvoiceCommand,
 
     public RejectInvoiceCommandHandler(
         IInvoiceRepository invoiceRepository,
+        IPurchaseOrderRepository purchaseOrderRepository,
+        IPurchaseRequestRepository purchaseRequestRepository,
         IOutletRepository outletRepository,
         IUserRepository userRepository,
         INotificationRepository notificationRepository,
@@ -29,6 +34,8 @@ public class RejectInvoiceCommandHandler : IRequestHandler<RejectInvoiceCommand,
         IInvoiceDocumentService invoiceDocumentService)
     {
         _invoiceRepository = invoiceRepository;
+        _purchaseOrderRepository = purchaseOrderRepository;
+        _purchaseRequestRepository = purchaseRequestRepository;
         _outletRepository = outletRepository;
         _userRepository = userRepository;
         _notificationRepository = notificationRepository;
@@ -84,6 +91,23 @@ public class RejectInvoiceCommandHandler : IRequestHandler<RejectInvoiceCommand,
             var vendorUsers = allUsers.Where(u => u.VendorID == invoice.VendorID).ToList();
             var targetUserIds = new HashSet<int>();
 
+            var purchaseOrder = await _purchaseOrderRepository.GetByIdAsync(invoice.PurchaseOrderID);
+            var purchaseRequest = purchaseOrder != null ? await _purchaseRequestRepository.GetByIdAsync(purchaseOrder.RequestID) : null;
+            var invProducts = invoice.Items?.Select(item =>
+            {
+                var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == item.ProductID);
+                var name = item.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{item.ProductID}";
+                var unit = item.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, item.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(invProducts);
+            string orgName = invoice.Outlet?.Organization?.OrganizationName ?? "the organization";
+
+            string notifTitle = string.IsNullOrWhiteSpace(prodTitle) ? $"Invoice Rejected: INV-{invoice.InvoiceID}" : $"Invoice Rejected: {prodTitle}";
+            string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Invoice INV-{invoice.InvoiceID} against Purchase Order PO-{invoice.PurchaseOrderID} has been rejected by {orgName}. Reason: {reasonNote}"
+                : $"Invoice INV-{invoice.InvoiceID} for {prodMsg} against Purchase Order PO-{invoice.PurchaseOrderID} has been rejected by {orgName}. Reason: {reasonNote}";
+
             foreach (var user in vendorUsers)
             {
                 if (targetUserIds.Add(user.UserID))
@@ -91,8 +115,8 @@ public class RejectInvoiceCommandHandler : IRequestHandler<RejectInvoiceCommand,
                     await _notificationRepository.AddAsync(new Notification
                     {
                         UserID = user.UserID,
-                        Title = "Invoice Rejected",
-                        Message = $"Invoice #{invoice.InvoiceID} for PO-#{invoice.PurchaseOrderID} has been rejected by the organization. Reason: {reasonNote}",
+                        Title = notifTitle,
+                        Message = notifMsg,
                         NotificationType = "InvoiceRejected",
                         RelatedRequestID = invoice.PurchaseOrderID,
                         RelatedVendorID = invoice.VendorID,

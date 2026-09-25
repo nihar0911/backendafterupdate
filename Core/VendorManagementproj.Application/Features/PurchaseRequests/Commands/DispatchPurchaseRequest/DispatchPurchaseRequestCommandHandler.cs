@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -240,13 +241,20 @@ public class DispatchPurchaseRequestCommandHandler
             if (vendorPairs.Count == 0)
                 continue;
 
-            var firstPair = vendorPairs[0];
-            var product = await _productRepository.GetByIdAsync(firstPair.Item.ProductID);
-            string prodName = product?.ProductName ?? $"Product #{firstPair.Item.ProductID}";
+            var prodList = new List<(string? ProductName, decimal Quantity, string? Unit)>();
+            foreach (var pair in vendorPairs)
+            {
+                var product = await _productRepository.GetByIdAsync(pair.Item.ProductID);
+                prodList.Add((product?.ProductName ?? $"Product #{pair.Item.ProductID}", pair.Item.Quantity, pair.Item.Unit));
+            }
+            var (titleProd, msgProd) = NotificationProductFormatter.FormatProductSummaries(prodList);
 
-            string message = vendorPairs.Count > 1
-                ? $"You have received a new procurement opportunity for {vendorPairs.Count} items from {outletName}."
-                : $"You have received a new procurement opportunity for {firstPair.Item.Quantity:N2} {firstPair.Item.Unit} of {prodName} from {outletName}.";
+            string title = string.IsNullOrEmpty(titleProd)
+                ? $"New Procurement Opportunity: PR-{purchaseRequest.RequestID}"
+                : $"New Procurement Opportunity: {titleProd}";
+            string message = string.IsNullOrEmpty(msgProd)
+                ? $"You have received a new procurement opportunity under Purchase Request PR-{purchaseRequest.RequestID} from {outletName}."
+                : $"You have received a new procurement opportunity for {msgProd} under Purchase Request PR-{purchaseRequest.RequestID} from {outletName}.";
 
             var vendorManagers = allUsers.Where(u =>
                 u.VendorID == vendor.VendorID &&
@@ -257,19 +265,28 @@ public class DispatchPurchaseRequestCommandHandler
             {
                 if (notifiedVendorUserIds.Add(vm.UserID))
                 {
-                    var notif = new Notification
+                    bool alreadyNotified = await _notificationRepository.ExistsAsync(
+                        "ProcurementOpportunity",
+                        purchaseRequest.RequestID,
+                        vendor.VendorID,
+                        vm.UserID);
+
+                    if (!alreadyNotified)
                     {
-                        UserID = vm.UserID,
-                        Title = $"New Procurement Opportunity #PR-{purchaseRequest.RequestID}",
-                        Message = message,
-                        NotificationType = "ProcurementOpportunity",
-                        RelatedRequestID = purchaseRequest.RequestID,
-                        RelatedVendorID = vendor.VendorID,
-                        IsRead = false,
-                        CreatedDate = DateTime.Now
-                    };
-                    await _notificationRepository.AddAsync(notif);
-                    notifsSent++;
+                        var notif = new Notification
+                        {
+                            UserID = vm.UserID,
+                            Title = title,
+                            Message = message,
+                            NotificationType = "ProcurementOpportunity",
+                            RelatedRequestID = purchaseRequest.RequestID,
+                            RelatedVendorID = vendor.VendorID,
+                            IsRead = false,
+                            CreatedDate = DateTime.Now
+                        };
+                        await _notificationRepository.AddAsync(notif);
+                        notifsSent++;
+                    }
                 }
             }
         }

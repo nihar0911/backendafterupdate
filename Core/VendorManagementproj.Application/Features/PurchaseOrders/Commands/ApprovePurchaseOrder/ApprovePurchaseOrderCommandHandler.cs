@@ -75,13 +75,33 @@ public class ApprovePurchaseOrderCommandHandler : IRequestHandler<ApprovePurchas
                 targetUserIds.Add(pmUser.UserID);
             }
 
+            var poProducts = purchaseOrder.Items?.Select(poi =>
+            {
+                var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == poi.ProductID);
+                var name = poi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{poi.ProductID}";
+                var unit = poi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, poi.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(poProducts);
+            string vendorName = purchaseOrder.Vendor?.VendorName ?? "the vendor";
+
+            string pmTitle = string.IsNullOrWhiteSpace(prodTitle) ? "Purchase Order Approved" : $"Purchase Order Approved: {prodTitle}";
+            string pmMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} was approved and placed with {vendorName}."
+                : $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {prodMsg} was approved and placed with {vendorName}.";
+
+            string vendorTitle = string.IsNullOrWhiteSpace(prodTitle) ? "New Purchase Order" : $"New Purchase Order: {prodTitle}";
+            string vendorMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} has been placed with you."
+                : $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {prodMsg} has been placed with you.";
+
             foreach (var userId in targetUserIds)
             {
                 await _notificationRepository.AddAsync(new Notification
                 {
                     UserID = userId,
-                    Title = "Purchase Order Approved",
-                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} was approved and placed with the vendor.",
+                    Title = pmTitle,
+                    Message = pmMsg,
                     NotificationType = "PurchaseOrderApproved",
                     RelatedRequestID = purchaseOrder.PurchaseOrderID,
                     RelatedVendorID = purchaseOrder.VendorID,
@@ -100,8 +120,8 @@ public class ApprovePurchaseOrderCommandHandler : IRequestHandler<ApprovePurchas
                     await _notificationRepository.AddAsync(new Notification
                     {
                         UserID = user.UserID,
-                        Title = "New Purchase Order",
-                        Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been placed with you.",
+                        Title = vendorTitle,
+                        Message = vendorMsg,
                         NotificationType = "PurchaseOrderSent",
                         RelatedRequestID = purchaseOrder.PurchaseOrderID,
                         RelatedVendorID = purchaseOrder.VendorID,

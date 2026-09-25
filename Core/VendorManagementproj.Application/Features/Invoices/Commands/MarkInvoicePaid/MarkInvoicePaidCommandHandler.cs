@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Linq;
 using System.Threading;
@@ -17,6 +18,7 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
     private readonly IPaymentRepository _paymentRepository;
     private readonly IUserRepository _userRepository;
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+    private readonly IPurchaseRequestRepository _purchaseRequestRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly INotificationRepository _notificationRepository;
     private readonly IInvoiceDocumentService _invoiceDocumentService;
@@ -34,6 +36,7 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
         IPaymentRepository paymentRepository,
         IUserRepository userRepository,
         IPurchaseOrderRepository purchaseOrderRepository,
+        IPurchaseRequestRepository purchaseRequestRepository,
         ICurrentUserService currentUserService,
         INotificationRepository notificationRepository,
         IInvoiceDocumentService invoiceDocumentService)
@@ -42,6 +45,7 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
         _paymentRepository = paymentRepository;
         _userRepository = userRepository;
         _purchaseOrderRepository = purchaseOrderRepository;
+        _purchaseRequestRepository = purchaseRequestRepository;
         _currentUserService = currentUserService;
         _notificationRepository = notificationRepository;
         _invoiceDocumentService = invoiceDocumentService;
@@ -155,6 +159,21 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
             var targetUserIds = new HashSet<int>();
             string orgName = purchaseOrder.Outlet?.Organization?.OrganizationName ?? "Organization";
 
+            var purchaseRequest = purchaseOrder != null ? await _purchaseRequestRepository.GetByIdAsync(purchaseOrder.RequestID) : null;
+            var invProducts = invoice.Items?.Select(item =>
+            {
+                var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == item.ProductID);
+                var name = item.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{item.ProductID}";
+                var unit = item.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, item.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(invProducts);
+
+            string notifTitle = string.IsNullOrWhiteSpace(prodTitle) ? $"Payment Received: INV-{invoice.InvoiceID}" : $"Payment Received: {prodTitle}";
+            string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Payment of Rs. {payment.Amount:N2} for Invoice INV-{invoice.InvoiceID} has been completed by {orgName}."
+                : $"Payment of Rs. {payment.Amount:N2} for Invoice INV-{invoice.InvoiceID} ({prodMsg}) has been completed by {orgName}.";
+
             foreach (var vendorUser in vendorUsers)
             {
                 if (targetUserIds.Add(vendorUser.UserID))
@@ -162,8 +181,8 @@ public class MarkInvoicePaidCommandHandler : IRequestHandler<MarkInvoicePaidComm
                     await _notificationRepository.AddAsync(new Notification
                     {
                         UserID = vendorUser.UserID,
-                        Title = "Payment Received",
-                        Message = $"Payment of Rs. {payment.Amount:N2} for Invoice INV-{invoice.InvoiceID} has been completed by {orgName}.",
+                        Title = notifTitle,
+                        Message = notifMsg,
                         NotificationType = "PaymentReceived",
                         RelatedRequestID = invoice.PurchaseOrderID,
                         RelatedVendorID = invoice.VendorID,

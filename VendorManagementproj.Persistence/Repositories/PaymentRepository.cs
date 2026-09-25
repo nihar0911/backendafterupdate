@@ -52,6 +52,9 @@ public class PaymentRepository : IPaymentRepository
                 .ThenInclude(i => i!.Vendor)
             .Include(p => p.Invoice)
                 .ThenInclude(i => i!.Outlet)
+            .Include(p => p.Invoice)
+                .ThenInclude(i => i!.Items)
+                    .ThenInclude(it => it.Product)
             .FirstOrDefaultAsync(p => p.InvoiceID == invoiceID);
     }
 

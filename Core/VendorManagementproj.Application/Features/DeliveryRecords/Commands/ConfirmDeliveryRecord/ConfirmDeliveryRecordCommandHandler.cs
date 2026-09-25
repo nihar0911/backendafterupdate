@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Linq;
 using System.Threading;
@@ -17,6 +18,7 @@ public class ConfirmDeliveryRecordCommandHandler
 {
     private readonly IDeliveryRecordRepository _deliveryRecordRepository;
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+    private readonly IPurchaseRequestRepository _purchaseRequestRepository;
     private readonly IUserRepository _userRepository;
     private readonly IContractRepository _contractRepository;
     private readonly INotificationRepository _notificationRepository;
@@ -26,6 +28,7 @@ public class ConfirmDeliveryRecordCommandHandler
     public ConfirmDeliveryRecordCommandHandler(
         IDeliveryRecordRepository deliveryRecordRepository,
         IPurchaseOrderRepository purchaseOrderRepository,
+        IPurchaseRequestRepository purchaseRequestRepository,
         IUserRepository userRepository,
         IContractRepository contractRepository,
         INotificationRepository notificationRepository,
@@ -34,6 +37,7 @@ public class ConfirmDeliveryRecordCommandHandler
     {
         _deliveryRecordRepository = deliveryRecordRepository;
         _purchaseOrderRepository = purchaseOrderRepository;
+        _purchaseRequestRepository = purchaseRequestRepository;
         _userRepository = userRepository;
         _contractRepository = contractRepository;
         _notificationRepository = notificationRepository;
@@ -289,13 +293,28 @@ public class ConfirmDeliveryRecordCommandHandler
                         targetUserIds.Add(outUser.UserID);
                     }
 
+                    var purchaseRequest = await _purchaseRequestRepository.GetByIdAsync(purchaseOrder.RequestID);
+                    var poProducts = purchaseOrder.Items?.Select(poi =>
+                    {
+                        var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == poi.ProductID);
+                        var name = poi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{poi.ProductID}";
+                        var unit = poi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                        return ((string?)name, poi.Quantity, (string?)unit);
+                    });
+                    var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(poProducts);
+
+                    string notifTitle = string.IsNullOrWhiteSpace(prodTitle) ? "Purchase Order Delivered" : $"Purchase Order Delivered: {prodTitle}";
+                    string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                        ? $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} has been delivered and confirmed at {outlet.OutletName}."
+                        : $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {prodMsg} has been delivered and confirmed at {outlet.OutletName}.";
+
                     foreach (var userId in targetUserIds)
                     {
                         await _notificationRepository.AddAsync(new Notification
                         {
                             UserID = userId,
-                            Title = "Purchase Order Delivered",
-                            Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been delivered and confirmed at {outlet.OutletName}.",
+                            Title = notifTitle,
+                            Message = notifMsg,
                             NotificationType = "PurchaseOrderDelivered",
                             RelatedRequestID = purchaseOrder.PurchaseOrderID,
                             RelatedVendorID = purchaseOrder.VendorID,

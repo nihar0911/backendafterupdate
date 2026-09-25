@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,17 +15,20 @@ namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.Send
 public class SendPurchaseOrderCommandHandler : IRequestHandler<SendPurchaseOrderCommand, SendPurchaseOrderResponse>
 {
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+    private readonly IPurchaseRequestRepository _purchaseRequestRepository;
     private readonly IUserRepository _userRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly ICurrentUserService _currentUserService;
 
     public SendPurchaseOrderCommandHandler(
         IPurchaseOrderRepository purchaseOrderRepository,
+        IPurchaseRequestRepository purchaseRequestRepository,
         IUserRepository userRepository,
         INotificationRepository notificationRepository,
         ICurrentUserService currentUserService)
     {
         _purchaseOrderRepository = purchaseOrderRepository;
+        _purchaseRequestRepository = purchaseRequestRepository;
         _userRepository = userRepository;
         _notificationRepository = notificationRepository;
         _currentUserService = currentUserService;
@@ -76,6 +80,21 @@ public class SendPurchaseOrderCommandHandler : IRequestHandler<SendPurchaseOrder
             var vendorUsers = allUsers.Where(u => u.VendorID == purchaseOrder.VendorID).ToList();
             var targetVendorUserIds = new HashSet<int>();
 
+            var purchaseRequest = await _purchaseRequestRepository.GetByIdAsync(purchaseOrder.RequestID);
+            var poProducts = purchaseOrder.Items?.Select(poi =>
+            {
+                var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == poi.ProductID);
+                var name = poi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{poi.ProductID}";
+                var unit = poi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, poi.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(poProducts);
+
+            string notifTitle = string.IsNullOrWhiteSpace(prodTitle) ? "New Purchase Order" : $"New Purchase Order: {prodTitle}";
+            string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} has been sent to you."
+                : $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {prodMsg} has been sent to you.";
+
             foreach (var user in vendorUsers)
             {
                 if (targetVendorUserIds.Add(user.UserID))
@@ -83,8 +102,8 @@ public class SendPurchaseOrderCommandHandler : IRequestHandler<SendPurchaseOrder
                     await _notificationRepository.AddAsync(new Notification
                     {
                         UserID = user.UserID,
-                        Title = "New Purchase Order",
-                        Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been sent to you.",
+                        Title = notifTitle,
+                        Message = notifMsg,
                         NotificationType = "PurchaseOrderSent",
                         RelatedRequestID = purchaseOrder.PurchaseOrderID,
                         RelatedVendorID = purchaseOrder.VendorID,

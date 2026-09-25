@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using VendorManagementproj.Application.Common;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Application.DTOs;
 using VendorManagementproj.Domain.Entities;
@@ -13,6 +14,8 @@ namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.Resp
 public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPurchaseOrderCommand, RespondToPurchaseOrderResponse>
 {
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+    private readonly IPurchaseRequestRepository _purchaseRequestRepository;
+    private readonly IVendorRepository _vendorRepository;
     private readonly IContractRepository _contractRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly IUserRepository _userRepository;
@@ -20,12 +23,16 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
 
     public RespondToPurchaseOrderCommandHandler(
         IPurchaseOrderRepository purchaseOrderRepository,
+        IPurchaseRequestRepository purchaseRequestRepository,
+        IVendorRepository vendorRepository,
         IContractRepository contractRepository,
         INotificationRepository notificationRepository,
         IUserRepository userRepository,
         IOutletRepository outletRepository)
     {
         _purchaseOrderRepository = purchaseOrderRepository;
+        _purchaseRequestRepository = purchaseRequestRepository;
+        _vendorRepository = vendorRepository;
         _contractRepository = contractRepository;
         _notificationRepository = notificationRepository;
         _userRepository = userRepository;
@@ -55,6 +62,18 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
             throw new InvalidOperationException("This purchase order has already been responded to.");
         }
 
+        var purchaseRequest = await _purchaseRequestRepository.GetByIdAsync(purchaseOrder.RequestID);
+        var vendor = await _vendorRepository.GetByIdAsync(purchaseOrder.VendorID);
+        string vendorName = vendor?.VendorName ?? "Vendor";
+        var poProducts = purchaseOrder.Items?.Select(poi =>
+        {
+            var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == poi.ProductID);
+            var name = poi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{poi.ProductID}";
+            var unit = poi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+            return ((string?)name, poi.Quantity, (string?)unit);
+        });
+        var (titleProd, msgProd) = NotificationProductFormatter.FormatProductSummaries(poProducts);
+
         if (string.Equals(request.Status, "Rejected", StringComparison.OrdinalIgnoreCase))
         {
             purchaseOrder.Status = "Rejected";
@@ -64,7 +83,14 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
             if (rejectedPurchaseOrder == null)
                 throw new InvalidOperationException("Unable to update purchase order.");
 
-            await NotifyStakeholdersAsync(purchaseOrder, "Purchase Order Declined", $"Vendor has declined Purchase Order PO-#{purchaseOrder.PurchaseOrderID}.", "PurchaseOrderRejected");
+            string title = string.IsNullOrEmpty(titleProd)
+                ? $"Purchase Order Declined: PO-{purchaseOrder.PurchaseOrderID}"
+                : $"Purchase Order Declined: {titleProd}";
+            string message = string.IsNullOrEmpty(msgProd)
+                ? $"{vendorName} declined Purchase Order PO-{purchaseOrder.PurchaseOrderID}."
+                : $"{vendorName} declined Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {msgProd}.";
+
+            await NotifyStakeholdersAsync(purchaseOrder, title, message, "PurchaseOrderRejected");
 
             return new RespondToPurchaseOrderResponse
             {
@@ -79,7 +105,14 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
         if (updatedPurchaseOrder == null)
             throw new InvalidOperationException("Unable to update purchase order.");
 
-        await NotifyStakeholdersAsync(purchaseOrder, "Purchase Order Accepted", $"Vendor has accepted Purchase Order PO-#{purchaseOrder.PurchaseOrderID}.", "PurchaseOrderAccepted");
+        string acceptTitle = string.IsNullOrEmpty(titleProd)
+            ? $"Purchase Order Accepted: PO-{purchaseOrder.PurchaseOrderID}"
+            : $"Purchase Order Accepted: {titleProd}";
+        string acceptMessage = string.IsNullOrEmpty(msgProd)
+            ? $"{vendorName} accepted Purchase Order PO-{purchaseOrder.PurchaseOrderID}."
+            : $"{vendorName} accepted Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {msgProd}.";
+
+        await NotifyStakeholdersAsync(purchaseOrder, acceptTitle, acceptMessage, "PurchaseOrderAccepted");
 
         return new RespondToPurchaseOrderResponse
         {
@@ -149,7 +182,7 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
             DeliveryStatus = purchaseOrder.DeliveryStatus,
             Status = purchaseOrder.Status,
             ApproverRole = purchaseOrder.ApproverRole,
-            Items = purchaseOrder.Items.Select(item => new PurchaseOrderItemDto
+            Items = purchaseOrder.Items?.Select(item => new PurchaseOrderItemDto
             {
                 POItemID = item.POItemID,
                 ProductID = item.ProductID,
@@ -159,7 +192,7 @@ public class RespondToPurchaseOrderCommandHandler : IRequestHandler<RespondToPur
                 Subtotal = item.Subtotal,
                 TaxAmount = item.TaxAmount,
                 TotalAmount = item.TotalAmount
-            }).ToList()
+            }).ToList() ?? new List<PurchaseOrderItemDto>()
         };
     }
 }

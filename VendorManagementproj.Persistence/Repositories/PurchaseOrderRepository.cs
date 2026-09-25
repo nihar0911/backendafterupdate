@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using VendorManagementproj.Application.Contracts.Persistence;
 using VendorManagementproj.Domain.Entities;
 using VendorManagementproj.Persistence.Data;
@@ -29,6 +29,7 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
     {
         return await _context.PurchaseOrders
             .Include(p => p.Items)
+                .ThenInclude(i => i.Product)
             .Include(p => p.Outlet)
             .Include(p => p.Vendor)
             .FirstOrDefaultAsync(
@@ -39,6 +40,7 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
     {
         return await _context.PurchaseOrders
             .Include(p => p.Items)
+                .ThenInclude(i => i.Product)
             .Include(p => p.Outlet)
             .Include(p => p.Vendor)
             .ToListAsync();
@@ -49,6 +51,7 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
     {
         return await _context.PurchaseOrders
             .Include(p => p.Items)
+                .ThenInclude(i => i.Product)
             .Include(p => p.Outlet)
             .Include(p => p.Vendor)
             .Where(p =>
@@ -62,6 +65,7 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
     {
         return await _context.PurchaseOrders
             .Include(po => po.Items)
+                .ThenInclude(i => i.Product)
             .Include(po => po.Outlet)
             .Include(po => po.Vendor)
             .FirstOrDefaultAsync(
@@ -122,6 +126,7 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
         return await _context.PurchaseOrders
             .Where(p => p.OutletID == outletId)
             .Include(p => p.Items)
+                .ThenInclude(i => i.Product)
             .Include(p => p.Outlet)
             .Include(p => p.Vendor)
             .AsNoTracking()
@@ -133,6 +138,7 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
         return await _context.PurchaseOrders
             .Where(p => outletIds.Contains(p.OutletID))
             .Include(p => p.Items)
+                .ThenInclude(i => i.Product)
             .Include(p => p.Outlet)
             .Include(p => p.Vendor)
             .AsNoTracking()
@@ -144,6 +150,7 @@ public class PurchaseOrderRepository : IPurchaseOrderRepository
         return await _context.PurchaseOrders
             .Where(p => p.VendorID == vendorId)
             .Include(p => p.Items)
+                .ThenInclude(i => i.Product)
             .Include(p => p.Outlet)
             .Include(p => p.Vendor)
             .AsNoTracking()

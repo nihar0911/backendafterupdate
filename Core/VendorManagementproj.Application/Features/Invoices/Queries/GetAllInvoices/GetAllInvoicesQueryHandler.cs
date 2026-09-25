@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -101,7 +101,7 @@ public class GetAllInvoicesQueryHandler : IRequestHandler<GetAllInvoicesQuery, G
             TaxAmount = invoice.TaxAmount,
             TotalAmount = invoice.TotalAmount,
             Status = invoice.Status,
-            InvoiceDocumentBase64 = invoice.InvoiceDocumentBase64,
+            InvoiceDocumentBase64 = null,
             InvoiceFileName = invoice.InvoiceFileName,
             InvoiceContentType = invoice.InvoiceContentType,
             Items = invoice.Items?.Select(item => new InvoiceItemDto

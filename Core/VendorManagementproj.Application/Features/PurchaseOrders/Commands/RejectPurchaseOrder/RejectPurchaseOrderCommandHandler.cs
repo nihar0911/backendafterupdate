@@ -76,13 +76,26 @@ public class RejectPurchaseOrderCommandHandler : IRequestHandler<RejectPurchaseO
                 targetUserIds.Add(pmUser.UserID);
             }
 
+            var poProducts = purchaseOrder.Items?.Select(poi =>
+            {
+                var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == poi.ProductID);
+                var name = poi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{poi.ProductID}";
+                var unit = poi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, poi.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(poProducts);
+            string notifTitle = string.IsNullOrWhiteSpace(prodTitle) ? "Purchase Order Rejected" : $"Purchase Order Rejected: {prodTitle}";
+            string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} has been rejected."
+                : $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {prodMsg} has been rejected.";
+
             foreach (var userId in targetUserIds)
             {
                 await _notificationRepository.AddAsync(new Notification
                 {
                     UserID = userId,
-                    Title = "Purchase Order Rejected",
-                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been rejected.",
+                    Title = notifTitle,
+                    Message = notifMsg,
                     NotificationType = "PurchaseOrderRejected",
                     RelatedRequestID = purchaseOrder.PurchaseOrderID,
                     RelatedVendorID = purchaseOrder.VendorID,

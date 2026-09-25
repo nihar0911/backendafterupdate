@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -298,6 +299,21 @@ public class CreateQuotationCommandHandler
                     .ToList();
             }
 
+            var quoteProducts = createdQuotation.QuotationItems.Select(qi =>
+            {
+                var prItem = purchaseRequest.Items?.FirstOrDefault(pi => pi.ProductID == qi.ProductID);
+                var name = qi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{qi.ProductID}";
+                var unit = qi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, qi.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(quoteProducts);
+            string notifTitle = string.IsNullOrWhiteSpace(prodTitle)
+                ? $"New Quotation: PR-{purchaseRequest.RequestID}"
+                : $"New Quotation: {prodTitle}";
+            string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"{vendorName} submitted a quotation under Purchase Request PR-{purchaseRequest.RequestID}."
+                : $"{vendorName} submitted a quotation for {prodMsg} under Purchase Request PR-{purchaseRequest.RequestID}.";
+
             var notifiedOrgUserIds = new HashSet<int>();
 
             foreach (var om in orgManagers)
@@ -309,8 +325,8 @@ public class CreateQuotationCommandHandler
                         UserID = om.UserID,
                         RelatedRequestID = purchaseRequest.RequestID,
                         RelatedVendorID = request.VendorID,
-                        Title = $"New Quotation for PR-{purchaseRequest.RequestID}",
-                        Message = $"New quotation submitted for Purchase Request PR-{purchaseRequest.RequestID} by {vendorName}.",
+                        Title = notifTitle,
+                        Message = notifMsg,
                         NotificationType = "QuotationSubmitted",
                         IsRead = false,
                         CreatedDate = DateTime.Now
@@ -327,8 +343,8 @@ public class CreateQuotationCommandHandler
                     UserID = purchaseRequest.CreatedByUserID,
                     RelatedRequestID = purchaseRequest.RequestID,
                     RelatedVendorID = request.VendorID,
-                    Title = $"New Quotation for PR-{purchaseRequest.RequestID}",
-                    Message = $"New quotation submitted for Purchase Request PR-{purchaseRequest.RequestID} by {vendorName}.",
+                    Title = notifTitle,
+                    Message = notifMsg,
                     NotificationType = "QuotationSubmitted",
                     IsRead = false,
                     CreatedDate = DateTime.Now

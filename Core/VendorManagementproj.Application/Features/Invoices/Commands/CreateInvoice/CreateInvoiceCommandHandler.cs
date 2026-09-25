@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,7 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
     private readonly IUserRepository _userRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly IVendorRepository _vendorRepository;
+    private readonly IPurchaseRequestRepository _purchaseRequestRepository;
 
     public CreateInvoiceCommandHandler(
         IInvoiceRepository invoiceRepository,
@@ -30,7 +32,8 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
         IOutletRepository outletRepository,
         IUserRepository userRepository,
         INotificationRepository notificationRepository,
-        IVendorRepository vendorRepository)
+        IVendorRepository vendorRepository,
+        IPurchaseRequestRepository purchaseRequestRepository)
     {
         _invoiceRepository = invoiceRepository;
         _purchaseOrderRepository = purchaseOrderRepository;
@@ -40,6 +43,7 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
         _userRepository = userRepository;
         _notificationRepository = notificationRepository;
         _vendorRepository = vendorRepository;
+        _purchaseRequestRepository = purchaseRequestRepository;
     }
 
     public async Task<CreateInvoiceResponse> Handle(
@@ -165,6 +169,24 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
             var vendor = await _vendorRepository.GetByIdAsync(fullInvoice.VendorID);
             string vendorName = vendor?.VendorName ?? "Vendor";
 
+            var poForNotif = purchaseOrder ?? await _purchaseOrderRepository.GetByIdAsync(fullInvoice.PurchaseOrderID);
+            var purchaseRequest = poForNotif != null ? await _purchaseRequestRepository.GetByIdAsync(poForNotif.RequestID) : null;
+            var invProducts = fullInvoice.Items?.Select(item =>
+            {
+                var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == item.ProductID);
+                var name = item.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{item.ProductID}";
+                var unit = item.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, item.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(invProducts);
+
+            string notifTitle = string.IsNullOrWhiteSpace(prodTitle)
+                ? $"Invoice Submitted: INV-{fullInvoice.InvoiceID}"
+                : $"Invoice Submitted: {prodTitle}";
+            string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"{vendorName} submitted Invoice INV-{fullInvoice.InvoiceID} against Purchase Order PO-{fullInvoice.PurchaseOrderID}."
+                : $"{vendorName} submitted Invoice INV-{fullInvoice.InvoiceID} for {prodMsg} against Purchase Order PO-{fullInvoice.PurchaseOrderID}.";
+
             var outlet = await _outletRepository.GetByIdAsync(fullInvoice.OutletID);
             if (outlet != null)
             {
@@ -188,8 +210,8 @@ public class CreateInvoiceCommandHandler : IRequestHandler<CreateInvoiceCommand,
                     await _notificationRepository.AddAsync(new Notification
                     {
                         UserID = userId,
-                        Title = "Invoice Submitted",
-                        Message = $"New invoice INV-{fullInvoice.InvoiceID} has been submitted by {vendorName} for PO-#{fullInvoice.PurchaseOrderID}.",
+                        Title = notifTitle,
+                        Message = notifMsg,
                         NotificationType = "InvoiceSubmitted",
                         RelatedRequestID = fullInvoice.PurchaseOrderID,
                         RelatedVendorID = fullInvoice.VendorID,

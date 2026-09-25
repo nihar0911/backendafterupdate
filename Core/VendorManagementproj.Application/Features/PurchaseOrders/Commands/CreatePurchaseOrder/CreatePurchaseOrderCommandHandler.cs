@@ -17,6 +17,7 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
     private readonly IQuotationRepository _quotationRepository;
     private readonly IPurchaseRequestRepository _purchaseRequestRepository;
+    private readonly IVendorRepository _vendorRepository;
     private readonly IContractRepository _contractRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly IUserRepository _userRepository;
@@ -27,6 +28,7 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
         IPurchaseOrderRepository purchaseOrderRepository,
         IQuotationRepository quotationRepository,
         IPurchaseRequestRepository purchaseRequestRepository,
+        IVendorRepository vendorRepository,
         IContractRepository contractRepository,
         INotificationRepository notificationRepository,
         IUserRepository userRepository,
@@ -36,6 +38,7 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
         _purchaseOrderRepository = purchaseOrderRepository;
         _quotationRepository = quotationRepository;
         _purchaseRequestRepository = purchaseRequestRepository;
+        _vendorRepository = vendorRepository;
         _contractRepository = contractRepository;
         _notificationRepository = notificationRepository;
         _userRepository = userRepository;
@@ -157,6 +160,24 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
                        string.Equals(roleName, PurchaseOrderApprover.OrganizationManager, StringComparison.OrdinalIgnoreCase);
             }).ToList();
 
+            var poProducts = createdPurchaseOrder.Items.Select(poi =>
+            {
+                var prItem = purchaseRequest.Items?.FirstOrDefault(pi => pi.ProductID == poi.ProductID);
+                var name = poi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{poi.ProductID}";
+                var unit = poi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, poi.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(poProducts);
+            var vendor = await _vendorRepository.GetByIdAsync(quotation.VendorID);
+            string vendorName = vendor?.VendorName ?? "Vendor";
+
+            string notifTitle = string.IsNullOrWhiteSpace(prodTitle)
+                ? $"Purchase Order: PO-{createdPurchaseOrder.PurchaseOrderID}"
+                : $"Purchase Order: {prodTitle}";
+            string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Purchase Order PO-{createdPurchaseOrder.PurchaseOrderID} was created with {vendorName}."
+                : $"Purchase Order PO-{createdPurchaseOrder.PurchaseOrderID} was created for {prodMsg} with {vendorName}.";
+
             var targetUserIds = new HashSet<int>();
             foreach (var user in approvers)
             {
@@ -165,8 +186,8 @@ public class CreatePurchaseOrderCommandHandler : IRequestHandler<CreatePurchaseO
                     await _notificationRepository.AddAsync(new Notification
                     {
                         UserID = user.UserID,
-                        Title = "Purchase Order Awaiting Approval",
-                        Message = $"Purchase Order PO-#{createdPurchaseOrder.PurchaseOrderID} is awaiting your approval before it is placed with the vendor.",
+                        Title = notifTitle,
+                        Message = notifMsg,
                         NotificationType = "PurchaseOrderAwaitingApproval",
                         RelatedRequestID = createdPurchaseOrder.PurchaseOrderID,
                         RelatedVendorID = quotation.VendorID,

@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -163,8 +164,17 @@ public class RespondToOpportunityCommandHandler
 
             var notifiedUserIds = new HashSet<int>();
 
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(new[] { prItem });
+
             if (isAccept)
             {
+                string notifTitle = string.IsNullOrWhiteSpace(prodTitle)
+                    ? $"Purchase Request PR-{pr.RequestID} Accepted"
+                    : $"Purchase Request Accepted: {prodTitle}";
+                string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                    ? $"{vendor.VendorName} accepted Purchase Request PR-{pr.RequestID} at {outletName}."
+                    : $"{vendor.VendorName} accepted Purchase Request PR-{pr.RequestID} for {prodMsg} at {outletName}.";
+
                 // 1. Notify the specific Outlet Manager(s) assigned to this outlet
                 foreach (var om in outletManagers)
                 {
@@ -175,8 +185,8 @@ public class RespondToOpportunityCommandHandler
                             UserID = om.UserID,
                             RelatedRequestID = pr.RequestID,
                             RelatedVendorID = vendorId,
-                            Title = $"Purchase Request PR-{pr.RequestID} Accepted",
-                            Message = $"Purchase Request PR-{pr.RequestID} for {outletName} has been accepted by {vendor.VendorName}.",
+                            Title = notifTitle,
+                            Message = notifMsg,
                             NotificationType = "OpportunityAccepted",
                             IsRead = false,
                             CreatedDate = DateTime.Now
@@ -185,7 +195,6 @@ public class RespondToOpportunityCommandHandler
                     }
                 }
 
-                
                 if (pr.CreatedByUserID > 0 && notifiedUserIds.Add(pr.CreatedByUserID))
                 {
                     var creatorNotif = new Notification
@@ -193,8 +202,8 @@ public class RespondToOpportunityCommandHandler
                         UserID = pr.CreatedByUserID,
                         RelatedRequestID = pr.RequestID,
                         RelatedVendorID = vendorId,
-                        Title = $"Purchase Request PR-{pr.RequestID} Accepted",
-                        Message = $"Purchase Request PR-{pr.RequestID} for {outletName} has been accepted by {vendor.VendorName}.",
+                        Title = notifTitle,
+                        Message = notifMsg,
                         NotificationType = "OpportunityAccepted",
                         IsRead = false,
                         CreatedDate = DateTime.Now
@@ -208,6 +217,13 @@ public class RespondToOpportunityCommandHandler
                     ? $" Reason: {request.RejectionReason.Trim()}"
                     : string.Empty;
 
+                string notifTitle = string.IsNullOrWhiteSpace(prodTitle)
+                    ? $"Purchase Request PR-{pr.RequestID} Rejected"
+                    : $"Purchase Request Rejected: {prodTitle}";
+                string notifMsg = string.IsNullOrWhiteSpace(prodMsg)
+                    ? $"{vendor.VendorName} rejected Purchase Request PR-{pr.RequestID} at {outletName}.{reasonText}"
+                    : $"{vendor.VendorName} rejected Purchase Request PR-{pr.RequestID} for {prodMsg} at {outletName}.{reasonText}";
+
                 // 1. Notify the specific Outlet Manager(s) assigned to this outlet
                 foreach (var om in outletManagers)
                 {
@@ -218,8 +234,8 @@ public class RespondToOpportunityCommandHandler
                             UserID = om.UserID,
                             RelatedRequestID = pr.RequestID,
                             RelatedVendorID = vendorId,
-                            Title = $"Purchase Request PR-{pr.RequestID} Rejected",
-                            Message = $"Purchase Request PR-{pr.RequestID} for {outletName} has been rejected by {vendor.VendorName}.{reasonText}",
+                            Title = notifTitle,
+                            Message = notifMsg,
                             NotificationType = "OpportunityRejected",
                             IsRead = false,
                             CreatedDate = DateTime.Now
@@ -228,7 +244,6 @@ public class RespondToOpportunityCommandHandler
                     }
                 }
 
-              
                 if (pr.CreatedByUserID > 0 && notifiedUserIds.Add(pr.CreatedByUserID))
                 {
                     var creatorNotif = new Notification
@@ -236,8 +251,8 @@ public class RespondToOpportunityCommandHandler
                         UserID = pr.CreatedByUserID,
                         RelatedRequestID = pr.RequestID,
                         RelatedVendorID = vendorId,
-                        Title = $"Purchase Request PR-{pr.RequestID} Rejected",
-                        Message = $"Purchase Request PR-{pr.RequestID} for {outletName} has been rejected by {vendor.VendorName}.{reasonText}",
+                        Title = notifTitle,
+                        Message = notifMsg,
                         NotificationType = "OpportunityRejected",
                         IsRead = false,
                         CreatedDate = DateTime.Now

@@ -1,3 +1,4 @@
+using VendorManagementproj.Application.Common;
 using System;
 using System.Linq;
 using System.Threading;
@@ -12,6 +13,7 @@ namespace VendorManagementproj.Application.Features.PurchaseOrders.Commands.Disp
 public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurchaseOrderCommand, DispatchPurchaseOrderResponse>
 {
     private readonly IPurchaseOrderRepository _purchaseOrderRepository;
+    private readonly IPurchaseRequestRepository _purchaseRequestRepository;
     private readonly INotificationRepository _notificationRepository;
     private readonly IUserRepository _userRepository;
     private readonly IOutletRepository _outletRepository;
@@ -19,12 +21,14 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
 
     public DispatchPurchaseOrderCommandHandler(
         IPurchaseOrderRepository purchaseOrderRepository,
+        IPurchaseRequestRepository purchaseRequestRepository,
         INotificationRepository notificationRepository,
         IUserRepository userRepository,
         IOutletRepository outletRepository,
         IVendorRepository vendorRepository)
     {
         _purchaseOrderRepository = purchaseOrderRepository;
+        _purchaseRequestRepository = purchaseRequestRepository;
         _notificationRepository = notificationRepository;
         _userRepository = userRepository;
         _outletRepository = outletRepository;
@@ -86,13 +90,31 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
                 }
             }
 
+            var purchaseRequest = await _purchaseRequestRepository.GetByIdAsync(purchaseOrder.RequestID);
+            var poProducts = purchaseOrder.Items?.Select(poi =>
+            {
+                var prItem = purchaseRequest?.Items?.FirstOrDefault(pi => pi.ProductID == poi.ProductID);
+                var name = poi.Product?.ProductName ?? prItem?.Product?.ProductName ?? $"Product #{poi.ProductID}";
+                var unit = poi.Product?.Unit ?? prItem?.Unit ?? prItem?.Product?.Unit;
+                return ((string?)name, poi.Quantity, (string?)unit);
+            });
+            var (prodTitle, prodMsg) = NotificationProductFormatter.FormatProductSummaries(poProducts);
+
+            string notifTitle = string.IsNullOrWhiteSpace(prodTitle) ? "Purchase Order Dispatched" : $"Purchase Order Dispatched: {prodTitle}";
+            string outletMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} has been dispatched and is on the way to your outlet."
+                : $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {prodMsg} has been dispatched and is on the way to your outlet.";
+            string orgMsg = string.IsNullOrWhiteSpace(prodMsg)
+                ? $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} has been dispatched by {vendorName}."
+                : $"Purchase Order PO-{purchaseOrder.PurchaseOrderID} for {prodMsg} has been dispatched by {vendorName}.";
+
             foreach (var userId in targetOutletUserIds)
             {
                 await _notificationRepository.AddAsync(new Notification
                 {
                     UserID = userId,
-                    Title = "Purchase Order Dispatched",
-                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been dispatched and is on the way to your outlet.",
+                    Title = notifTitle,
+                    Message = outletMsg,
                     NotificationType = "PurchaseOrderDispatched",
                     RelatedRequestID = purchaseOrder.PurchaseOrderID,
                     RelatedVendorID = purchaseOrder.VendorID,
@@ -106,8 +128,8 @@ public class DispatchPurchaseOrderCommandHandler : IRequestHandler<DispatchPurch
                 await _notificationRepository.AddAsync(new Notification
                 {
                     UserID = userId,
-                    Title = "Purchase Order Dispatched",
-                    Message = $"Purchase Order PO-#{purchaseOrder.PurchaseOrderID} has been dispatched by {vendorName}.",
+                    Title = notifTitle,
+                    Message = orgMsg,
                     NotificationType = "PurchaseOrderDispatched",
                     RelatedRequestID = purchaseOrder.PurchaseOrderID,
                     RelatedVendorID = purchaseOrder.VendorID,
